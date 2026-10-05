@@ -69,15 +69,31 @@ h1{font:700 26px/1.2 var(--display);margin:0}
 #tip .l{display:flex;gap:10px;justify-content:space-between;font-family:var(--mono);font-size:12px}
 #tip .t{color:var(--haze);font:11px var(--mono);margin-top:6px}
 
+.ctl{position:absolute;top:16px;right:16px;width:280px;background:var(--dusk);border:1px solid var(--rule);border-radius:8px;font-size:12.5px;color:var(--haze);box-shadow:0 8px 24px #0006}
+.ctl summary{cursor:pointer;list-style:none;padding:9px 12px;font:600 11px/1.5 var(--body);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.ctl summary::-webkit-details-marker{display:none}
+.ctl summary::after{content:"";width:6px;height:6px;border:solid var(--haze);border-width:0 1.5px 1.5px 0;transform:rotate(-135deg) translate(-1px,-1px);transition:transform .15s}
+.ctl:not([open]) summary::after{transform:rotate(45deg)}
+.ctl summary:hover{color:var(--ink)}
+.ctl>div{display:grid;gap:10px;padding:2px 12px 12px}
+.ctl label{display:grid;grid-template-columns:84px 1fr 44px;align-items:center;gap:10px}
+.ctl input{width:100%;accent-color:var(--ink)}
+.ctl output{font:11px var(--mono);text-align:right}
+@media (max-width:900px){.ctl{top:12px;right:12px;width:230px}}
+
 </style></head><body><div class="page" id="page">
  <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
+  <details class="ctl" open><summary>Display</summary><div>
+   <label><span>Votes per dot</span><input id="vpd" type="range" min="0" max="5" step="1" value="0"><output id="vpdv">250</output></label>
+   <label><span>Dot size</span><input id="rad" type="range" min="-1" max="1" step=".05" value="0"><output id="radv">1×</output></label>
+  </div></details>
   <div class="mapbar">
-   <div class="key"><span class="k-dot"></span><b>1 dot = 250 votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
+   <div class="key"><span class="k-dot"></span><b>1 dot = <span class="vpd">250</span> votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
    <div class="credit">Created by <b>Felipe dos Anjos</b><br><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> · <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br>Data: <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a></div></div></div>
  <aside>
   <p class="eyebrow">4 October 2026</p>
   <h1>Brazil 2026 presidential election, first round</h1>
-  <p class="deck">1 dot = <b>250 votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.</p>
+  <p class="deck">1 dot = <b><span class="vpd">250</span> votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.</p>
   <div class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg><input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="qlist" aria-autocomplete="list" placeholder="Search a municipality" autocomplete="off"><ul id="qlist" role="listbox" hidden></ul></div>
   <div id="cands"></div>
  </aside>
@@ -116,7 +132,7 @@ const mu=g.append("g").selectAll("path").data(MG.features).join("path").attr("cl
   .html(`<b>${m.n}, ${m.uf}</b>`+m.v.map(([n,v])=>`<div class="l"><span>${NAME[n]||title(n)}</span><span>${pct(v,m.t)}</span></div>`).join("")+`<div class="t">${fmt(m.t)} valid votes</div>`);})
  .on("mouseenter",(e,f)=>hl.datum(f).attr("d",path).style("display",null))
  .on("mouseleave",()=>{tip.style("opacity",0);hl.style("display","none");})
- .on("click",(e,f)=>select(sel===f?null:f))
+ .on("click",(e,f)=>{e.stopPropagation();select(sel===f?null:f);})
  .on("dblclick",(e,f)=>{e.stopPropagation();select(f,true);}); // double click: select and zoom to it
 const uf=g.append("g").selectAll("path").data(SG.features).join("path").attr("class","uf");
 // Brazil's outer border: every state outline stroked once, masked to outside the country so the internal
@@ -150,7 +166,8 @@ function layout(){
 // Zoomed in, the dots grow past a pixel and are drawn as discs. Nothing is added or removed.
 // Dot radius grows as k^0.5 (CartoDB's women dot map grows ~k^0.83: 0.5px at z8 → 16px at z14), so dots
 // per screen area fall by k² but each grows by k^1.5: coverage thins slowly instead of collapsing mid-zoom.
-const R1=.32, GAMMA=.5, ALO=.4; // radius in css px at zoom 1, growth exponent, opacity of the sparsest pixels
+let R1=.32, STEP=1; // radius in css px at zoom 1 (dot-size control); draw every STEP-th dot (votes-per-dot control)
+const GAMMA=.5, ALO=.4; // growth exponent, opacity of the sparsest pixels
 function paint(t){
  const rd=R1*Math.pow(t.k,GAMMA)*dpr, sx=t.k*dpr,ox=t.x*dpr,oy=t.y*dpr, N=W*H, f=focus;
  T.fill(0);if(f>=0)O.fill(0);
@@ -160,11 +177,11 @@ function paint(t){
  // speckle (as in Cable's and CartoDB's maps) instead of averaging complementary hues into grey.
  const add=(j,c,a)=>{if(f<0||c===f){T[j]+=a;TOP[j]=c;}else O[j]+=a;};
  if(rd<1.2){const ar=Math.PI*rd*rd; // sub-pixel dots add their area to one pixel
-  for(let i=0;i<n;i++){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
+  for(let i=0;i<n;i+=STEP){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
    if(x>=0&&x<W&&y>=0&&y<H)add(y*W+x,C[i],ar);}
  }else{const Rr=Math.ceil(rd),r2=rd*rd,off=[]; // larger dots add 1 to every pixel of a disc
   for(let dy=-Rr;dy<=Rr;dy++)for(let dx=-Rr;dx<=Rr;dx++)if(dx*dx+dy*dy<=r2)off.push(dx,dy);
-  for(let i=0;i<n;i++){const X=(P[2*i]*sx+ox)|0,Y=(P[2*i+1]*sx+oy)|0;
+  for(let i=0;i<n;i+=STEP){const X=(P[2*i]*sx+ox)|0,Y=(P[2*i+1]*sx+oy)|0;
    if(X<-Rr||X>=W+Rr||Y<-Rr||Y>=H+Rr)continue;const c=C[i];
    for(let q=0;q<off.length;q+=2){const x=X+off[q],y=Y+off[q+1];if(x>=0&&x<W&&y>=0&&y<H)add(y*W+x,c,1);}}
  }
@@ -188,17 +205,29 @@ let pending=null;
 // so city limits read clearly up close.
 const borderOpacity=k=>k<3?Math.max(0,Math.min(.1,(k-1.3)*.06)):k<20?Math.max(.06,.1-.04*Math.log(k/3)/Math.log(20/3)):Math.min(.4,.06+.34*Math.log(k/20)/Math.log(3));
 const MAXK=400; // deep enough for the smallest municipalities to fill the screen
+let lastK=1;const CLEARK=1.5;
 const zoom=d3.zoom().scaleExtent([1,MAXK]).on("zoom",e=>{const t=e.transform;
+ // zooming out by hand to near the whole-country view clears the selection
+ if(sel&&e.sourceEvent&&t.k<lastK&&t.k<CLEARK)select(null);
+ lastK=t.k;
  g.attr("transform",t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<20?.5:Math.min(1.1,.5+.6*Math.log(t.k/20)/Math.log(3)));
  if(!pending)requestAnimationFrame(()=>{paint(pending);pending=null;});pending=t;});
 
 layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));
 // replace d3's double-click zoom-in: on a municipality it zooms to that municipality (handler above);
 // anywhere outside Brazil it zooms back out to the whole country
-svg.on("dblclick.zoom",null).on("dblclick",()=>svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity));
+svg.on("dblclick.zoom",null).on("dblclick",()=>{select(null);svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity);});
+// a selection clears on a click outside Brazil or on Escape anywhere (clicking the same municipality also toggles it)
+svg.on("click",()=>select(null));
+addEventListener("keydown",e=>{if(e.key==="Escape"&&e.target!==q)select(null);});
 repaint=()=>paint(d3.zoomTransform(svg.node()));repaint();
+// controls. Dots are shuffled, so keeping every STEP-th one is a random sample at STEP × 250 votes per dot.
+const STEPS=[1,2,4,10,20,40];let vpdTimer;
+d3.select("#vpd").on("input",e=>{STEP=STEPS[+e.target.value];const v=fmt(STEP*250);d3.selectAll(".vpd").text(v);d3.select("#vpdv").text(v);
+ clearTimeout(vpdTimer);vpdTimer=setTimeout(repaint,120);}); // repaint once the slider settles
+d3.select("#rad").on("input",e=>{const m=2**+e.target.value;R1=.32*m;d3.select("#radv").text(m.toFixed(m<1?2:1).replace(/\.?0+$/,"")+"×");repaint();});
 // selecting a municipality (by click or search) outlines it; from search it also zooms to it
-function select(f,zoomTo){sel=f;sl.datum(f).attr("d",f?path:null).style("display",f?null:"none");
+function select(f,zoomTo){sel=f;if(!f&&typeof q!=="undefined")q.value="";sl.datum(f).attr("d",f?path:null).style("display",f?null:"none");
  if(f&&zoomTo){const [[x0,y0],[x1,y1]]=path.bounds(f),k=Math.min(MAXK,.9/Math.max((x1-x0)/w,(y1-y0)/h));
   svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity.translate(w/2,h/2).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2));}}
 
@@ -224,4 +253,5 @@ q.addEventListener("keydown",e=>{
 q.addEventListener("blur",()=>setTimeout(()=>{ql.attr("hidden",true);q.setAttribute("aria-expanded","false");},100));
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{layout();zoom.translateExtent([[0,0],[w,h]]);
  svg.call(zoom.transform,d3.zoomIdentity);},150);});
+
 </script></body></html>

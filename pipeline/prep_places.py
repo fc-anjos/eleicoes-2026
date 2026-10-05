@@ -1,4 +1,5 @@
 """Aggregate TSE section-level presidential votes to polling places (locais de votação) with coordinates.
+Run from the repo root: python3 -m pipeline.prep_places
 
 Inputs (TSE open data, unzipped into data/raw/):
   votacao_secao_2026_BR.csv            votes per section and candidate

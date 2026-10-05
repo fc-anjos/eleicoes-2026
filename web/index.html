@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Where Brazil Voted</title>
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+/*__CSS__*/
+</style></head><body><div class="page" id="page">
+ <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
+  <details class="ctl" open><summary>Display</summary><div>
+   <label><span>Votes per dot</span><input id="vpd" type="range" min="0" max="5" step="1" value="0"><output id="vpdv">250</output></label>
+   <label><span>Dot size</span><input id="rad" type="range" min="-1" max="1" step=".05" value="0"><output id="radv">1×</output></label>
+  </div></details>
+  <div class="mapbar">
+   <div class="key"><span class="k-dot"></span><b>1 dot = <span class="vpd">__VPD__</span> votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
+   <div class="credit">Created by <b>Felipe dos Anjos</b><br><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> · <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br>Data: <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a></div></div></div>
+ <aside>
+  <p class="eyebrow">4 October 2026</p>
+  <h1>Brazil 2026 presidential election, first round</h1>
+  <p class="deck">1 dot = <b><span class="vpd">__VPD__</span> votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.</p>
+  <div class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg><input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="qlist" aria-autocomplete="list" placeholder="Search a municipality" autocomplete="off"><ul id="qlist" role="listbox" hidden></ul></div>
+  <div id="cands"></div>
+ </aside>
+</div>
+<div id="tip"></div>
+<script>
+const DOTS=__DOTS__, MG=__MGEO__, SG=__SGEO__, M=__MUNS__, CANDS=__CANDS__;
+/*__JS__*/
+</script></body></html>

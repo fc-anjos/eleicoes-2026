@@ -1,90 +1,3 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Where Brazil Voted</title>
-<meta name="color-scheme" content="dark">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-<style>
-:root{--night:#1a1a1a;--dusk:#242424;--ink:#f2f2f2;--haze:#a3a3a3;--rule:#333;
- /* Flávio, Lula and Cury pass dataviz validate_palette (dark, all pairs). Santos and Caiado were added on request
-    and fail it: violet vs blue is hard to tell apart for protan readers; hovering a candidate isolates them */
- --c0:#3987e5;--c1:#d95926;--c2:#199e70;--c3:#eda100;--c4:#9085e9;--c5:#8a8a8a;
- --display:"Open Sans",Helvetica,Arial,sans-serif;--body:"Open Sans",Helvetica,Arial,sans-serif;--mono:"Open Sans",Helvetica,Arial,sans-serif}
-*{box-sizing:border-box}
-body{margin:0;background:var(--night);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
-html,body{height:100%;overflow:hidden}
-.page{display:grid;grid-template-columns:380px minmax(0,1fr);height:100vh;height:100dvh}
-#wrap{position:relative;overflow:hidden;grid-column:2;grid-row:1}
-canvas,svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-svg{cursor:grab}svg:active{cursor:grabbing}
-/* municipality borders fade in with zoom (--mu-o, set from JS); hovered and selected ones are drawn on top */
-path.mu{fill:transparent;stroke:var(--haze);stroke-opacity:var(--mu-o,0);stroke-width:var(--mu-w,.5);vector-effect:non-scaling-stroke;cursor:pointer}
-path.hl{fill:none;stroke:var(--ink);stroke-opacity:.9;stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}
-path.sel{fill:none;stroke:var(--ink);stroke-width:2;vector-effect:non-scaling-stroke;pointer-events:none}
-path.outer{fill:none;stroke:var(--ink);stroke-opacity:.18;stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:none}
-path.uf{fill:none;stroke:var(--haze);stroke-opacity:.28;stroke-width:.7;vector-effect:non-scaling-stroke;pointer-events:none}
-.mapbar{position:absolute;left:20px;right:20px;bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;font:11.5px/1.6 var(--body);color:var(--haze);pointer-events:none}
-.mapbar>div{text-shadow:0 0 3px var(--night),0 0 6px var(--night),0 0 10px var(--night);pointer-events:auto}
-.mapbar b{color:var(--ink);font-weight:600}
-.mapbar a{color:inherit;text-decoration:none;border-bottom:1px solid var(--rule)}.mapbar a:hover{color:var(--ink);border-color:var(--haze)}
-.mapbar .k-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ink);margin-right:7px;vertical-align:1px}
-.mapbar .credit{text-align:right}
-button{font:500 12px/1 var(--mono);color:var(--ink);background:var(--night);border:1px solid var(--rule);border-radius:999px;padding:7px 12px;cursor:pointer}
-button:hover{border-color:var(--haze)}
-:focus-visible{outline:2px solid var(--c0);outline-offset:2px}
-
-aside{overflow-y:auto;padding:28px 28px 22px;border-right:1px solid var(--rule);grid-column:1;grid-row:1;display:flex;flex-direction:column}
-.eyebrow{font:600 11px/1.5 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--haze);margin:0 0 12px}
-h1{font:700 26px/1.2 var(--display);margin:0}
-.deck{color:var(--haze);font-size:14px;margin:14px 0 20px}
-.deck b{color:var(--ink);font-weight:500}
-.search{position:relative;margin:0 0 20px}
-.search svg{position:absolute;left:12px;top:50%;width:15px;height:15px;transform:translateY(-50%);stroke:var(--haze);fill:none;stroke-width:1.8;pointer-events:none}
-.search input{display:block;width:100%;height:40px;font:inherit;font-size:14px;color:var(--ink);background:var(--dusk);border:1px solid var(--rule);border-radius:8px;padding:0 12px 0 36px;outline:none;transition:border-color .15s,background .15s}
-.search input:hover{border-color:#444}
-.search input:focus{border-color:var(--haze);background:#262626}
-.search input::placeholder{color:var(--haze)}
-.search ul{position:absolute;z-index:5;left:0;right:0;top:calc(100% + 6px);margin:0;padding:6px;list-style:none;background:var(--dusk);border:1px solid var(--rule);border-radius:8px;box-shadow:0 12px 32px #000a;max-height:300px;overflow-y:auto}
-.search li{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:5px;cursor:pointer;font-size:13.5px;line-height:1.3}
-.search li span{color:var(--haze);font-size:12px;margin:0}
-.search li[aria-selected="true"]{background:var(--rule)}
-.search .none{color:var(--haze);cursor:default}
-.cand{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--rule);border-radius:0;padding:9px 0;color:inherit;font:inherit;background:none;transition:opacity .2s}
-.cand:hover{border-color:var(--rule)}
-.cand .row{display:flex;align-items:baseline;gap:10px}
-.cand .nm{font:500 15px/1.2 var(--body);flex:1}
-.cand .pc{font:600 18px/1 var(--body)}
-.cand .vt{font:11px/1.3 var(--mono);color:var(--haze);margin-top:3px}
-.cand .who{font-size:11px;color:var(--haze);margin-top:3px;line-height:1.4}
-.grains{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px}
-.grains i{width:5px;height:5px;border-radius:50%;background:var(--c)}
-.grains i.part{opacity:.4}
-.page.focus .cand{opacity:.35}.page.focus .cand[aria-pressed="true"]{opacity:1}
-@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);grid-template-rows:58dvh minmax(0,1fr)}
- aside{border-right:0;border-top:1px solid var(--rule);padding:20px 16px;grid-column:1;grid-row:2}#wrap{grid-column:1;grid-row:1}
- .mapbar{left:16px;right:16px;flex-direction:column;align-items:flex-start;gap:6px}.mapbar .hint{display:none}.mapbar .credit{text-align:left}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-#tip{position:fixed;pointer-events:none;background:var(--dusk);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;font:13px/1.5 var(--body);opacity:0;min-width:200px;box-shadow:0 8px 30px #0008}
-#tip b{font:700 14px/1.2 var(--display);display:block;margin-bottom:6px}
-#tip .l{display:flex;gap:10px;justify-content:space-between;font-family:var(--mono);font-size:12px}
-#tip .t{color:var(--haze);font:11px var(--mono);margin-top:6px}
-
-</style></head><body><div class="page" id="page">
- <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
-  <div class="mapbar">
-   <div class="key"><span class="k-dot"></span><b>1 dot = __VPD__ votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
-   <div class="credit">Created by <b>Felipe dos Anjos</b><br><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> · <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br>Data: <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a></div></div></div>
- <aside>
-  <p class="eyebrow">4 October 2026</p>
-  <h1>Brazil 2026 presidential election, first round</h1>
-  <p class="deck">1 dot = <b>__VPD__ votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.</p>
-  <div class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg><input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="qlist" aria-autocomplete="list" placeholder="Search a municipality" autocomplete="off"><ul id="qlist" role="listbox" hidden></ul></div>
-  <div id="cands"></div>
- </aside>
-</div>
-<div id="tip"></div>
-<script>
-const DOTS=__DOTS__, MG=__MGEO__, SG=__SGEO__, M=__MUNS__, CANDS=__CANDS__;
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const K=CANDS.length, COLS=CANDS.map((c,i)=>css(i<K-1?`--c${i}`:"--c5"));
 const NAME=Object.fromEntries(CANDS.filter(c=>c.k).map(c=>[c.k,c.n]));
@@ -116,7 +29,7 @@ const mu=g.append("g").selectAll("path").data(MG.features).join("path").attr("cl
   .html(`<b>${m.n}, ${m.uf}</b>`+m.v.map(([n,v])=>`<div class="l"><span>${NAME[n]||title(n)}</span><span>${pct(v,m.t)}</span></div>`).join("")+`<div class="t">${fmt(m.t)} valid votes</div>`);})
  .on("mouseenter",(e,f)=>hl.datum(f).attr("d",path).style("display",null))
  .on("mouseleave",()=>{tip.style("opacity",0);hl.style("display","none");})
- .on("click",(e,f)=>select(sel===f?null:f))
+ .on("click",(e,f)=>{e.stopPropagation();select(sel===f?null:f);})
  .on("dblclick",(e,f)=>{e.stopPropagation();select(f,true);}); // double click: select and zoom to it
 const uf=g.append("g").selectAll("path").data(SG.features).join("path").attr("class","uf");
 // Brazil's outer border: every state outline stroked once, masked to outside the country so the internal
@@ -150,7 +63,8 @@ function layout(){
 // Zoomed in, the dots grow past a pixel and are drawn as discs. Nothing is added or removed.
 // Dot radius grows as k^0.5 (CartoDB's women dot map grows ~k^0.83: 0.5px at z8 → 16px at z14), so dots
 // per screen area fall by k² but each grows by k^1.5: coverage thins slowly instead of collapsing mid-zoom.
-const R1=.32, GAMMA=.5, ALO=.4; // radius in css px at zoom 1, growth exponent, opacity of the sparsest pixels
+let R1=.32, STEP=1; // radius in css px at zoom 1 (dot-size control); draw every STEP-th dot (votes-per-dot control)
+const GAMMA=.5, ALO=.4; // growth exponent, opacity of the sparsest pixels
 function paint(t){
  const rd=R1*Math.pow(t.k,GAMMA)*dpr, sx=t.k*dpr,ox=t.x*dpr,oy=t.y*dpr, N=W*H, f=focus;
  T.fill(0);if(f>=0)O.fill(0);
@@ -160,11 +74,11 @@ function paint(t){
  // speckle (as in Cable's and CartoDB's maps) instead of averaging complementary hues into grey.
  const add=(j,c,a)=>{if(f<0||c===f){T[j]+=a;TOP[j]=c;}else O[j]+=a;};
  if(rd<1.2){const ar=Math.PI*rd*rd; // sub-pixel dots add their area to one pixel
-  for(let i=0;i<n;i++){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
+  for(let i=0;i<n;i+=STEP){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
    if(x>=0&&x<W&&y>=0&&y<H)add(y*W+x,C[i],ar);}
  }else{const Rr=Math.ceil(rd),r2=rd*rd,off=[]; // larger dots add 1 to every pixel of a disc
   for(let dy=-Rr;dy<=Rr;dy++)for(let dx=-Rr;dx<=Rr;dx++)if(dx*dx+dy*dy<=r2)off.push(dx,dy);
-  for(let i=0;i<n;i++){const X=(P[2*i]*sx+ox)|0,Y=(P[2*i+1]*sx+oy)|0;
+  for(let i=0;i<n;i+=STEP){const X=(P[2*i]*sx+ox)|0,Y=(P[2*i+1]*sx+oy)|0;
    if(X<-Rr||X>=W+Rr||Y<-Rr||Y>=H+Rr)continue;const c=C[i];
    for(let q=0;q<off.length;q+=2){const x=X+off[q],y=Y+off[q+1];if(x>=0&&x<W&&y>=0&&y<H)add(y*W+x,c,1);}}
  }
@@ -188,17 +102,29 @@ let pending=null;
 // so city limits read clearly up close.
 const borderOpacity=k=>k<3?Math.max(0,Math.min(.1,(k-1.3)*.06)):k<20?Math.max(.06,.1-.04*Math.log(k/3)/Math.log(20/3)):Math.min(.4,.06+.34*Math.log(k/20)/Math.log(3));
 const MAXK=400; // deep enough for the smallest municipalities to fill the screen
+let lastK=1;const CLEARK=1.5;
 const zoom=d3.zoom().scaleExtent([1,MAXK]).on("zoom",e=>{const t=e.transform;
+ // zooming out by hand to near the whole-country view clears the selection
+ if(sel&&e.sourceEvent&&t.k<lastK&&t.k<CLEARK)select(null);
+ lastK=t.k;
  g.attr("transform",t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<20?.5:Math.min(1.1,.5+.6*Math.log(t.k/20)/Math.log(3)));
  if(!pending)requestAnimationFrame(()=>{paint(pending);pending=null;});pending=t;});
 
 layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));
 // replace d3's double-click zoom-in: on a municipality it zooms to that municipality (handler above);
 // anywhere outside Brazil it zooms back out to the whole country
-svg.on("dblclick.zoom",null).on("dblclick",()=>svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity));
+svg.on("dblclick.zoom",null).on("dblclick",()=>{select(null);svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity);});
+// a selection clears on a click outside Brazil or on Escape anywhere (clicking the same municipality also toggles it)
+svg.on("click",()=>select(null));
+addEventListener("keydown",e=>{if(e.key==="Escape"&&e.target!==q)select(null);});
 repaint=()=>paint(d3.zoomTransform(svg.node()));repaint();
+// controls. Dots are shuffled, so keeping every STEP-th one is a random sample at STEP × __VPD__ votes per dot.
+const STEPS=[1,2,4,10,20,40];let vpdTimer;
+d3.select("#vpd").on("input",e=>{STEP=STEPS[+e.target.value];const v=fmt(STEP*__VPD__);d3.selectAll(".vpd").text(v);d3.select("#vpdv").text(v);
+ clearTimeout(vpdTimer);vpdTimer=setTimeout(repaint,120);}); // repaint once the slider settles
+d3.select("#rad").on("input",e=>{const m=2**+e.target.value;R1=.32*m;d3.select("#radv").text(m.toFixed(m<1?2:1).replace(/\.?0+$/,"")+"×");repaint();});
 // selecting a municipality (by click or search) outlines it; from search it also zooms to it
-function select(f,zoomTo){sel=f;sl.datum(f).attr("d",f?path:null).style("display",f?null:"none");
+function select(f,zoomTo){sel=f;if(!f&&typeof q!=="undefined")q.value="";sl.datum(f).attr("d",f?path:null).style("display",f?null:"none");
  if(f&&zoomTo){const [[x0,y0],[x1,y1]]=path.bounds(f),k=Math.min(MAXK,.9/Math.max((x1-x0)/w,(y1-y0)/h));
   svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity.translate(w/2,h/2).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2));}}
 
@@ -224,4 +150,3 @@ q.addEventListener("keydown",e=>{
 q.addEventListener("blur",()=>setTimeout(()=>{ql.attr("hidden",true);q.setAttribute("aria-expanded","false");},100));
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{layout();zoom.translateExtent([[0,0],[w,h]]);
  svg.call(zoom.transform,d3.zoomIdentity);},150);});
-</script></body></html>
