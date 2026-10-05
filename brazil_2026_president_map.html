@@ -2,9 +2,9 @@
 <title>Brazil 2026 Presidential Vote</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
-:root{--bg:#fafaf8;--fg:#1d1d1b;--muted:#6b6b66;--line:#fff;--card:#fff;--flavio:#1f4e9c;--lula:#c8102e}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151514;--fg:#ecebe6;--muted:#9a9a93;--line:#151514;--card:#1f1f1d;--flavio:#5b8de0;--lula:#e5484d}}
-:root[data-theme="dark"]{--bg:#151514;--fg:#ecebe6;--muted:#9a9a93;--line:#151514;--card:#1f1f1d;--flavio:#5b8de0;--lula:#e5484d}
+:root{--bg:#fafaf8;--fg:#1d1d1b;--muted:#6b6b66;--line:#fff;--card:#fff;--flavio:#1f4e9c;--lula:#c8102e;--other:#c9c9c2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151514;--fg:#ecebe6;--muted:#9a9a93;--line:#151514;--card:#1f1f1d;--flavio:#4f9dff;--lula:#ff5a5f;--other:#4a4a46}}
+:root[data-theme="dark"]{--bg:#151514;--fg:#ecebe6;--muted:#9a9a93;--line:#151514;--card:#1f1f1d;--flavio:#4f9dff;--lula:#ff5a5f;--other:#4a4a46}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif}
 main{max-width:980px;margin:0 auto;padding:24px 16px}
 h1{font-size:24px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 20px}
@@ -12,11 +12,11 @@ h1{font-size:24px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 20px}
 .c{background:var(--card);border-radius:10px;padding:10px 14px;min-width:150px;box-shadow:0 1px 3px #0001}
 .c b{display:block;font-size:22px}.c span{color:var(--muted);font-size:13px}
 .bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:0 0 20px}
-#wrap{position:relative}canvas{position:absolute;inset:0;width:100%;height:100%}svg{position:relative;width:100%;height:auto;display:block}path.mu{fill:transparent;stroke:var(--muted);stroke-opacity:.18;stroke-width:.25}path.mu:hover{stroke:var(--fg);stroke-opacity:1;stroke-width:1}path.uf{fill:none;stroke:var(--fg);stroke-opacity:.55;stroke-width:.7;pointer-events:none}
+#wrap{position:relative}canvas{position:absolute;inset:0;width:100%;height:100%}svg{position:relative;width:100%;height:auto;display:block}path.mu{fill:transparent;stroke:none;vector-effect:non-scaling-stroke}svg.near path.mu{stroke:var(--muted);stroke-opacity:.35;stroke-width:.5}svg{cursor:grab}path.mu:hover{stroke:var(--fg);stroke-opacity:1;stroke-width:1.2}path.uf{fill:none;stroke:var(--fg);stroke-opacity:.35;stroke-width:.8;vector-effect:non-scaling-stroke;pointer-events:none}
 #tip{position:fixed;pointer-events:none;background:var(--card);border-radius:8px;padding:8px 10px;box-shadow:0 4px 14px #0003;font-size:13px;opacity:0}
 .legend{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:13px;align-items:center}
 .ramp{width:140px;height:10px;border-radius:3px}
-footer{color:var(--muted);font-size:12px;margin-top:16px}
+button{font:inherit;font-size:12px;background:var(--card);color:var(--fg);border:1px solid var(--muted);border-radius:6px;padding:2px 8px;cursor:pointer}footer{color:var(--muted);font-size:12px;margin-top:16px}
 </style></head><body><main>
 <h1>Brazil 2026 presidential election, 1st round</h1>
 <p class="sub">October 4, 2026 · one dot = 1000 votes, placed randomly within the municipality where they were cast · 100% of polling stations counted</p>
@@ -39,22 +39,36 @@ function draw(){
  const bar=d3.select("#bar").html("");
  ranked.forEach(([n,v])=>bar.append("div").style("width",100*v/natTot+"%").style("background",COL[n]?css(COL[n]):css("--muted")));
  const lg=d3.select("#legend").html("");
- for(const [n,c] of [["FLAVIO BOLSONARO",css('--flavio')],["LULA",css('--lula')],["Other candidates",css('--muted')]])
+ for(const [n,c] of [["FLAVIO BOLSONARO",css('--flavio')],["LULA",css('--lula')],["Other candidates",css('--other')]])
   lg.append("div").html(`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c};vertical-align:middle"></span> ${n}`);
- lg.append("div").text(`1 dot = ${fmt(1000)} votes`);
+ lg.append("div").text(`1 dot = ${fmt(1000)} votes · scroll or pinch to zoom, drag to pan`);lg.append("button").attr("id","reset").text("Reset zoom");
  const proj=d3.geoMercator().fitSize([900,820],SG), path=d3.geoPath(proj);
- const svg=d3.select("#map").html(""), tip=d3.select("#tip");
- svg.append("g").selectAll("path").data(MG.features).join("path").attr("class","mu").attr("d",path)
-    .on("mousemove",(e,f)=>{const m=M[f.properties.codarea];if(!m)return;
+ const svg=d3.select("#map").html(""), tip=d3.select("#tip"), g=svg.append("g");
+ g.append("g").selectAll("path").data(MG.features).join("path").attr("class","mu").attr("d",path)
+  .on("mousemove",(e,f)=>{const m=M[f.properties.codarea];if(!m)return;
     tip.style("opacity",1).style("left",Math.min(e.clientX+14,innerWidth-230)+"px").style("top",e.clientY+14+"px")
     .html(`<b>${m.n} (${m.uf})</b><br>`+m.v.map(([n,v])=>`${n}: ${pct(v,m.t)}`).join("<br>")+`<br><span style="color:var(--muted)">${fmt(m.t)} valid votes</span>`);})
   .on("mouseleave",()=>tip.style("opacity",0));
- const cv=document.getElementById("cv"),k=2*(devicePixelRatio||1);
- cv.width=900*k;cv.height=820*k;const cx=cv.getContext("2d");cx.scale(k,k);
- const cc=[css('--flavio'),css('--lula'),css('--muted')];
- for(let i=0;i<DOTS.length;i+=3){const [x,y]=proj([DOTS[i]/1000,DOTS[i+1]/1000]);
-  cx.fillStyle=cc[DOTS[i+2]];cx.beginPath();cx.arc(x,y,.75,0,6.2832);cx.fill();}
- svg.append("g").selectAll("path").data(SG.features).join("path").attr("class","uf").attr("d",path);
+ g.append("g").selectAll("path").data(SG.features).join("path").attr("class","uf").attr("d",path);
+ // project once; redraw the canvas on every zoom step with dots at a near-constant screen size
+ const n=DOTS.length/3, P=new Float32Array(2*n), C=new Uint8Array(n);
+ for(let i=0;i<n;i++){const [x,y]=proj([DOTS[3*i]/1000,DOTS[3*i+1]/1000]);P[2*i]=x;P[2*i+1]=y;C[i]=DOTS[3*i+2];}
+ const cv=document.getElementById("cv"),dpr=2*(devicePixelRatio||1);
+ cv.width=900*dpr;cv.height=820*dpr;const cx=cv.getContext("2d");
+ const cc=[css('--flavio'),css('--lula'),css('--other')];
+ function paint(t){
+  cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);
+  cx.setTransform(dpr*t.k,0,0,dpr*t.k,dpr*t.x,dpr*t.y);
+  const s=(.55+.35*Math.sqrt(t.k))/t.k; // dot side in map units: grows slowly on screen as you zoom in
+  // chunked so neither colour systematically paints over the other
+  for(let a=0;a<n;a+=4000){const b=Math.min(n,a+4000);
+   for(let c=2;c>=0;c--){cx.fillStyle=cc[c];cx.beginPath();
+    for(let i=a;i<b;i++)if(C[i]===c)cx.rect(P[2*i]-s/2,P[2*i+1]-s/2,s,s);cx.fill();}}
+ }
+ const zoom=d3.zoom().scaleExtent([1,60]).translateExtent([[0,0],[900,820]]).on("zoom",e=>{
+  g.attr("transform",e.transform);paint(e.transform);svg.classed("near",e.transform.k>=4);});
+ svg.call(zoom);paint(d3.zoomTransform(svg.node()));
+ d3.select("#reset").on("click",()=>svg.transition().duration(600).call(zoom.transform,d3.zoomIdentity));
 }
 draw();matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
 </script></body></html>
