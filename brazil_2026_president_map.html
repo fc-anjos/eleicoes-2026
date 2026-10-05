@@ -5,7 +5,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
-:root{--night:#1a1a1a;--dusk:#242424;--ink:#f2f2f2;--haze:#a3a3a3;--rule:#333;
+:root{/* cool-tinted neutrals: the page reads as one surface from map to sidebar to panels */
+ --night:#151517;--dusk:#1e1e21;--lift:#26262a;--ink:#f2f2f3;--haze:#a3a3a8;--rule:#2c2c31;--edge:#3d3d43;
  /* Flávio, Lula and Cury pass dataviz validate_palette (dark, all pairs). Santos and Caiado were added on request
     and fail it: violet vs blue is hard to tell apart for protan readers; hovering a candidate isolates them */
  --c0:#3987e5;--c1:#d95926;--c2:#199e70;--c3:#eda100;--c4:#9085e9;--c5:#8a8a8a;
@@ -14,8 +15,11 @@
 body{margin:0;background:var(--night);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
 html,body{height:100%;overflow:hidden}
 .page{display:grid;grid-template-columns:380px minmax(0,1fr);height:100vh;height:100dvh}
-#wrap{position:relative;overflow:hidden;grid-column:2;grid-row:1}
+#wrap{position:relative;overflow:hidden;grid-column:2;grid-row:1;background:var(--night)}
 #cv,#map{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* place names: a halo in the background colour separates them from the dots beneath */
+.place text{font:500 11px var(--body);fill:var(--haze);text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:var(--night);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.place text.big{font-weight:600;fill:var(--ink)}
 #map{cursor:grab}#map:active{cursor:grabbing}
 /* municipality borders fade in with zoom (--mu-o, set from JS); hovered and selected ones are drawn on top */
 path.mu{fill:transparent;stroke:var(--haze);stroke-opacity:var(--mu-o,0);stroke-width:var(--mu-w,.5);vector-effect:non-scaling-stroke;cursor:pointer}
@@ -41,8 +45,8 @@ h1{font:700 26px/1.2 var(--display);margin:0}
 .search{position:relative;margin:0 0 20px}
 .search svg{position:absolute;left:12px;top:50%;width:15px;height:15px;transform:translateY(-50%);stroke:var(--haze);fill:none;stroke-width:1.8;pointer-events:none}
 .search input{display:block;width:100%;height:40px;font:inherit;font-size:14px;color:var(--ink);background:var(--dusk);border:1px solid var(--rule);border-radius:8px;padding:0 12px 0 36px;outline:none;transition:border-color .15s,background .15s}
-.search input:hover{border-color:#444}
-.search input:focus{border-color:var(--haze);background:#262626}
+.search input:hover{border-color:var(--edge)}
+.search input:focus{border-color:var(--haze);background:var(--lift)}
 .search input::placeholder{color:var(--haze)}
 .search ul{position:absolute;z-index:5;left:0;right:0;top:calc(100% + 6px);margin:0;padding:6px;list-style:none;background:var(--dusk);border:1px solid var(--rule);border-radius:8px;box-shadow:0 12px 32px #000a;max-height:300px;overflow-y:auto}
 .search li{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:5px;cursor:pointer;font-size:13.5px;line-height:1.3}
@@ -71,9 +75,9 @@ h1{font:700 26px/1.2 var(--display);margin:0}
 
 .ctl{position:absolute;top:14px;right:14px;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:8px;font-size:12px;color:var(--haze)}
 #gear{width:30px;height:30px;padding:0;display:grid;place-items:center;background:none;border:0;border-radius:6px;opacity:.55;transition:opacity .15s,background .15s}
-#gear:hover,#gear[aria-expanded="true"]{opacity:1;background:#ffffff10}
+#gear:hover,#gear[aria-expanded="true"]{opacity:1;background:var(--lift)}
 #gear svg{width:16px;height:16px;fill:none;stroke:var(--ink);stroke-width:1.6}
-#ctlp{display:grid;gap:8px;padding:10px 12px;width:250px;background:#242424e6;backdrop-filter:blur(6px);border:1px solid var(--rule);border-radius:8px}
+#ctlp{display:grid;gap:8px;padding:10px 12px;width:250px;background:color-mix(in srgb,var(--dusk) 90%,transparent);backdrop-filter:blur(6px);border:1px solid var(--rule);border-radius:8px}
 #ctlp[hidden]{display:none}
 .ctl label,.ctl .lbl{display:grid;grid-template-columns:80px 1fr 40px;align-items:center;gap:10px}
 .ctl input{width:100%;accent-color:var(--haze)}
@@ -155,13 +159,14 @@ const n=DOTS.n, P=new Float32Array(2*n), U=new Float32Array(2*n), C=new Uint8Arr
  const X=new Uint16Array(bytes.buffer,0,n),Y=new Uint16Array(bytes.buffer,2*n,n),rad=Math.PI/180000;C.set(bytes.subarray(4*n,5*n));
  for(let i=0;i<n;i++){U[2*i]=(X[i]+DOTS.x0)*rad;U[2*i+1]=-Math.log(Math.tan(Math.PI/4+(Y[i]+DOTS.y0)*rad/2));}}
 const cv=document.getElementById("cv"),dpr=devicePixelRatio||1,cx=cv.getContext("2d"),cc=COLS.map(h=>d3.rgb(h));
-let w,h,W,H,img,px,T,O,TOP,cnt;
+let w,h,W,H,img,px,T,O,TOP,cnt,layoutGen=0;
 const PX=cc.map(c=>(c.b<<16|c.g<<8|c.r)>>>0); // candidate colours packed as little-endian RGB
 function layout(){
  const r=document.getElementById("wrap").getBoundingClientRect();w=r.width;h=r.height;
  const pad=Math.min(w,h)*.05,lg=0;
  proj.fitExtent([[pad,pad],[w-pad,h-pad-24]],SG);
  svg.attr("viewBox",`0 0 ${w} ${h}`);mu.attr("d",path);uf.attr("d",path);outer.attr("d",path(SG));mskIn.attr("d",path(SG));if(typeof sl!=="undefined"&&sel)sl.attr("d",path);
+ layoutGen++;
  {const k=proj.scale(),[tx,ty]=proj.translate();for(let i=0;i<n;i++){P[2*i]=U[2*i]*k+tx;P[2*i+1]=U[2*i+1]*k+ty;}}
  W=Math.round(w*dpr);H=Math.round(h*dpr);cv.width=W;cv.height=H;
  img=cx.createImageData(W,H);px=new Uint32Array(img.data.buffer);
@@ -178,7 +183,7 @@ let SIZE=1, STEP=1, ADAPT=true; // radius multiplier (dot-size control); draw ev
 const ALO=.4, CELL=16, COVER=.6; // opacity of the sparsest pixels; density fit
 // The other strategy (the original): radius from zoom alone, R0·k^0.5 (CartoDB's women dot map grows ~k^0.83),
 // so dots per screen area fall by k² but each grows by k^1.5 and coverage thins slowly as you zoom in.
-const R0=.32, DENSE_W=.5, ADAPT_W=.9, AMIN=.3, AMAX=8;
+const R0=.32, DENSE_W=.35, ADAPT_W=.9, AMIN=.3, AMAX=8;
 function radius(t){ // in css px
  const k=t.k,rz=R0*Math.sqrt(k);
  if(!ADAPT)return rz*SIZE;
@@ -268,10 +273,29 @@ const zoom=d3.zoom().scaleExtent([1,MAXK]).on("zoom",e=>{const t=e.transform;
  // zooming out by hand to near the whole-country view clears the selection
  if(sel&&e.sourceEvent&&t.k<lastK&&t.k<CLEARK)select(null);
  lastK=t.k;
- g.attr("transform",t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<20?.5:Math.min(1.1,.5+.6*Math.log(t.k/20)/Math.log(3)));
+ g.attr("transform",t);placeLabels(t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<20?.5:Math.min(1.1,.5+.6*Math.log(t.k/20)/Math.log(3)));
  if(!pending)requestAnimationFrame(()=>{paint(pending);pending=null;});pending=t;});
 
 layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));
+// Place names. Municipalities are tried in order of votes cast; a name is shown when
+// it falls in view and doesn't collide with one already placed, so big cities win and more names appear as you
+// zoom in. Names sit at the municipality's centroid.
+const LABELS_K=2.5,labG=svg.append("g").attr("class","place");
+const LAB=MG.features.filter(f=>M[f.properties.codarea]).map(f=>({f,n:M[f.properties.codarea].n,t:M[f.properties.codarea].t,c:[0,0]})).sort((a,b)=>b.t-a.t);
+let labGen=-1;
+function placeLabels(t){
+ if(labGen!==layoutGen){LAB.forEach(d=>d.c=path.centroid(d.f));labGen=layoutGen;} // centroids follow the fitted projection
+ const out=[];
+ if(t.k>=LABELS_K){const boxes=[],max=Math.round(w*h/28000);
+  for(const d of LAB){if(out.length>=max)break;
+   const x=d.c[0]*t.k+t.x,y=d.c[1]*t.k+t.y;if(x<20||x>w-20||y<10||y>h-90)continue; // keep clear of the key and credits
+   const fs=d.t>1e6?13.5:d.t>2e5?12:11,bw=d.n.length*fs*.56+40,bh=fs+26,b=[x-bw/2,y-bh/2,x+bw/2,y+bh/2];
+   if(boxes.some(o=>o[0]<b[2]&&b[0]<o[2]&&o[1]<b[3]&&b[1]<o[3]))continue;
+   boxes.push(b);out.push({d,x,y,fs});}}
+ labG.selectAll("text").data(out,o=>o.d.f.properties.codarea).join("text")
+  .attr("x",o=>o.x).attr("y",o=>o.y).style("font-size",o=>o.fs+"px").classed("big",o=>o.d.t>1e6).text(o=>o.d.n);
+}
+placeLabels(d3.zoomIdentity);
 // replace d3's double-click zoom-in: on a municipality it zooms to that municipality (handler above);
 // anywhere outside Brazil it zooms back out to the whole country
 svg.on("dblclick.zoom",null).on("dblclick",()=>{select(null);svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity);});

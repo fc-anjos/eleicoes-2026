@@ -50,13 +50,14 @@ const n=DOTS.n, P=new Float32Array(2*n), U=new Float32Array(2*n), C=new Uint8Arr
  const X=new Uint16Array(bytes.buffer,0,n),Y=new Uint16Array(bytes.buffer,2*n,n),rad=Math.PI/180000;C.set(bytes.subarray(4*n,5*n));
  for(let i=0;i<n;i++){U[2*i]=(X[i]+DOTS.x0)*rad;U[2*i+1]=-Math.log(Math.tan(Math.PI/4+(Y[i]+DOTS.y0)*rad/2));}}
 const cv=document.getElementById("cv"),dpr=devicePixelRatio||1,cx=cv.getContext("2d"),cc=COLS.map(h=>d3.rgb(h));
-let w,h,W,H,img,px,T,O,TOP,cnt;
+let w,h,W,H,img,px,T,O,TOP,cnt,layoutGen=0;
 const PX=cc.map(c=>(c.b<<16|c.g<<8|c.r)>>>0); // candidate colours packed as little-endian RGB
 function layout(){
  const r=document.getElementById("wrap").getBoundingClientRect();w=r.width;h=r.height;
  const pad=Math.min(w,h)*.05,lg=0;
  proj.fitExtent([[pad,pad],[w-pad,h-pad-24]],SG);
  svg.attr("viewBox",`0 0 ${w} ${h}`);mu.attr("d",path);uf.attr("d",path);outer.attr("d",path(SG));mskIn.attr("d",path(SG));if(typeof sl!=="undefined"&&sel)sl.attr("d",path);
+ layoutGen++;
  {const k=proj.scale(),[tx,ty]=proj.translate();for(let i=0;i<n;i++){P[2*i]=U[2*i]*k+tx;P[2*i+1]=U[2*i+1]*k+ty;}}
  W=Math.round(w*dpr);H=Math.round(h*dpr);cv.width=W;cv.height=H;
  img=cx.createImageData(W,H);px=new Uint32Array(img.data.buffer);
@@ -73,7 +74,7 @@ let SIZE=1, STEP=1, ADAPT=true; // radius multiplier (dot-size control); draw ev
 const ALO=.4, CELL=16, COVER=.6; // opacity of the sparsest pixels; density fit
 // The other strategy (the original): radius from zoom alone, R0·k^0.5 (CartoDB's women dot map grows ~k^0.83),
 // so dots per screen area fall by k² but each grows by k^1.5 and coverage thins slowly as you zoom in.
-const R0=.32, DENSE_W=.5, ADAPT_W=.9, AMIN=.3, AMAX=8;
+const R0=.32, DENSE_W=.35, ADAPT_W=.9, AMIN=.3, AMAX=8;
 function radius(t){ // in css px
  const k=t.k,rz=R0*Math.sqrt(k);
  if(!ADAPT)return rz*SIZE;
@@ -163,10 +164,29 @@ const zoom=d3.zoom().scaleExtent([1,MAXK]).on("zoom",e=>{const t=e.transform;
  // zooming out by hand to near the whole-country view clears the selection
  if(sel&&e.sourceEvent&&t.k<lastK&&t.k<CLEARK)select(null);
  lastK=t.k;
- g.attr("transform",t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<20?.5:Math.min(1.1,.5+.6*Math.log(t.k/20)/Math.log(3)));
+ g.attr("transform",t);placeLabels(t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<20?.5:Math.min(1.1,.5+.6*Math.log(t.k/20)/Math.log(3)));
  if(!pending)requestAnimationFrame(()=>{paint(pending);pending=null;});pending=t;});
 
 layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));
+// Place names. Municipalities are tried in order of votes cast; a name is shown when
+// it falls in view and doesn't collide with one already placed, so big cities win and more names appear as you
+// zoom in. Names sit at the municipality's centroid.
+const LABELS_K=2.5,labG=svg.append("g").attr("class","place");
+const LAB=MG.features.filter(f=>M[f.properties.codarea]).map(f=>({f,n:M[f.properties.codarea].n,t:M[f.properties.codarea].t,c:[0,0]})).sort((a,b)=>b.t-a.t);
+let labGen=-1;
+function placeLabels(t){
+ if(labGen!==layoutGen){LAB.forEach(d=>d.c=path.centroid(d.f));labGen=layoutGen;} // centroids follow the fitted projection
+ const out=[];
+ if(t.k>=LABELS_K){const boxes=[],max=Math.round(w*h/28000);
+  for(const d of LAB){if(out.length>=max)break;
+   const x=d.c[0]*t.k+t.x,y=d.c[1]*t.k+t.y;if(x<20||x>w-20||y<10||y>h-90)continue; // keep clear of the key and credits
+   const fs=d.t>1e6?13.5:d.t>2e5?12:11,bw=d.n.length*fs*.56+40,bh=fs+26,b=[x-bw/2,y-bh/2,x+bw/2,y+bh/2];
+   if(boxes.some(o=>o[0]<b[2]&&b[0]<o[2]&&o[1]<b[3]&&b[1]<o[3]))continue;
+   boxes.push(b);out.push({d,x,y,fs});}}
+ labG.selectAll("text").data(out,o=>o.d.f.properties.codarea).join("text")
+  .attr("x",o=>o.x).attr("y",o=>o.y).style("font-size",o=>o.fs+"px").classed("big",o=>o.d.t>1e6).text(o=>o.d.n);
+}
+placeLabels(d3.zoomIdentity);
 // replace d3's double-click zoom-in: on a municipality it zooms to that municipality (handler above);
 // anywhere outside Brazil it zooms back out to the whole country
 svg.on("dblclick.zoom",null).on("dblclick",()=>{select(null);svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity);});

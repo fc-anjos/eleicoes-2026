@@ -1,4 +1,5 @@
-:root{--night:#1a1a1a;--dusk:#242424;--ink:#f2f2f2;--haze:#a3a3a3;--rule:#333;
+:root{/* cool-tinted neutrals: the page reads as one surface from map to sidebar to panels */
+ --night:#151517;--dusk:#1e1e21;--lift:#26262a;--ink:#f2f2f3;--haze:#a3a3a8;--rule:#2c2c31;--edge:#3d3d43;
  /* Flávio, Lula and Cury pass dataviz validate_palette (dark, all pairs). Santos and Caiado were added on request
     and fail it: violet vs blue is hard to tell apart for protan readers; hovering a candidate isolates them */
  --c0:#3987e5;--c1:#d95926;--c2:#199e70;--c3:#eda100;--c4:#9085e9;--c5:#8a8a8a;
@@ -7,8 +8,11 @@
 body{margin:0;background:var(--night);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
 html,body{height:100%;overflow:hidden}
 .page{display:grid;grid-template-columns:380px minmax(0,1fr);height:100vh;height:100dvh}
-#wrap{position:relative;overflow:hidden;grid-column:2;grid-row:1}
+#wrap{position:relative;overflow:hidden;grid-column:2;grid-row:1;background:var(--night)}
 #cv,#map{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* place names: a halo in the background colour separates them from the dots beneath */
+.place text{font:500 11px var(--body);fill:var(--haze);text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:var(--night);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.place text.big{font-weight:600;fill:var(--ink)}
 #map{cursor:grab}#map:active{cursor:grabbing}
 /* municipality borders fade in with zoom (--mu-o, set from JS); hovered and selected ones are drawn on top */
 path.mu{fill:transparent;stroke:var(--haze);stroke-opacity:var(--mu-o,0);stroke-width:var(--mu-w,.5);vector-effect:non-scaling-stroke;cursor:pointer}
@@ -34,8 +38,8 @@ h1{font:700 26px/1.2 var(--display);margin:0}
 .search{position:relative;margin:0 0 20px}
 .search svg{position:absolute;left:12px;top:50%;width:15px;height:15px;transform:translateY(-50%);stroke:var(--haze);fill:none;stroke-width:1.8;pointer-events:none}
 .search input{display:block;width:100%;height:40px;font:inherit;font-size:14px;color:var(--ink);background:var(--dusk);border:1px solid var(--rule);border-radius:8px;padding:0 12px 0 36px;outline:none;transition:border-color .15s,background .15s}
-.search input:hover{border-color:#444}
-.search input:focus{border-color:var(--haze);background:#262626}
+.search input:hover{border-color:var(--edge)}
+.search input:focus{border-color:var(--haze);background:var(--lift)}
 .search input::placeholder{color:var(--haze)}
 .search ul{position:absolute;z-index:5;left:0;right:0;top:calc(100% + 6px);margin:0;padding:6px;list-style:none;background:var(--dusk);border:1px solid var(--rule);border-radius:8px;box-shadow:0 12px 32px #000a;max-height:300px;overflow-y:auto}
 .search li{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:5px;cursor:pointer;font-size:13.5px;line-height:1.3}
@@ -64,9 +68,9 @@ h1{font:700 26px/1.2 var(--display);margin:0}
 
 .ctl{position:absolute;top:14px;right:14px;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:8px;font-size:12px;color:var(--haze)}
 #gear{width:30px;height:30px;padding:0;display:grid;place-items:center;background:none;border:0;border-radius:6px;opacity:.55;transition:opacity .15s,background .15s}
-#gear:hover,#gear[aria-expanded="true"]{opacity:1;background:#ffffff10}
+#gear:hover,#gear[aria-expanded="true"]{opacity:1;background:var(--lift)}
 #gear svg{width:16px;height:16px;fill:none;stroke:var(--ink);stroke-width:1.6}
-#ctlp{display:grid;gap:8px;padding:10px 12px;width:250px;background:#242424e6;backdrop-filter:blur(6px);border:1px solid var(--rule);border-radius:8px}
+#ctlp{display:grid;gap:8px;padding:10px 12px;width:250px;background:color-mix(in srgb,var(--dusk) 90%,transparent);backdrop-filter:blur(6px);border:1px solid var(--rule);border-radius:8px}
 #ctlp[hidden]{display:none}
 .ctl label,.ctl .lbl{display:grid;grid-template-columns:80px 1fr 40px;align-items:center;gap:10px}
 .ctl input{width:100%;accent-color:var(--haze)}
