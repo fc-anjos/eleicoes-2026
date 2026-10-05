@@ -27,11 +27,16 @@ for f in mgeo["features"]:
     g["coordinates"] = rewind([g["coordinates"]])[0] if g["type"] == "Polygon" else rewind(g["coordinates"])
 sgeo["features"] = [{"type": "Feature", "properties": {"sigla": f["properties"]["sigla"]}, "geometry": f["geometry"]} for f in sgeo["features"]]
 
+def pt_title(name):
+    """Title-case a Portuguese place name, keeping particles lowercase: São José dos Campos, not Dos."""
+    small = {"de", "do", "dos", "da", "das", "e", "d'"}
+    return " ".join(w if i and w in small else w[:1].upper() + w[1:] for i, w in enumerate(name.lower().split()))
+
 muns = {}
 for code, m in r["municipalities"].items():
     if m["uf"] == "zz": continue
     ranked = sorted(m["votes"].items(), key=lambda x: -x[1])[:4]
-    muns[code] = {"n": m["name"].title(), "uf": m["uf"].upper(), "t": sum(m["votes"].values()), "v": ranked}
+    muns[code] = {"n": pt_title(m["name"]), "uf": m["uf"].upper(), "t": sum(m["votes"].values()), "v": ranked}
 def edges(polys):
     """All ring edges of a (multi)polygon as arrays x1, y1, x2, y2."""
     e = np.array([(*a, *b) for p in polys for ring in p for a, b in zip(ring, ring[1:])], dtype=float)
