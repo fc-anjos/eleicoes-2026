@@ -1,7 +1,7 @@
 """Build a self-contained HTML choropleth of the 2026 presidential 1st round by municipality."""
 import json, random
 
-VPD = 5000  # votes per dot
+VPD = 250  # votes per dot
 random.seed(2026)
 
 def rnd(c):
@@ -50,17 +50,23 @@ def sample(polys, n):
         if inside(x, y, polys): out.append((x, y))
     return out
 
-# category per dot: 0 Flavio, 1 Lula, 2 everyone else; random rounding keeps totals unbiased
-CAT = {"FLAVIO BOLSONARO": 0, "LULA": 1}
+# category per dot: one per candidate above 1% nationally, plus one for everyone else; random rounding keeps totals unbiased
+LABEL = {"FLAVIO BOLSONARO": "Flávio Bolsonaro", "LULA": "Lula", "ESCRITOR AUGUSTO CURY": "Augusto Cury"}
+nat = r["national"]["votes"]; nat_tot = sum(nat.values())
+label = lambda k: LABEL.get(k, k.title())
+ranked = sorted(nat.items(), key=lambda x: -x[1])
+main = [k for k, v in ranked if v / nat_tot > .01]
+CAT = {k: i for i, k in enumerate(main)}
+cands = [{"k": k, "n": label(k), "v": nat[k]} for k in main] + [{"k": "", "n": "Others", "v": sum(v for k, v in ranked if k not in CAT), "who": [label(k) for k, v in ranked if k not in CAT]}]
 dots = []
 for f in mgeo["features"]:
     m = r["municipalities"].get(f["properties"]["codarea"])
     if not m: continue
     g = f["geometry"]
     polys = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"]
-    cats = [0, 0, 0]
+    cats = [0] * len(cands)
     for name, v in m["votes"].items():
-        cats[CAT.get(name, 2)] += v
+        cats[CAT.get(name, len(main))] += v
     want = []
     for c, v in enumerate(cats):
         want += [c] * (int(v // VPD) + (random.random() < v % VPD / VPD))
@@ -71,7 +77,7 @@ dots = [v for i in idx for v in dots[3 * i:3 * i + 3]]
 print(len(dots) // 3, "dots")
 
 html = open("map_template.html").read()
-for k, v in {"__MGEO__": mgeo, "__SGEO__": sgeo, "__MUNS__": muns, "__NAT__": r["national"]["votes"], "__DOTS__": dots, "__VPD__": VPD}.items():
+for k, v in {"__MGEO__": mgeo, "__SGEO__": sgeo, "__MUNS__": muns, "__CANDS__": cands, "__DOTS__": dots, "__VPD__": VPD}.items():
     html = html.replace(k, json.dumps(v, ensure_ascii=False, separators=(",", ":")))
 open("brazil_2026_president_map.html", "w").write(html)
 print("ok", len(muns), "municipalities;", sum(1 for f in mgeo["features"] if f["properties"]["codarea"] not in muns), "unmatched shapes")
