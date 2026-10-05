@@ -17,12 +17,18 @@ html,body{height:100%;overflow:hidden}
 #wrap{position:relative;overflow:hidden;grid-column:2;grid-row:1}
 canvas,svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 svg{cursor:grab}svg:active{cursor:grabbing}
-path.mu{fill:transparent;stroke:none;vector-effect:non-scaling-stroke}
-svg.near path.mu{stroke:var(--haze);stroke-opacity:.18;stroke-width:.5}
-path.mu:hover{stroke:var(--ink);stroke-opacity:.9;stroke-width:1.2}
+/* municipality borders fade in with zoom (--mu-o, set from JS); hovered and selected ones are drawn on top */
+path.mu{fill:transparent;stroke:var(--haze);stroke-opacity:var(--mu-o,0);stroke-width:var(--mu-w,.5);vector-effect:non-scaling-stroke;cursor:pointer}
+path.hl{fill:none;stroke:var(--ink);stroke-opacity:.9;stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}
+path.sel{fill:none;stroke:var(--ink);stroke-width:2;vector-effect:non-scaling-stroke;pointer-events:none}
+path.outer{fill:none;stroke:var(--ink);stroke-opacity:.18;stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:none}
 path.uf{fill:none;stroke:var(--haze);stroke-opacity:.28;stroke-width:.7;vector-effect:non-scaling-stroke;pointer-events:none}
-.mapbar{position:absolute;left:20px;right:20px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font:12px/1.3 var(--mono);color:var(--haze);pointer-events:none}
-.mapbar button{pointer-events:auto;margin-left:auto}
+.mapbar{position:absolute;left:20px;right:20px;bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;font:11.5px/1.6 var(--body);color:var(--haze);pointer-events:none}
+.mapbar>div{text-shadow:0 0 3px var(--night),0 0 6px var(--night),0 0 10px var(--night);pointer-events:auto}
+.mapbar b{color:var(--ink);font-weight:600}
+.mapbar a{color:inherit;text-decoration:none;border-bottom:1px solid var(--rule)}.mapbar a:hover{color:var(--ink);border-color:var(--haze)}
+.mapbar .k-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ink);margin-right:7px;vertical-align:1px}
+.mapbar .credit{text-align:right}
 button{font:500 12px/1 var(--mono);color:var(--ink);background:var(--night);border:1px solid var(--rule);border-radius:999px;padding:7px 12px;cursor:pointer}
 button:hover{border-color:var(--haze)}
 :focus-visible{outline:2px solid var(--c0);outline-offset:2px}
@@ -30,8 +36,19 @@ button:hover{border-color:var(--haze)}
 aside{overflow-y:auto;padding:28px 28px 22px;border-right:1px solid var(--rule);grid-column:1;grid-row:1;display:flex;flex-direction:column}
 .eyebrow{font:600 11px/1.5 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--haze);margin:0 0 12px}
 h1{font:700 26px/1.2 var(--display);margin:0}
-.deck{color:var(--haze);font-size:14px;margin:14px 0 18px}
+.deck{color:var(--haze);font-size:14px;margin:14px 0 20px}
 .deck b{color:var(--ink);font-weight:500}
+.search{position:relative;margin:0 0 20px}
+.search svg{position:absolute;left:12px;top:50%;width:15px;height:15px;transform:translateY(-50%);stroke:var(--haze);fill:none;stroke-width:1.8;pointer-events:none}
+.search input{display:block;width:100%;height:40px;font:inherit;font-size:14px;color:var(--ink);background:var(--dusk);border:1px solid var(--rule);border-radius:8px;padding:0 12px 0 36px;outline:none;transition:border-color .15s,background .15s}
+.search input:hover{border-color:#444}
+.search input:focus{border-color:var(--haze);background:#262626}
+.search input::placeholder{color:var(--haze)}
+.search ul{position:absolute;z-index:5;left:0;right:0;top:calc(100% + 6px);margin:0;padding:6px;list-style:none;background:var(--dusk);border:1px solid var(--rule);border-radius:8px;box-shadow:0 12px 32px #000a;max-height:300px;overflow-y:auto}
+.search li{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:5px;cursor:pointer;font-size:13.5px;line-height:1.3}
+.search li span{color:var(--haze);font-size:12px;margin:0}
+.search li[aria-selected="true"]{background:var(--rule)}
+.search .none{color:var(--haze);cursor:default}
 .cand{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--rule);border-radius:0;padding:9px 0;color:inherit;font:inherit;background:none;transition:opacity .2s}
 .cand:hover{border-color:var(--rule)}
 .cand .row{display:flex;align-items:baseline;gap:10px}
@@ -45,7 +62,7 @@ h1{font:700 26px/1.2 var(--display);margin:0}
 .page.focus .cand{opacity:.35}.page.focus .cand[aria-pressed="true"]{opacity:1}
 @media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);grid-template-rows:58dvh minmax(0,1fr)}
  aside{border-right:0;border-top:1px solid var(--rule);padding:20px 16px;grid-column:1;grid-row:2}#wrap{grid-column:1;grid-row:1}
- .mapbar{left:16px;right:16px}.mapbar span+span{display:none}}
+ .mapbar{left:16px;right:16px;flex-direction:column;align-items:flex-start;gap:6px}.mapbar .hint{display:none}.mapbar .credit{text-align:left}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 #tip{position:fixed;pointer-events:none;background:var(--dusk);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;font:13px/1.5 var(--body);opacity:0;min-width:200px;box-shadow:0 8px 30px #0008}
 #tip b{font:700 14px/1.2 var(--display);display:block;margin-bottom:6px}
@@ -54,11 +71,14 @@ h1{font:700 26px/1.2 var(--display);margin:0}
 
 </style></head><body><div class="page" id="page">
  <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
-  <div class="mapbar"><span>1 dot = __VPD__ votes · Source: TSE</span><span>Scroll to zoom · drag to pan</span><button id="reset">Reset view</button></div></div>
+  <div class="mapbar">
+   <div class="key"><span class="k-dot"></span><b>1 dot = __VPD__ votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
+   <div class="credit">Created by <b>Felipe dos Anjos</b><br><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> · <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br>Data: <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a></div></div></div>
  <aside>
   <p class="eyebrow">4 October 2026</p>
   <h1>Brazil 2026 presidential election, first round</h1>
-  <p class="deck">1 dot = <b>__VPD__ votes</b>, placed randomly within the municipality where they were cast. Hover a candidate to show only their votes.</p>
+  <p class="deck">1 dot = <b>__VPD__ votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.</p>
+  <div class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg><input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="qlist" aria-autocomplete="list" placeholder="Search a municipality" autocomplete="off"><ul id="qlist" role="listbox" hidden></ul></div>
   <div id="cands"></div>
  </aside>
 </div>
@@ -94,8 +114,20 @@ const mu=g.append("g").selectAll("path").data(MG.features).join("path").attr("cl
  .on("mousemove",(e,f)=>{const m=M[f.properties.codarea];if(!m)return;
   tip.style("opacity",1).style("left",Math.min(e.clientX+16,innerWidth-240)+"px").style("top",Math.min(e.clientY+16,innerHeight-160)+"px")
   .html(`<b>${m.n}, ${m.uf}</b>`+m.v.map(([n,v])=>`<div class="l"><span>${NAME[n]||title(n)}</span><span>${pct(v,m.t)}</span></div>`).join("")+`<div class="t">${fmt(m.t)} valid votes</div>`);})
- .on("mouseleave",()=>tip.style("opacity",0));
+ .on("mouseenter",(e,f)=>hl.datum(f).attr("d",path).style("display",null))
+ .on("mouseleave",()=>{tip.style("opacity",0);hl.style("display","none");})
+ .on("click",(e,f)=>select(sel===f?null:f))
+ .on("dblclick",(e,f)=>{e.stopPropagation();select(f,true);}); // double click: select and zoom to it
 const uf=g.append("g").selectAll("path").data(SG.features).join("path").attr("class","uf");
+// Brazil's outer border: every state outline stroked once, masked to outside the country so the internal
+// state borders vanish and only a light halo around the coast and frontier remains
+const outer=g.append("path").attr("class","outer").attr("mask","url(#outside)");
+const msk=svg.append("defs").append("mask").attr("id","outside").attr("maskUnits","userSpaceOnUse").attr("x",-1e5).attr("y",-1e5).attr("width",2e5).attr("height",2e5);
+msk.append("rect").attr("x",-1e5).attr("y",-1e5).attr("width",2e5).attr("height",2e5).attr("fill","#fff");
+const mskIn=msk.append("path").attr("fill","#000");
+// hover and selection outlines live above every border so neighbours never paint over them; click selects
+// a municipality (click again to clear) and its outline stays at any zoom
+let sel=null;const hl=g.append("path").attr("class","hl").style("display","none"),sl=g.append("path").attr("class","sel").style("display","none");
 
 // the map fills its container: on load and on resize, refit the projection and reallocate the pixel buffers
 const n=DOTS.length/3, P=new Float32Array(2*n), C=new Uint8Array(n);
@@ -107,7 +139,7 @@ function layout(){
  const r=document.getElementById("wrap").getBoundingClientRect();w=r.width;h=r.height;
  const pad=Math.min(w,h)*.05,lg=0;
  proj.fitExtent([[pad,pad],[w-pad,h-pad-24]],SG);
- svg.attr("viewBox",`0 0 ${w} ${h}`);mu.attr("d",path);uf.attr("d",path);
+ svg.attr("viewBox",`0 0 ${w} ${h}`);mu.attr("d",path);uf.attr("d",path);outer.attr("d",path(SG));mskIn.attr("d",path(SG));if(typeof sl!=="undefined"&&sel)sl.attr("d",path);
  for(let i=0;i<n;i++){const [x,y]=proj([DOTS[3*i]/1000,DOTS[3*i+1]/1000]);P[2*i]=x;P[2*i+1]=y;}
  W=Math.round(w*dpr);H=Math.round(h*dpr);cv.width=W;cv.height=H;
  img=cx.createImageData(W,H);px=new Uint32Array(img.data.buffer);
@@ -151,13 +183,43 @@ function paint(t){
 }
 // paint during the gesture, at most once per animation frame (zoom events can arrive faster than frames)
 let pending=null;
+// unselected borders fade in up to ~4x and stay faint at mid zoom, where they would compete with dense dots;
+// from 12x they grow stronger and thicker (to 0.5 opacity, 1.2px at 60x) so city limits read clearly up close
+const borderOpacity=k=>k<4?Math.max(0,Math.min(.14,(k-1.3)*.06)):k<12?.14:Math.min(.5,.14+.36*Math.log(k/12)/Math.log(5));
 const zoom=d3.zoom().scaleExtent([1,60]).on("zoom",e=>{const t=e.transform;
- g.attr("transform",t);svg.classed("near",t.k>=4);
+ g.attr("transform",t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<12?.5:Math.min(1.2,.5+.7*Math.log(t.k/12)/Math.log(5)));
  if(!pending)requestAnimationFrame(()=>{paint(pending);pending=null;});pending=t;});
 
 layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));
+// replace d3's double-click zoom-in: on a municipality it zooms to that municipality (handler above);
+// anywhere outside Brazil it zooms back out to the whole country
+svg.on("dblclick.zoom",null).on("dblclick",()=>svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity));
 repaint=()=>paint(d3.zoomTransform(svg.node()));repaint();
-d3.select("#reset").on("click",()=>svg.transition().duration(600).call(zoom.transform,d3.zoomIdentity));
+// selecting a municipality (by click or search) outlines it; from search it also zooms to it
+function select(f,zoomTo){sel=f;sl.datum(f).attr("d",f?path:null).style("display",f?null:"none");
+ if(f&&zoomTo){const [[x0,y0],[x1,y1]]=path.bounds(f),k=Math.min(60,.6/Math.max((x1-x0)/w,(y1-y0)/h));
+  svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity.translate(w/2,h/2).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2));}}
+
+// municipality search: accent- and case-insensitive; prefix matches first, then substring matches, each by size
+const fold=t=>t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const index=MG.features.filter(f=>M[f.properties.codarea]).map(f=>{const m=M[f.properties.codarea];return {f,label:m.n,uf:m.uf,key:fold(m.n),t:m.t};}).sort((a,b)=>b.t-a.t); // bigger municipalities first
+const q=document.getElementById("q"),ql=d3.select("#qlist");let hits=[],cur=-1;
+function show(){const t=fold(q.value.trim());
+ hits=t?[...index.filter(d=>d.key.startsWith(t)),...index.filter(d=>!d.key.startsWith(t)&&d.key.includes(t))].slice(0,8):[];cur=hits.length?0:-1;
+ ql.attr("hidden",t?null:true);q.setAttribute("aria-expanded",String(!!t));
+ ql.selectAll("li").data(hits.length?hits:t?[null]:[]).join("li").attr("id",(d,i)=>"q"+i)
+  .attr("role",d=>d?"option":null).attr("class",d=>d?null:"none")
+  .html(d=>d?`${d.label}<span>${d.uf}</span>`:"No municipality found")
+  .on("mousedown",(e,d)=>{if(d){e.preventDefault();pick(d);}});mark();}
+function mark(){ql.selectAll("li").attr("aria-selected",(d,i)=>String(i===cur));
+ q.setAttribute("aria-activedescendant",cur>=0?"q"+cur:"");if(cur>=0)document.getElementById("q"+cur)?.scrollIntoView({block:"nearest"});}
+function pick(d){q.value=`${d.label}, ${d.uf}`;ql.attr("hidden",true);q.setAttribute("aria-expanded","false");select(d.f,true);}
+q.addEventListener("input",show);
+q.addEventListener("keydown",e=>{
+ if(e.key==="ArrowDown"||e.key==="ArrowUp"){if(!hits.length)return;e.preventDefault();cur=(cur+(e.key==="ArrowDown"?1:hits.length-1))%hits.length;mark();}
+ else if(e.key==="Enter"&&cur>=0){e.preventDefault();pick(hits[cur]);}
+ else if(e.key==="Escape"){q.value="";show();select(null);}});
+q.addEventListener("blur",()=>setTimeout(()=>{ql.attr("hidden",true);q.setAttribute("aria-expanded","false");},100));
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{layout();zoom.translateExtent([[0,0],[w,h]]);
  svg.call(zoom.transform,d3.zoomIdentity);},150);});
 </script></body></html>
