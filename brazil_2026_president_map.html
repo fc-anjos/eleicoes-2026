@@ -2,13 +2,14 @@
 <title>Where Brazil Voted</title>
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=DM+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
-/* night ground: the votes are the only light on the page */
-:root{--night:#12101f;--dusk:#1c1930;--ink:#ebe7f5;--haze:#9a94b3;--rule:#2c2846;
- --c0:#5b9bff;--c1:#ff5d62;--c2:#f5b841;--c3:#3fd0b0;--c4:#b5dc5c;--c5:#8a8698;
- --display:"Bodoni Moda",Didot,serif;--body:"Public Sans",system-ui,sans-serif;--mono:"DM Mono",ui-monospace,monospace}
+:root{--night:#1a1a1a;--dusk:#242424;--ink:#f2f2f2;--haze:#a3a3a3;--rule:#333;
+ /* Flávio, Lula and Cury pass dataviz validate_palette (dark, all pairs). Santos and Caiado were added on request
+    and fail it: violet vs blue is hard to tell apart for protan readers; hovering a candidate isolates them */
+ --c0:#3987e5;--c1:#d95926;--c2:#199e70;--c3:#eda100;--c4:#9085e9;--c5:#8a8a8a;
+ --display:"Open Sans",Helvetica,Arial,sans-serif;--body:"Open Sans",Helvetica,Arial,sans-serif;--mono:"Open Sans",Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
 body{margin:0;background:var(--night);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
 html,body{height:100%;overflow:hidden}
@@ -24,44 +25,41 @@ path.uf{fill:none;stroke:var(--haze);stroke-opacity:.28;stroke-width:.7;vector-e
 .mapbar button{pointer-events:auto;margin-left:auto}
 button{font:500 12px/1 var(--mono);color:var(--ink);background:var(--night);border:1px solid var(--rule);border-radius:999px;padding:7px 12px;cursor:pointer}
 button:hover{border-color:var(--haze)}
-:focus-visible{outline:2px solid var(--c2);outline-offset:2px}
+:focus-visible{outline:2px solid var(--c0);outline-offset:2px}
 
 aside{overflow-y:auto;padding:28px 28px 22px;border-right:1px solid var(--rule);grid-column:1;grid-row:1;display:flex;flex-direction:column}
-.eyebrow{font:500 11px/1.5 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--haze);margin:0 0 12px}
-h1{font:italic 400 clamp(38px,3.4vw,50px)/.98 var(--display);letter-spacing:-.02em;margin:0}
-h1 em{font-style:normal;font-weight:600}
+.eyebrow{font:600 11px/1.5 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--haze);margin:0 0 12px}
+h1{font:700 26px/1.2 var(--display);margin:0}
 .deck{color:var(--haze);font-size:14px;margin:14px 0 18px}
 .deck b{color:var(--ink);font-weight:500}
 .cand{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--rule);border-radius:0;padding:9px 0;color:inherit;font:inherit;background:none;transition:opacity .2s}
 .cand:hover{border-color:var(--rule)}
 .cand .row{display:flex;align-items:baseline;gap:10px}
 .cand .nm{font:500 15px/1.2 var(--body);flex:1}
-.cand .pc{font:500 20px/1 var(--mono);color:var(--c)}
+.cand .pc{font:600 18px/1 var(--body)}
 .cand .vt{font:11px/1.3 var(--mono);color:var(--haze);margin-top:3px}
 .cand .who{font-size:11px;color:var(--haze);margin-top:3px;line-height:1.4}
 .grains{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px}
-.grains i{width:5px;height:5px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c)}
+.grains i{width:5px;height:5px;border-radius:50%;background:var(--c)}
 .grains i.part{opacity:.4}
 .page.focus .cand{opacity:.35}.page.focus .cand[aria-pressed="true"]{opacity:1}
-.runoff{margin:auto 0 0;padding-top:14px;border-top:1px solid var(--rule);font:italic 400 19px/1.25 var(--display)}
 @media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);grid-template-rows:58dvh minmax(0,1fr)}
  aside{border-right:0;border-top:1px solid var(--rule);padding:20px 16px;grid-column:1;grid-row:2}#wrap{grid-column:1;grid-row:1}
  .mapbar{left:16px;right:16px}.mapbar span+span{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 #tip{position:fixed;pointer-events:none;background:var(--dusk);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;font:13px/1.5 var(--body);opacity:0;min-width:200px;box-shadow:0 8px 30px #0008}
-#tip b{font:italic 600 17px/1.2 var(--display);display:block;margin-bottom:6px}
+#tip b{font:700 14px/1.2 var(--display);display:block;margin-bottom:6px}
 #tip .l{display:flex;gap:10px;justify-content:space-between;font-family:var(--mono);font-size:12px}
 #tip .t{color:var(--haze);font:11px var(--mono);margin-top:6px}
 
 </style></head><body><div class="page" id="page">
  <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
-  <div class="mapbar"><span>1 grain = 250 votes · TSE</span><span>Scroll to zoom · drag to pan</span><button id="reset">Reset view</button></div></div>
+  <div class="mapbar"><span>1 dot = 250 votes · Source: TSE</span><span>Scroll to zoom · drag to pan</span><button id="reset">Reset view</button></div></div>
  <aside>
-  <p class="eyebrow">Brazil · President · 1st round · 4 Oct 2026</p>
-  <h1>Where Brazil <em>voted</em></h1>
-  <p class="deck">Every grain of light is <b>250 votes</b>, placed in the municipality where they were cast. Hover a candidate to see only their votes.</p>
+  <p class="eyebrow">4 October 2026</p>
+  <h1>Brazil 2026 presidential election, first round</h1>
+  <p class="deck">1 dot = <b>250 votes</b>, placed randomly within the municipality where they were cast. Hover a candidate to show only their votes.</p>
   <div id="cands"></div>
-  <p class="runoff">No one passed half the valid votes. Flávio Bolsonaro and Lula go to a runoff.</p>
  </aside>
 </div>
 <div id="tip"></div>
@@ -72,11 +70,11 @@ const K=CANDS.length, COLS=CANDS.map((c,i)=>css(i<K-1?`--c${i}`:"--c5"));
 const NAME=Object.fromEntries(CANDS.filter(c=>c.k).map(c=>[c.k,c.n]));
 const title=s=>s.toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase());
 const natTot=d3.sum(CANDS,c=>c.v);
-const pct=(v,t)=>(100*v/t).toFixed(2).replace('.',',')+'%';
+const pct=(v,t)=>(100*v/t).toFixed(1)+'%';
 const fmt=d3.format(",");
 let focus=-1, repaint=()=>{};
 
-// results panel: same grain language as the map, one grain per million votes
+// results panel: same dot language as the map, one dot per million votes
 const list=d3.select("#cands");
 CANDS.forEach((c,i)=>{
  const b=list.append("button").attr("class","cand").attr("aria-pressed","false").style("--c",COLS[i]);
@@ -103,53 +101,60 @@ const uf=g.append("g").selectAll("path").data(SG.features).join("path").attr("cl
 const n=DOTS.length/3, P=new Float32Array(2*n), C=new Uint8Array(n);
 for(let i=0;i<n;i++)C[i]=DOTS[3*i+2];
 const cv=document.getElementById("cv"),dpr=devicePixelRatio||1,cx=cv.getContext("2d"),cc=COLS.map(h=>d3.rgb(h));
-let w,h,W,H,img,acc,tot;
+let w,h,W,H,img,px,T,O,TOP;
+const PX=cc.map(c=>(c.b<<16|c.g<<8|c.r)>>>0); // candidate colours packed as little-endian RGB
 function layout(){
  const r=document.getElementById("wrap").getBoundingClientRect();w=r.width;h=r.height;
- const pad=Math.min(w,h)*.04;proj.fitExtent([[pad,pad],[w-pad,h-pad-24]],SG);
+ const pad=Math.min(w,h)*.05,lg=0;
+ proj.fitExtent([[pad,pad],[w-pad,h-pad-24]],SG);
  svg.attr("viewBox",`0 0 ${w} ${h}`);mu.attr("d",path);uf.attr("d",path);
  for(let i=0;i<n;i++){const [x,y]=proj([DOTS[3*i]/1000,DOTS[3*i+1]/1000]);P[2*i]=x;P[2*i+1]=y;}
  W=Math.round(w*dpr);H=Math.round(h*dpr);cv.width=W;cv.height=H;
- img=cx.createImageData(W,H);acc=cc.map(()=>new Float32Array(W*H));tot=new Float32Array(W*H);
+ img=cx.createImageData(W,H);px=new Uint32Array(img.data.buffer);
+ [T,O]=[0,0].map(()=>new Float32Array(W*H));TOP=new Uint8Array(W*H);
 }
 // Every dot exists at every zoom (as in Cable's Racial Dot Map).
-// Zoomed out, many dots share a pixel: the pixel's colour is their mix and its opacity their coverage.
+// Zoomed out, many dots share a pixel: its opacity shows their coverage, its colour one of them (see add()).
 // Zoomed in, the dots grow past a pixel and are drawn as discs. Nothing is added or removed.
 // Dot radius grows as k^0.5 (CartoDB's women dot map grows ~k^0.83: 0.5px at z8 → 16px at z14), so dots
 // per screen area fall by k² but each grows by k^1.5: coverage thins slowly instead of collapsing mid-zoom.
 const R1=.32, GAMMA=.5, ALO=.4; // radius in css px at zoom 1, growth exponent, opacity of the sparsest pixels
 function paint(t){
- const rd=R1*Math.pow(t.k,GAMMA)*dpr, sx=t.k*dpr,ox=t.x*dpr,oy=t.y*dpr;
- for(const A of acc)A.fill(0);
- // accumulate dot coverage per pixel: sub-pixel dots add their area, larger ones a disc of 1s
- if(rd<1.2){const ar=Math.PI*rd*rd;
+ const rd=R1*Math.pow(t.k,GAMMA)*dpr, sx=t.k*dpr,ox=t.x*dpr,oy=t.y*dpr, N=W*H, f=focus;
+ T.fill(0);if(f>=0)O.fill(0);
+ // T is total coverage per pixel (with a candidate in focus, only theirs; O holds everyone else's, drawn as
+ // a faint grey trace). A pixel's colour is the last dot drawn on it, not the average: dots are shuffled, so
+ // that is a random pick weighted by each candidate's share, and dense mixed places read as blue-and-orange
+ // speckle (as in Cable's and CartoDB's maps) instead of averaging complementary hues into grey.
+ const add=(j,c,a)=>{if(f<0||c===f){T[j]+=a;TOP[j]=c;}else O[j]+=a;};
+ if(rd<1.2){const ar=Math.PI*rd*rd; // sub-pixel dots add their area to one pixel
   for(let i=0;i<n;i++){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
-   if(x>=0&&x<W&&y>=0&&y<H)acc[C[i]][y*W+x]+=ar;}
- }else{const R=Math.ceil(rd),r2=rd*rd;
-  for(let i=0;i<n;i++){const X=P[2*i]*sx+ox,Y=P[2*i+1]*sx+oy;
-   if(X<-R||X>=W+R||Y<-R||Y>=H+R)continue;const A=acc[C[i]];
-   for(let y=Math.max(0,(Y-R)|0);y<=Math.min(H-1,Y+R);y++){const dy=y+.5-Y;
-    for(let x=Math.max(0,(X-R)|0);x<=Math.min(W-1,X+R);x++){const dx=x+.5-X;if(dx*dx+dy*dy<=r2)A[y*W+x]+=1;}}}
+   if(x>=0&&x<W&&y>=0&&y<H)add(y*W+x,C[i],ar);}
+ }else{const Rr=Math.ceil(rd),r2=rd*rd,off=[]; // larger dots add 1 to every pixel of a disc
+  for(let dy=-Rr;dy<=Rr;dy++)for(let dx=-Rr;dx<=Rr;dx++)if(dx*dx+dy*dy<=r2)off.push(dx,dy);
+  for(let i=0;i<n;i++){const X=(P[2*i]*sx+ox)|0,Y=(P[2*i+1]*sx+oy)|0;
+   if(X<-Rr||X>=W+Rr||Y<-Rr||Y>=H+Rr)continue;const c=C[i];
+   for(let q=0;q<off.length;q+=2){const x=X+off[q],y=Y+off[q+1];if(x>=0&&x<W&&y>=0&&y<H)add(y*W+x,c,1);}}
  }
- // with a candidate in focus, only their coverage lights up; everyone else's is a faint grey trace
- tot.fill(0);
- if(focus<0)for(const A of acc)for(let j=0;j<W*H;j++)tot[j]+=A[j];else tot.set(acc[focus]);
  // histogram-equalised opacity (as in Datashader's eq_hist): pixels are ranked by coverage within the
- // current view, so a pixel with 50 overlapping dots reads denser than one with 5 instead of both saturating
- const smp=[];for(let j=0;j<W*H;j+=7)if(tot[j])smp.push(tot[j]);
- smp.sort((p,q)=>p-q);const L=smp.length;
- const rank=v=>{let lo=0,hi=L;while(lo<hi){const m=(lo+hi)>>1;if(smp[m]<v)lo=m+1;else hi=m;}return lo/L;};
- const d=img.data;
- for(let j=0,o=0;j<W*H;j++,o+=4){const v=tot[j];
-  if(!v){if(focus>=0&&acc.some(A=>A[j])){d[o]=d[o+1]=d[o+2]=150;d[o+3]=22;}else d[o+3]=0;continue;}
-  if(focus>=0){const c=cc[focus];d[o]=c.r;d[o+1]=c.g;d[o+2]=c.b;}
-  else{let r=0,gg=0,b=0;for(let k=0;k<K;k++){const a=acc[k][j];if(a){r+=a*cc[k].r;gg+=a*cc[k].g;b+=a*cc[k].b;}}
-   d[o]=r/v;d[o+1]=gg/v;d[o+2]=b/v;}
-  d[o+3]=255*(ALO+(1-ALO)*rank(v));}
+ // current view, so a pixel with 50 overlapping dots reads denser than one with 5 instead of both saturating.
+ // The ranking is sampled once into a 1024-step lookup table over log coverage.
+ let m=0;const smp=new Float32Array(Math.ceil(N/7));for(let j=0;j<N;j+=7)if(T[j])smp[m++]=T[j];
+ const S=smp.subarray(0,m).sort(),lo=Math.log(S[0]||1),sc=1023/Math.max(1e-6,Math.log(S[m-1]||1)-lo),LUT=new Uint8Array(1024);
+ for(let b=0,i=0;b<1024;b++){const v=Math.exp(lo+b/sc);while(i<m&&S[i]<v)i++;LUT[b]=255*(ALO+(1-ALO)*i/Math.max(1,m));}
+ const grey=(22<<24|150<<16|150<<8|150)>>>0;
+ for(let j=0;j<N;j++){const v=T[j];
+  if(!v){px[j]=f>=0&&O[j]?grey:0;continue;}
+  let b=((Math.log(v)-lo)*sc)|0;b=b<0?0:b>1023?1023:b;
+  px[j]=(LUT[b]<<24|PX[TOP[j]])>>>0;}
  cx.putImageData(img,0,0);
 }
-const zoom=d3.zoom().scaleExtent([1,60]).on("zoom",e=>{
- g.attr("transform",e.transform);paint(e.transform);svg.classed("near",e.transform.k>=4);});
+// paint during the gesture, at most once per animation frame (zoom events can arrive faster than frames)
+let pending=null;
+const zoom=d3.zoom().scaleExtent([1,60]).on("zoom",e=>{const t=e.transform;
+ g.attr("transform",t);svg.classed("near",t.k>=4);
+ if(!pending)requestAnimationFrame(()=>{paint(pending);pending=null;});pending=t;});
+
 layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));
 repaint=()=>paint(d3.zoomTransform(svg.node()));repaint();
 d3.select("#reset").on("click",()=>svg.transition().duration(600).call(zoom.transform,d3.zoomIdentity));
