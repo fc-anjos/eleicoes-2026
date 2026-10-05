@@ -8,10 +8,11 @@
 /*__CSS__*/
 </style></head><body><div class="page" id="page">
  <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
-  <details class="ctl" open><summary>Display</summary><div>
+  <div class="ctl"><button id="gear" aria-label="Display settings" aria-expanded="false" aria-controls="ctlp"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><div id="ctlp" hidden>
+   <div class="lbl"><span>Dot size</span><div id="mode" role="group" aria-label="Dot sizing"><button data-m="a" aria-pressed="true" title="Sized to the dots in view">Adaptive</button><button data-m="f" aria-pressed="false" title="Sized by zoom only">By zoom</button></div></div>
    <label><span>Votes per dot</span><input id="vpd" type="range" min="0" max="5" step="1" value="0"><output id="vpdv">250</output></label>
-   <label><span>Dot size</span><input id="rad" type="range" min="-1" max="1" step=".05" value="0"><output id="radv">1×</output></label>
-  </div></details>
+   <label><span>Scale</span><input id="rad" type="range" min="-1" max="1" step=".05" value="0"><output id="radv">1×</output></label>
+  </div></div>
   <div class="mapbar">
    <div class="key"><span class="k-dot"></span><b>1 dot = <span class="vpd">__VPD__</span> votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
    <div class="credit">Created by <b>Felipe dos Anjos</b><br><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> · <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br>Data: <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a></div></div></div>
