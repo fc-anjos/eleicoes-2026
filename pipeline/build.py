@@ -3,7 +3,7 @@
 Each dot is VPD votes for one candidate, placed in the Voronoi cell of the polling place where the votes were
 cast (see geometry.cells), clipped to the municipality. Run from the repo root: python3 -m pipeline.build
 """
-import json, os, random
+import base64, json, os, random
 import numpy as np
 from .geometry import round_coords, rewind, polygons, edges, bbox, inside, uniform, dist_km, area_km2, cells
 
@@ -115,6 +115,17 @@ def make_dots(mgeo, places, cat, n_cats):
     return [v for i in idx for v in dots[3 * i:3 * i + 3]]
 
 
+def pack(dots):
+    """Dots as base64 binary, much faster for the page to load than a JSON array: uint16 longitudes, then uint16
+    latitudes (thousandths of a degree above x0 / y0: Brazil spans ~40° each way, under 65.536), then uint8
+    categories."""
+    a = np.array(dots, dtype=np.int64).reshape(-1, 3)
+    x0, y0 = int(a[:, 0].min()), int(a[:, 1].min())
+    assert a[:, 0].max() - x0 < 65536 and a[:, 1].max() - y0 < 65536
+    raw = (a[:, 0] - x0).astype("<u2").tobytes() + (a[:, 1] - y0).astype("<u2").tobytes() + a[:, 2].astype("u1").tobytes()
+    return {"n": len(a), "x0": x0, "y0": y0, "b": base64.b64encode(raw).decode()}
+
+
 def render(data):
     """Inline web/style.css, web/map.js and the data into web/index.html."""
     html = open("web/index.html").read()
@@ -133,7 +144,7 @@ def main():
     dots = make_dots(mgeo, places, cat, len(cands))
     print(len(dots) // 3, "dots")
     open(OUT, "w").write(render({"__MGEO__": mgeo, "__SGEO__": sgeo, "__MUNS__": muns, "__CANDS__": cands,
-                                 "__DOTS__": dots, "__VPD__": VPD}))
+                                 "__DOTS__": pack(dots), "__VPD__": VPD}))
     print("ok", len(muns), "municipalities;", sum(1 for f in mgeo["features"] if f["properties"]["codarea"] not in muns), "unmatched shapes")
 
 

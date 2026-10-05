@@ -43,20 +43,25 @@ const mskIn=msk.append("path").attr("fill","#000");
 let sel=null;const hl=g.append("path").attr("class","hl").style("display","none"),sl=g.append("path").attr("class","sel").style("display","none");
 
 // the map fills its container: on load and on resize, refit the projection and reallocate the pixel buffers
-const n=DOTS.length/3, P=new Float32Array(2*n), C=new Uint8Array(n);
-for(let i=0;i<n;i++)C[i]=DOTS[3*i+2];
+// dots arrive packed (see pack() in build.py). They are projected once, with the raw Mercator formula, into U;
+// fitting the map to the window is then just a scale and offset of U (layout() runs again on every resize).
+const n=DOTS.n, P=new Float32Array(2*n), U=new Float32Array(2*n), C=new Uint8Array(n);
+{const bin=atob(DOTS.b),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+ const X=new Uint16Array(bytes.buffer,0,n),Y=new Uint16Array(bytes.buffer,2*n,n),rad=Math.PI/180000;C.set(bytes.subarray(4*n,5*n));
+ for(let i=0;i<n;i++){U[2*i]=(X[i]+DOTS.x0)*rad;U[2*i+1]=-Math.log(Math.tan(Math.PI/4+(Y[i]+DOTS.y0)*rad/2));}}
 const cv=document.getElementById("cv"),dpr=devicePixelRatio||1,cx=cv.getContext("2d"),cc=COLS.map(h=>d3.rgb(h));
-let w,h,W,H,img,px,T,O,TOP;
+let w,h,W,H,img,px,T,O,TOP,cnt;
 const PX=cc.map(c=>(c.b<<16|c.g<<8|c.r)>>>0); // candidate colours packed as little-endian RGB
 function layout(){
  const r=document.getElementById("wrap").getBoundingClientRect();w=r.width;h=r.height;
  const pad=Math.min(w,h)*.05,lg=0;
  proj.fitExtent([[pad,pad],[w-pad,h-pad-24]],SG);
  svg.attr("viewBox",`0 0 ${w} ${h}`);mu.attr("d",path);uf.attr("d",path);outer.attr("d",path(SG));mskIn.attr("d",path(SG));if(typeof sl!=="undefined"&&sel)sl.attr("d",path);
- for(let i=0;i<n;i++){const [x,y]=proj([DOTS[3*i]/1000,DOTS[3*i+1]/1000]);P[2*i]=x;P[2*i+1]=y;}
+ {const k=proj.scale(),[tx,ty]=proj.translate();for(let i=0;i<n;i++){P[2*i]=U[2*i]*k+tx;P[2*i+1]=U[2*i+1]*k+ty;}}
  W=Math.round(w*dpr);H=Math.round(h*dpr);cv.width=W;cv.height=H;
  img=cx.createImageData(W,H);px=new Uint32Array(img.data.buffer);
  [T,O]=[0,0].map(()=>new Float32Array(W*H));TOP=new Uint8Array(W*H);
+ cnt=new Uint32Array(Math.ceil(w/CELL)*Math.ceil(h/CELL));
 }
 // Every dot exists at every zoom (as in Cable's Racial Dot Map).
 // Zoomed out, many dots share a pixel: its opacity shows their coverage, its colour one of them (see add()).
@@ -68,30 +73,46 @@ let SIZE=1, STEP=1, ADAPT=true; // radius multiplier (dot-size control); draw ev
 const ALO=.4, CELL=16, COVER=.6; // opacity of the sparsest pixels; density fit
 // The other strategy (the original): radius from zoom alone, R0·k^0.5 (CartoDB's women dot map grows ~k^0.83),
 // so dots per screen area fall by k² but each grows by k^1.5 and coverage thins slowly as you zoom in.
-const R0=.32, ADAPT_W=.5;
-function radius(sx,ox,oy){
- if(!ADAPT)return R0*Math.sqrt(sx/dpr)*SIZE*dpr;
- const g=CELL*dpr,gw=Math.ceil(W/g),gh=Math.ceil(H/g),cnt=new Uint32Array(gw*gh);
- for(let i=0;i<n;i+=STEP){const x=P[2*i]*sx+ox,y=P[2*i+1]*sx+oy;if(x>=0&&x<W&&y>=0&&y<H)cnt[((y/g)|0)*gw+((x/g)|0)]++;}
+const R0=.32, ADAPT_W=.9, AMIN=.3, AMAX=8;
+function radius(t){ // in css px
+ const k=t.k,rz=R0*Math.sqrt(k);
+ if(!ADAPT)return rz*SIZE;
+ const gw=Math.ceil(w/CELL);cnt.fill(0);
+ for(let i=0;i<n;i+=STEP){const x=P[2*i]*k+t.x,y=P[2*i+1]*k+t.y;if(x>=0&&x<w&&y>=0&&y<h)cnt[((y/CELL)|0)*gw+((x/CELL)|0)]++;}
  // density as seen by the average dot (Σc²/Σc over cells): unlike a percentile it moves smoothly as dots cross
  // cell boundaries, so the radius doesn't jump while panning
- let s1=0,s2=0;for(let j=0;j<cnt.length;j++){const v=cnt[j];s1+=v;s2+=v*v;}if(!s1)return R0*Math.sqrt(sx/dpr)*4*SIZE*dpr;
- const c=s2/s1;
+ let s1=0,s2=0;for(let j=0;j<cnt.length;j++){const v=cnt[j];s1+=v;s2+=v*v;}if(!s1)return rz*AMAX*SIZE;
  // n discs of radius r scattered in a cell of area g² cover 1-exp(-nπr²/g²) of it
- const r=g*Math.sqrt(-Math.log(1-COVER)/(Math.PI*c))/dpr;
- // The fit is a correction to the zoom rule, not a replacement: the radius moves halfway (geometrically) from
- // R0·√k towards it, within ×0.5–×4, so typical views keep the zoom rule's crisp look and only the extremes
- // (dense close-ups, empty ones) change. Soft limits (tanh) avoid a kink where the correction tops out.
- const rz=R0*Math.sqrt(sx/dpr),z=Math.log(r/rz)*ADAPT_W,lo=Math.log(.5),hi=Math.log(4),mid=(lo+hi)/2,h=(hi-lo)/2;
- return rz*Math.exp(mid+h*Math.tanh((z-mid)/h))*SIZE*dpr;}
+ const r=CELL*Math.sqrt(-Math.log(1-COVER)/(Math.PI*s2/s1));
+ // The fit is applied as a correction to the zoom rule: the radius moves ADAPT_W of the way (geometrically) from
+ // R0·√k towards it, within ×AMIN–×AMAX of the zoom rule, so dense views get much finer dots and sparse ones much
+ // larger. Soft limits (tanh) avoid a kink where the correction tops out.
+ const z=Math.log(r/rz)*ADAPT_W,lo=Math.log(AMIN),hi=Math.log(AMAX),mid=(lo+hi)/2,hh=(hi-lo)/2;
+ return rz*Math.exp(mid+hh*Math.tanh((z-mid)/hh))*SIZE;}
+// Disc stamps: pixel offsets and anti-aliased weights for a disc of radius rd, precomputed for 8×8 sub-pixel
+// phases of its centre, so drawing a dot is a table walk instead of a square root per pixel
+const PH=8;let stamp={rd:-1};
+function stamps(rd){
+ if(stamp.rd===rd)return stamp;
+ const e=rd+.5,Rr=Math.ceil(e)+1,off=[],wt=[],start=new Int32Array(PH*PH+1);
+ for(let p=0;p<PH*PH;p++){const cx=(p%PH+.5)/PH,cy=(((p/PH)|0)+.5)/PH; /* dot centre within its pixel */start[p]=off.length/2;
+  for(let dy=-Rr;dy<=Rr;dy++)for(let dx=-Rr;dx<=Rr;dx++){const a=e-Math.hypot(dx-cx,dy-cy);if(a>0){off.push(dx,dy);wt.push(a<1?a:1);}}}
+ start[PH*PH]=off.length/2;
+ return stamp={rd,Rr,start,off:Int16Array.from(off),wt:Float32Array.from(wt)};
+}
 // the radius eases towards its target over a few frames instead of snapping to it
 let rCur=0,easing=false;
+// Float32 coverage read as its bit pattern: for positive floats the bits grow monotonically with log2(value),
+// piecewise-linearly, which is close enough for binning and much cheaper than Math.log on every pixel
+let TI;
 function paint(t){
- const sx=t.k*dpr,ox=t.x*dpr,oy=t.y*dpr, target=radius(sx,ox,oy);
+ const target=radius(t);
  rCur=rCur&&ADAPT?rCur*Math.pow(target/rCur,.3):target;
  if(Math.abs(Math.log(rCur/target))>.01){if(!easing){easing=true;requestAnimationFrame(()=>{easing=false;if(!pending)paint(d3.zoomTransform(svg.node()));});}}else rCur=target;
- const rd=rCur, N=W*H, f=focus;
- T.fill(0);if(f>=0)O.fill(0);
+ const Wq=W,Hq=H,N=W*H,out=px;
+ const sx=t.k*dpr,ox=t.x*dpr,oy=t.y*dpr,rd=rCur*dpr,f=focus;
+ if(!TI||TI.buffer!==T.buffer)TI=new Int32Array(T.buffer);
+ T.fill(0,0,N);if(f>=0)O.fill(0,0,N);
  // T is total coverage per pixel (with a candidate in focus, only theirs; O holds everyone else's, drawn as
  // a faint grey trace). A pixel's colour is the last dot drawn on it, not the average: dots are shuffled, so
  // that is a random pick weighted by each candidate's share, and dense mixed places read as blue-and-orange
@@ -99,30 +120,31 @@ function paint(t){
  // Sub-pixel dots add their area to the one pixel they fall in: crisp and saturated (sharing it across
  // neighbours looked washed out). Larger dots are anti-aliased discs at their exact sub-pixel centre, adding ~1
  // per covered pixel; fringe pixels add partial coverage but only take the colour when mostly inside.
- const put=(j,c,w,top)=>{if(f<0||c===f){T[j]+=w;if(top||T[j]===w)TOP[j]=c;}else O[j]+=w;};
  if(rd<.75){const area=Math.PI*rd*rd;
   for(let i=0;i<n;i+=STEP){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
-   if(x>=0&&x<W&&y>=0&&y<H)put(y*W+x,C[i],area,true);}
- }else{const e=rd+.5,Rr=Math.ceil(e);
-  for(let i=0;i<n;i+=STEP){const fx=P[2*i]*sx+ox-.5,fy=P[2*i+1]*sx+oy-.5,X=Math.round(fx),Y=Math.round(fy);
-   if(X<-Rr||X>=W+Rr||Y<-Rr||Y>=H+Rr)continue;const c=C[i];
-   for(let y=Math.max(0,Y-Rr);y<=Math.min(H-1,Y+Rr);y++){const ddy=y-fy;
-    for(let x=Math.max(0,X-Rr);x<=Math.min(W-1,X+Rr);x++){const ddx=x-fx,a=e-Math.sqrt(ddx*ddx+ddy*ddy);
-     if(a>0)put(y*W+x,c,a<1?a:1,a>=.5);}}}
+   if(x<0||x>=Wq||y<0||y>=Hq)continue;const j=y*Wq+x,c=C[i];
+   if(f<0||c===f){T[j]+=area;TOP[j]=c;}else O[j]+=area;}
+ }else{const {Rr,start,off,wt}=stamps(rd);
+  for(let i=0;i<n;i+=STEP){const fx=P[2*i]*sx+ox-.5,fy=P[2*i+1]*sx+oy-.5,X=Math.floor(fx),Y=Math.floor(fy);
+   if(X<-Rr||X>=Wq+Rr||Y<-Rr||Y>=Hq+Rr)continue;const c=C[i],mine=f<0||c===f,p=((fy-Y)*PH|0)*PH+((fx-X)*PH|0);
+   const inside=X>=Rr&&X<Wq-Rr&&Y>=Rr&&Y<Hq-Rr;
+   for(let q2=start[p],e=start[p+1];q2<e;q2++){const x=X+off[2*q2],y=Y+off[2*q2+1];
+    if(!inside&&(x<0||x>=Wq||y<0||y>=Hq))continue;const j=y*Wq+x,a=wt[q2];
+    if(mine){T[j]+=a;if(a>=.5||T[j]===a)TOP[j]=c;}else O[j]+=a;}}
  }
  // histogram-equalised opacity (as in Datashader's eq_hist): pixels are ranked by coverage within the
  // current view, so a pixel with 50 overlapping dots reads denser than one with 5 instead of both saturating.
- // The ranking is sampled once into a 1024-step lookup table over log coverage.
- let m=0;const smp=new Float32Array(Math.ceil(N/7));for(let j=0;j<N;j+=7)if(T[j])smp[m++]=T[j];
- const S=smp.subarray(0,m).sort(),lo=Math.log(S[0]||1),sc=1023/Math.max(1e-6,Math.log(S[m-1]||1)-lo),LUT=new Uint8Array(1024);
- // a lone disc is a whole dot and should read clearly; sub-pixel coverage is a fraction of one and can be fainter
- const a0=ALO;
- for(let b=0,i=0;b<1024;b++){const v=Math.exp(lo+b/sc);while(i<m&&S[i]<v)i++;LUT[b]=255*(a0+(1-a0)*i/Math.max(1,m));}
+ // A sample of pixels is counted into 1024 log-coverage bins, and the running count gives each bin its rank.
+ let ilo=2147483647,ihi=0,m=0;
+ for(let j=0;j<N;j+=7){const v=TI[j];if(v){m++;if(v<ilo)ilo=v;if(v>ihi)ihi=v;}}
+ const sc=1023/Math.max(1,ihi-ilo),hist=new Uint32Array(1024),LUT=new Uint8Array(1024);
+ for(let j=0;j<N;j+=7){const v=TI[j];if(v)hist[((v-ilo)*sc)|0]++;}
+ for(let b=0,below=0;b<1024;b++){LUT[b]=255*(ALO+(1-ALO)*below/Math.max(1,m));below+=hist[b];}
  const grey=(22<<24|150<<16|150<<8|150)>>>0;
- for(let j=0;j<N;j++){const v=T[j];
-  if(!v){px[j]=f>=0&&O[j]?grey:0;continue;}
-  let b=((Math.log(v)-lo)*sc)|0;b=b<0?0:b>1023?1023:b;
-  px[j]=(LUT[b]<<24|PX[TOP[j]])>>>0;}
+ for(let j=0;j<N;j++){const v=TI[j];
+  if(!v){out[j]=f>=0&&O[j]?grey:0;continue;}
+  let b=((v-ilo)*sc)|0;b=b<0?0:b>1023?1023:b;
+  out[j]=(LUT[b]<<24|PX[TOP[j]])>>>0;}
  cx.putImageData(img,0,0);
 }
 // paint during the gesture, at most once per animation frame (zoom events can arrive faster than frames)
