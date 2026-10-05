@@ -73,17 +73,21 @@ let SIZE=1, STEP=1, ADAPT=true; // radius multiplier (dot-size control); draw ev
 const ALO=.4, CELL=16, COVER=.6; // opacity of the sparsest pixels; density fit
 // The other strategy (the original): radius from zoom alone, R0·k^0.5 (CartoDB's women dot map grows ~k^0.83),
 // so dots per screen area fall by k² but each grows by k^1.5 and coverage thins slowly as you zoom in.
-const R0=.32, ADAPT_W=.9, AMIN=.3, AMAX=8;
+const R0=.32, DENSE_W=.5, ADAPT_W=.9, AMIN=.3, AMAX=8;
 function radius(t){ // in css px
  const k=t.k,rz=R0*Math.sqrt(k);
  if(!ADAPT)return rz*SIZE;
  const gw=Math.ceil(w/CELL);cnt.fill(0);
  for(let i=0;i<n;i+=STEP){const x=P[2*i]*k+t.x,y=P[2*i+1]*k+t.y;if(x>=0&&x<w&&y>=0&&y<h)cnt[((y/CELL)|0)*gw+((x/CELL)|0)]++;}
- // density as seen by the average dot (Σc²/Σc over cells): unlike a percentile it moves smoothly as dots cross
- // cell boundaries, so the radius doesn't jump while panning
- let s1=0,s2=0;for(let j=0;j<cnt.length;j++){const v=cnt[j];s1+=v;s2+=v*v;}if(!s1)return rz*AMAX*SIZE;
+ // Two views of the density: as seen by the average dot (Σc²/Σc over cells, dominated by crowded town cells) and
+ // of a typical occupied cell (geometric mean of counts, dominated by sparse rural cells). Sizing by the first
+ // leaves the countryside as faint specks; by the second, cities and zoomed-out views clutter. The radius uses
+ // their geometric mean (DENSE_W sets the balance). Neither uses a percentile, so both move smoothly while panning.
+ let s1=0,s2=0,occ=0,sl=0;for(let j=0;j<cnt.length;j++){const v=cnt[j];if(v){s1+=v;s2+=v*v;occ++;sl+=Math.log(v);}}
+ if(!s1)return rz*AMAX*SIZE;
+ const c=Math.exp(DENSE_W*Math.log(s2/s1)+(1-DENSE_W)*sl/occ);
  // n discs of radius r scattered in a cell of area g² cover 1-exp(-nπr²/g²) of it
- const r=CELL*Math.sqrt(-Math.log(1-COVER)/(Math.PI*s2/s1));
+ const r=CELL*Math.sqrt(-Math.log(1-COVER)/(Math.PI*c));
  // The fit is applied as a correction to the zoom rule: the radius moves ADAPT_W of the way (geometrically) from
  // R0·√k towards it, within ×AMIN–×AMAX of the zoom rule, so dense views get much finer dots and sparse ones much
  // larger. Soft limits (tanh) avoid a kink where the correction tops out.
