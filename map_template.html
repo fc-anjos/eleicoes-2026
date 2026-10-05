@@ -59,11 +59,11 @@ function draw(){
  function paint(t){
   cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);
   cx.setTransform(dpr*t.k,0,0,dpr*t.k,dpr*t.x,dpr*t.y);
-  const s=(.55+.35*Math.sqrt(t.k))/t.k; // dot side in map units: grows slowly on screen as you zoom in
+  const r=(1.5+.5*Math.sqrt(t.k))/t.k; // dot radius in map units: grows slowly on screen as you zoom in
   // chunked so neither colour systematically paints over the other
-  for(let a=0;a<n;a+=4000){const b=Math.min(n,a+4000);
+  for(let a=0;a<n;a+=1000){const b=Math.min(n,a+1000);
    for(let c=2;c>=0;c--){cx.fillStyle=cc[c];cx.beginPath();
-    for(let i=a;i<b;i++)if(C[i]===c)cx.rect(P[2*i]-s/2,P[2*i+1]-s/2,s,s);cx.fill();}}
+    for(let i=a;i<b;i++)if(C[i]===c){cx.moveTo(P[2*i]+r,P[2*i+1]);cx.arc(P[2*i],P[2*i+1],r,0,6.2832);}cx.fill();}}
  }
  const zoom=d3.zoom().scaleExtent([1,60]).translateExtent([[0,0],[900,820]]).on("zoom",e=>{
   g.attr("transform",e.transform);paint(e.transform);svg.classed("near",e.transform.k>=4);});

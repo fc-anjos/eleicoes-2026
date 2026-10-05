@@ -1,7 +1,7 @@
 """Build a self-contained HTML choropleth of the 2026 presidential 1st round by municipality."""
 import json, random
 
-VPD = 1000  # votes per dot
+VPD = 5000  # votes per dot
 random.seed(2026)
 
 def rnd(c):
