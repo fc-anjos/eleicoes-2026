@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brazil 2026 Presidential Vote</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{--bg:#fafaf8;--fg:#1d1d1b;--muted:#6b6b66;--line:#fff;--card:#fff;--flavio:#1f4e9c;--lula:#c8102e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151514;--fg:#ecebe6;--muted:#9a9a93;--line:#151514;--card:#1f1f1d;--flavio:#5b8de0;--lula:#e5484d}}
+:root[data-theme="dark"]{--bg:#151514;--fg:#ecebe6;--muted:#9a9a93;--line:#151514;--card:#1f1f1d;--flavio:#5b8de0;--lula:#e5484d}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px}
+h1{font-size:24px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 20px}
+.tot{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.c{background:var(--card);border-radius:10px;padding:10px 14px;min-width:150px;box-shadow:0 1px 3px #0001}
+.c b{display:block;font-size:22px}.c span{color:var(--muted);font-size:13px}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:0 0 20px}
+svg{width:100%;height:auto}path.mu{stroke:none}path.mu:hover{stroke:var(--fg);stroke-width:1}path.uf{fill:none;stroke:var(--fg);stroke-opacity:.55;stroke-width:.7;pointer-events:none}
+#tip{position:fixed;pointer-events:none;background:var(--card);border-radius:8px;padding:8px 10px;box-shadow:0 4px 14px #0003;font-size:13px;opacity:0}
+.legend{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:13px;align-items:center}
+.ramp{width:140px;height:10px;border-radius:3px}
+footer{color:var(--muted);font-size:12px;margin-top:16px}
+</style></head><body><main>
+<h1>Brazil 2026 presidential election, 1st round</h1>
+<p class="sub">October 4, 2026 · winner by municipality, shaded by margin over the runner-up · 100% of polling stations counted</p>
+<div class="tot" id="tot"></div><div class="bar" id="bar"></div>
+<div class="legend" id="legend"></div>
+<svg id="map" viewBox="0 0 900 820"></svg>
+<div id="tip"></div>
+<footer>Source: TSE (resultados.tse.jus.br), election 6257. Percentages are of valid votes. Neither candidate passed 50%, so the race goes to a runoff.</footer>
+</main><script>
+const MG=__MGEO__, SG=__SGEO__, M=__MUNS__, NAT=__NAT__;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const COL={"FLAVIO BOLSONARO":"--flavio","LULA":"--lula"};
+const natTot=Object.values(NAT).reduce((a,b)=>a+b,0);
+const ranked=Object.entries(NAT).sort((a,b)=>b[1]-a[1]);
+const pct=(v,t)=>(100*v/t).toFixed(2).replace('.',',')+'%';
+const fmt=d3.format(",");
+function draw(){
+ const tot=d3.select("#tot").html("");
+ ranked.slice(0,3).forEach(([n,v])=>tot.append("div").attr("class","c").html(`<span>${n}</span><b style="color:${COL[n]?css(COL[n]):'inherit'}">${pct(v,natTot)}</b><span>${fmt(v)} votes</span>`));
+ const bar=d3.select("#bar").html("");
+ ranked.forEach(([n,v])=>bar.append("div").style("width",100*v/natTot+"%").style("background",COL[n]?css(COL[n]):css("--muted")));
+ const lg=d3.select("#legend").html("");
+ for(const n of ["FLAVIO BOLSONARO","LULA"]){const c=css(COL[n]);
+  lg.append("div").html(`${n} lead: <span style="vertical-align:middle;display:inline-block" class="ramp"></span> 0 → 60+ pts`).select(".ramp").style("background",`linear-gradient(90deg,${d3.interpolate(css('--bg'),c)(.2)},${c})`);}
+ const proj=d3.geoMercator().fitSize([900,820],SG), path=d3.geoPath(proj);
+ const svg=d3.select("#map").html(""), tip=d3.select("#tip");
+ svg.append("g").selectAll("path").data(MG.features).join("path").attr("class","mu").attr("d",path)
+  .attr("fill",f=>{const m=M[f.properties.codarea];if(!m)return css('--muted');
+    const mg=(m.v[0][1]-m.v[1][1])/m.t;
+    return d3.interpolate(css('--bg'),css(COL[m.v[0][0]]||'--muted'))(.15+.85*Math.min(mg/.6,1));})
+  .on("mousemove",(e,f)=>{const m=M[f.properties.codarea];if(!m)return;
+    tip.style("opacity",1).style("left",Math.min(e.clientX+14,innerWidth-230)+"px").style("top",e.clientY+14+"px")
+    .html(`<b>${m.n} (${m.uf})</b><br>`+m.v.map(([n,v])=>`${n}: ${pct(v,m.t)}`).join("<br>")+`<br><span style="color:var(--muted)">${fmt(m.t)} valid votes</span>`);})
+  .on("mouseleave",()=>tip.style("opacity",0));
+ svg.append("g").selectAll("path").data(SG.features).join("path").attr("class","uf").attr("d",path);
+}
+draw();matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+</script></body></html>
