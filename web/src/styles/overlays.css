@@ -190,3 +190,118 @@
   top: 68px;
   z-index: 4;
 }
+
+/* the guided tour: a spotlight cut out of a dimmed page (one box with a huge shadow) and a card beside it */
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+.tour[hidden] {
+  display: none;
+}
+.tspot {
+  position: fixed;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--ink) 70%, transparent),
+    0 0 0 100vmax rgb(0 0 0 / 0.62);
+  transition: all 0.35s ease;
+  pointer-events: none;
+}
+.tcard {
+  position: fixed;
+  width: min(300px, calc(100vw - 24px));
+  padding: 14px 16px 12px;
+  background: var(--dusk);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 0.45);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  transition:
+    left 0.35s ease,
+    top 0.35s ease;
+}
+.tcard p {
+  margin: 0 0 10px;
+}
+.tcard .tc {
+  display: flex;
+  gap: 5px;
+  margin: 2px 0 10px;
+}
+.tcard .tc i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--edge);
+  transition: all 0.25s;
+}
+.tcard .tc i.on {
+  width: 16px;
+  border-radius: 3px;
+  background: var(--ink);
+}
+.tcard .tl {
+  display: block;
+  margin: 6px 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--edge);
+}
+.tcard .tl:last-child {
+  margin-bottom: 0;
+}
+.tcard .tx {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--haze);
+  font-size: 18px;
+  line-height: 1;
+}
+.tcard .tx:hover {
+  color: var(--ink);
+}
+.tcard .tb {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+.tcard .tb .link {
+  margin-right: auto;
+}
+.tcard .tb .go {
+  background: var(--ink);
+  color: var(--night);
+  border-color: var(--ink);
+  font-weight: 600;
+}
+/* the tour's replay button, under Share on the map (beside it in the phone's slim header) */
+.share.tourbtn {
+  top: 52px;
+  right: 14px;
+  width: 30px;
+  justify-content: center;
+  font-weight: 700;
+}
+@media (max-width: 900px) {
+  .storymode .share.tourbtn {
+    top: 10px;
+    right: 58px;
+    width: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tspot,
+  .tcard {
+    transition: none;
+  }
+}

@@ -226,6 +226,29 @@
 .storymode aside::-webkit-scrollbar {
   display: none;
 }
+/* wider screens: cards scrolled up past the sticky header vanish into a fade from the top of the screen down to
+   the tabs (the column is transparent, so without it their text runs on above the header) */
+@media (min-width: 901px) {
+  .storymode .tabs::before {
+    content: "";
+    position: absolute;
+    left: -41px;
+    right: -25px;
+    bottom: 100%;
+    height: 21px;
+    background: var(--night);
+    pointer-events: none;
+  }
+  .storymode .tabs,
+  .storymode .stot {
+    background: color-mix(in srgb, var(--dusk) 97%, transparent);
+  }
+  /* the cards already read leave as they slide under the header, so no edge of them is left below it */
+  .storymode .step.past {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+}
 .storymode .tabs {
   position: sticky;
   top: 20px;
@@ -242,7 +265,7 @@
 .storymode .stot {
   position: sticky;
   top: 57px;
-  margin: 0 0 36vh;
+  margin: 0 0 var(--first-gap, 36vh);
   padding: 10px 16px 12px;
   background: color-mix(in srgb, var(--dusk) 92%, transparent);
   backdrop-filter: blur(8px);
@@ -252,13 +275,12 @@
 }
 .storymode .step {
   min-height: 0;
-  margin: 0 0 70vh;
+  margin: 0 0 32vh;
   padding: 18px 20px 8px;
   background: color-mix(in srgb, var(--night) 86%, transparent);
   backdrop-filter: blur(6px);
   border: 1px solid var(--rule);
   border-radius: 10px;
-  box-shadow: 0 10px 40px #0007;
   opacity: 0.55;
 }
 .storymode .step.on,
@@ -470,35 +492,86 @@
 /* scroll cues, after map-led stories: a "scroll" prompt on the first card, and progress dots beside the cards
    that show where you are and jump to a step */
 .cue {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  margin: 14px 0 6px;
   color: var(--haze);
   font-size: 12.5px;
-  margin: 14px 0 6px;
+}
+.step .cue p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-size: inherit;
+  color: inherit;
+}
+.cue .ci {
+  display: inline-flex;
+  justify-content: center;
+  gap: 3px;
+  min-width: 38px;
 }
 .cue svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   fill: none;
-  stroke: currentColor;
+  stroke: var(--ink);
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
-  animation: nudge 1.6s ease-in-out infinite;
 }
-@keyframes nudge {
+kbd {
+  display: inline-block;
+  min-width: 17px;
+  padding: 1px 4px;
+  border: 1px solid var(--edge);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font: 600 11px/1.3 var(--body);
+  color: var(--ink);
+  text-align: center;
+}
+/* until the reader first moves, the scroll sign bounces (sideways on phones) and the keys and the phone's › pulse */
+#page:not(.moved) .cue .sc svg {
+  animation: bounce 1.2s ease-in-out infinite;
+}
+#page:not(.moved) .cue .sw svg {
+  animation: sway 1.2s ease-in-out infinite;
+}
+#page:not(.moved) .cue kbd,
+#page:not(.moved) #snext {
+  animation: keypulse 1.8s ease-out infinite;
+}
+@keyframes bounce {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(-2px);
   }
   50% {
-    transform: translateY(4px);
+    transform: translateY(6px);
+  }
+}
+@keyframes sway {
+  0%,
+  100% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+@keyframes keypulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cue svg {
-    animation: none;
+  #page .cue svg,
+  #page .cue kbd,
+  #page #snext {
+    animation: none !important;
   }
 }
 .prog {
@@ -851,7 +924,6 @@
   border-radius: 10px;
   background: color-mix(in srgb, var(--night) 86%, transparent);
   backdrop-filter: blur(6px);
-  box-shadow: 0 10px 40px #0007;
   font-size: 11.5px;
   line-height: 1.35;
   white-space: normal;
@@ -973,4 +1045,30 @@
   bottom: auto;
   top: 56px;
   left: calc(var(--story-w, 0px) + 20px);
+}
+
+/* "how to read": the first time a step brings a new kind of chart, a short boxed note says what its marks mean,
+   set apart from the story's prose so a reader who knows can skip it */
+.step p.howto {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 8px 10px 8px 32px;
+  position: relative;
+}
+.step p.howto::before {
+  content: "i";
+  position: absolute;
+  left: 10px;
+  top: 9px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1.3px solid var(--haze);
+  color: var(--haze);
+  font: 700 10px/13px var(--body);
+  text-align: center;
 }

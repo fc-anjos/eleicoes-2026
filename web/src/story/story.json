@@ -4,6 +4,28 @@
     "view": "y=2026&at=home"
   },
   {
+    "id": "read",
+    "block": "shift",
+    "view": "y=2026&at=home&viz=circles*&vc=moved",
+    "notes": [
+      {
+        "at": [-46.63, -23.55],
+        "dx": 35,
+        "dy": 35
+      },
+      {
+        "at": [-49.25, -16.68],
+        "dx": -45,
+        "dy": 25
+      },
+      {
+        "at": [-48.49, -1.45],
+        "dx": -40,
+        "dy": -30
+      }
+    ]
+  },
+  {
     "id": "overview",
     "block": "shift",
     "view": "y=2026&at=home&viz=circles*&vc=moved"

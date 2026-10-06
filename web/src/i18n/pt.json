@@ -33,13 +33,13 @@
   },
   "map": {
     "aria": "Mapa de pontos dos votos por município",
-    "arrowKey": "<span class=\"ar r\">←</span> em direção a Lula <span class=\"ar b\">→</span> em direção ao campo bolsonarista · <i id=\"akl\"></i> = 10 pontos de margem",
-    "hint": "<b class=\"mh-t\">Arraste</b> para mover<br /><b class=\"mh-z\">Role</b> para dar zoom",
-    "hintPinch": "Pince",
+    "arrowKey": "<span class=\"ar r\">←</span> pró-Lula <span class=\"ar b\">→</span> pró-campo bolsonarista · <i id=\"akl\"></i> = 10 pontos de margem",
+    "hint": "<b class=\"mh-t\">Arraste</b> para mover<br /><b class=\"mh-z\">Role</b> para aproximar",
+    "hintPinch": "Use dois dedos",
     "divider": "Divisor entre os anos",
     "dragCompare": "Arraste para comparar",
     "share": "Compartilhar",
-    "key": "<span class=\"kd\"><b>1 ponto = <span class=\"vpd\"></span> votos</b><br />Votos posicionados ao redor do local de votação<br /></span><span class=\"hint\">Role para dar zoom · arraste para mover</span>",
+    "key": "<span class=\"kd\"><b>1 ponto = <span class=\"vpd\"></span> votos</b><br />Votos posicionados ao redor do local de votação<br /></span><span class=\"hint\">Role para aproximar · arraste para mover</span>",
     "credit": "Criado por <b>Felipe dos Anjos</b><br /><a href=\"https://github.com/fc-anjos\">github.com/fc-anjos</a> · <a href=\"mailto:felipe.cavalheiro.anjos@gmail.com\">felipe.cavalheiro.anjos@gmail.com</a><br />Dados: <a href=\"https://dadosabertos.tse.jus.br/\">Tribunal Superior Eleitoral (TSE)</a>",
     "compare": "Comparar",
     "language": "Idioma"
@@ -61,30 +61,35 @@
         "h": "Como o Brasil votou em 2026",
         "t": "<p>Cada ponto neste mapa representa 250 votos ou 250 pessoas que não votaram, distribuídos em volta do local de votação onde estão inscritas. Pontos <b class=\"sb\">azuis</b> são votos no campo bolsonarista, <b class=\"sr\">vermelhos</b> em Luiz Inácio Lula da Silva, <b class=\"sa\">amarelos</b> são eleitores que não votaram, e cinza, votos nos demais candidatos.</p><p>A seguir, onde o voto mudou entre o primeiro turno de 2022 e o de 2026.</p>"
       },
+      "read": {
+        "h": "Como ler os círculos",
+        "t": "<p>Daqui em diante, a maioria dos mapas mostra um círculo por município. A <b>cor</b> indica para que lado o voto pendeu entre 2022 e 2026: <b class=\"sb\">azul</b> para o campo bolsonarista, <b class=\"sr\">vermelho</b> para Lula.</p><p>O <b>tamanho</b> é o saldo de votos dessa mudança: a variação da votação de Lula, em pontos, multiplicada pelos votos do município. Uma cidade grande com pouca variação pode ter um círculo tão grande quanto o de uma cidade média com muita.</p><p class=\"howto\">São Paulo: a votação de Lula caiu 1,0 ponto sobre 6,6 milhões de votos, um saldo de cerca de 63 mil votos. Goiânia: caiu 4,9 pontos sobre 0,8 milhão, cerca de 38 mil. Belém: subiu 2,3 pontos, cerca de 19 mil a favor de Lula.</p>",
+        "notes": ["São Paulo −1,0 pt ≈ 63 mil votos", "Goiânia −4,9 pts ≈ 38 mil", "Belém +2,3 pts ≈ 19 mil"]
+      },
       "overview": {
-        "h": "Lula perdeu terreno em quase todo o país",
-        "t": "<p>A votação de Lula caiu em 5.468 dos 5.570 municípios do Brasil. Em 2022, ele terminou o primeiro turno à frente de Jair Bolsonaro, com 48,4% contra 43,2%. Neste ano, Flávio Bolsonaro ficou em primeiro, com 47,0%, contra 45,2% de Lula.</p><p>As perdas se espalharam pelo país. Lula recuou no Norte e no Sudeste e caiu mais no Sul. Ele ainda ficou bem à frente no Nordeste. Em mais de 700 municípios onde ele ficou à frente em 2022, o campo bolsonarista ficou à frente desta vez.</p><p class=\"n\">O voto é secreto. Estes mapas mostram como os lugares votaram. Não mostram quais eleitores mudaram de voto.</p>"
+        "h": "O voto pendeu para o campo bolsonarista em quase todo o país",
+        "t": "<p>A votação de Lula caiu em 5.468 dos 5.570 municípios do Brasil. Em 2022, ele terminou o primeiro turno à frente de Jair Bolsonaro, com 48,4% contra 43,2%. Neste ano, Flávio Bolsonaro ficou em primeiro, com 47,0%, contra 45,2% de Lula.</p><p>A mudança se espalhou pelo país. Lula recuou no Norte e no Sudeste e caiu mais no Sul. Ele ainda ficou bem à frente no Nordeste. Em mais de 700 municípios onde ele ficou à frente em 2022, o campo bolsonarista ficou à frente desta vez.</p><p class=\"n\">O voto é secreto. Estes mapas mostram como os lugares votaram. Não mostram quais eleitores mudaram de voto.</p>"
       },
       "arrows": {
         "h": "A mudança, município a município",
-        "t": "<p>A margem se moveu em direção ao campo bolsonarista em 5.512 dos 5.570 municípios. As próximas três telas separam os municípios pelo tamanho da perda de Lula.</p>"
+        "t": "<p>A margem pendeu para o campo bolsonarista em 5.512 dos 5.570 municípios. As próximas três telas dividem os municípios pelo tamanho da queda na votação de Lula.</p><p class=\"howto\">Cada seta é um município. Ela aponta para a <b class=\"sr\">esquerda</b> onde a margem pendeu para Lula e para a <b class=\"sb\">direita</b> onde pendeu para o campo bolsonarista; quanto mais longa a seta, maior a virada.</p>"
       },
       "held": {
         "h": "Onde Lula manteve votos",
-        "t": "<p>A votação de Lula se manteve ou subiu em 102 municípios, destacados aqui. A maioria são cidades grandes: Rio de Janeiro, Brasília, Fortaleza, Manaus, Recife, Belém, Maceió, Aracaju, Niterói e Santos. Juntos, eles somam 12% dos votos válidos.</p><p>Os totais no alto agora contam só esses lugares.</p>",
+        "t": "<p>A votação de Lula se manteve ou subiu em 102 municípios, destacados aqui. A maioria são cidades grandes: Rio de Janeiro, Brasília, Fortaleza, Manaus, Recife, Belém, Maceió, Aracaju, Niterói e Santos. Juntos, eles somam 12% dos votos válidos.</p><p class=\"howto\">Os lugares fora da seleção ficam apagados; os totais no alto contam só os destacados.</p>",
         "notes": ["Rio +0,4", "Brasília +1,3", "Belém +2,3", "Recife +1,3", "Manaus +0,1"]
       },
       "slipped": {
-        "h": "Onde ele perdeu pouco",
+        "h": "Onde a votação de Lula caiu pouco",
         "t": "<p>A votação dele caiu até cinco pontos em 2.312 municípios. Entre eles estão São Paulo, Salvador, a maioria dos municípios de 100 mil a 500 mil habitantes e boa parte do Nordeste, que somam 63% dos votos válidos. No conjunto, Lula passou de 48,0% para 45,6%.</p>"
       },
       "shifted": {
-        "h": "Onde ele perdeu mais",
+        "h": "Onde a votação de Lula mais caiu",
         "t": "<p>Nos outros 3.156 municípios, a votação dele caiu mais de cinco pontos. São mais da metade dos municípios do país, mas só 26% dos votos. A maioria são municípios pequenos do interior, do Sul e do Centro-Oeste. Ali, Lula caiu de 50,9% para 43,6%.</p>"
       },
       "small-towns": {
         "h": "Quanto menor a cidade, maior a mudança",
-        "t": "<p>A perda média cresce de forma constante conforme os lugares ficam menores, de cerca de um ponto nas maiores cidades a sete nas cidades com menos de 10 mil habitantes.</p>",
+        "t": "<p>A queda média na votação de Lula cresce à medida que o município diminui: cerca de um ponto nas maiores cidades e sete nas que têm menos de 10 mil habitantes.</p><p class=\"howto\">Esta tela é um gráfico, não um mapa. Cada círculo é um município: mais à direita, mais habitantes; mais alto, a votação de Lula subiu; mais baixo, caiu. A área é o número de votos válidos. A linha branca liga os pontos que marcam a variação média em cada faixa de população, como o −6,7 nas cidades com menos de 10 mil habitantes.</p>",
         "chart": {
           "title": "Votação de Lula por porte do município (habitantes)",
           "labels": ["Até 10 mil", "10 mil–50 mil", "50 mil–200 mil", "200 mil–1 mi", "Mais de 1 mi"]
@@ -92,7 +97,7 @@
       },
       "abstention": {
         "h": "A abstenção quase não mudou",
-        "t": "<p>Em 2026, 33,5 milhões de pessoas inscritas não votaram, mais do que os votos de qualquer candidato, exceto os dois primeiros colocados. A abstenção subiu em todos os primeiros turnos presidenciais desde 2006, de 16,8% para 21,1%.</p><p>Nem todos eram obrigados a votar: cerca de 70% de quem não votou tinha de 18 a 69 anos, faixa em que o voto é obrigatório; 17% tinham 16 e 17 ou de 70 a 79 anos, para quem é facultativo; 13% tinham 80 anos ou mais.</p><p>Desde 2022, ela subiu só 0,1 ponto e, por isso, não explica as perdas de Lula. Ele perdeu 3,4 milhões de votos, e o campo bolsonarista ganhou 5,0 milhões. Nos 25% dos municípios de menor renda média, onde Lula é mais forte, a abstenção caiu 2,5 pontos. Nos 25% de maior renda média, a abstenção subiu 0,9 ponto.</p><p>A abstenção caiu no Norte e no Nordeste e subiu no Sul e no Sudeste, e os dois movimentos se anulam. Por renda, caiu nos lugares mais pobres e subiu nos mais ricos.</p>",
+        "t": "<p>Em 2026, 33,5 milhões de pessoas inscritas não votaram, mais do que os votos de qualquer candidato, exceto os dois primeiros colocados. A abstenção subiu em todos os primeiros turnos presidenciais desde 2006, de 16,8% para 21,1%.</p><p>Nem todos eram obrigados a votar: cerca de 70% de quem não votou tinha de 18 a 69 anos, faixa em que o voto é obrigatório; 17% tinham 16 e 17 ou de 70 a 79 anos, para quem é facultativo; 13% tinham 80 anos ou mais.</p><p>Desde 2022, ela subiu só 0,1 ponto e, por isso, não explica a mudança. Lula teve 3,4 milhões de votos a menos que em 2022, e o campo bolsonarista, 5,0 milhões a mais. Nos 25% dos municípios de menor renda média, onde Lula é mais forte, a abstenção caiu 2,5 pontos. Nos 25% de maior renda média, a abstenção subiu 0,9 ponto.</p><p>A abstenção caiu no Norte e no Nordeste e subiu no Sul e no Sudeste, e os dois movimentos se anulam. Por renda, caiu nos lugares mais pobres e subiu nos mais ricos.</p><p class=\"howto\">Aqui a cor é a abstenção, não o voto: <b class=\"sa\">amarelo</b> onde uma parcela maior do eleitorado deixou de votar do que em 2022, verde onde uma parcela menor deixou. O gráfico à direita cruza a renda de cada município com essa variação.</p>",
         "chart": {
           "title": "Abstenção no primeiro turno presidencial (% do eleitorado)",
           "note": "Fonte: TSE. Inclui eleitores no exterior."
@@ -104,7 +109,7 @@
         }
       },
       "northeast": {
-        "h": "O Nordeste também se moveu",
+        "h": "O Nordeste também mudou",
         "t": "<p>Lula ainda lidera no Nordeste, mas sua votação ali caiu de 66,8% para 63,8%, e a do campo bolsonarista subiu 3,9 pontos. Em Salvador, ele foi de 67,0% para 65,3%. Em Feira de Santana, segunda maior cidade da Bahia, caiu de 61,7% para 57,1%. Algumas capitais se mantiveram, entre elas Fortaleza e Recife.</p>",
         "chart": {
           "title": "Votação de Lula por região",
@@ -118,8 +123,8 @@
         ]
       },
       "capitals": {
-        "h": "Nas capitais, Lula quase não perdeu",
-        "t": "<p>Nas 27 capitais, a votação de Lula recuou de 45,5% para 44,9%. No resto do país, caiu de 49,3% para 45,2%.</p><p>A diferença aparece em volta do Rio. Na capital e em Niterói, a votação de Lula se manteve. Ao lado, na Baixada Fluminense e em São Gonçalo, o voto se moveu em direção ao campo bolsonarista. A votação de Lula em cada uma, de 2022 para 2026:</p>",
+        "h": "Nas capitais, a votação de Lula quase não mudou",
+        "t": "<p class=\"howto\">Aqui os círculos mudam: o tamanho é o total de votos válidos, e a cor mostra quem liderou e por quanto. Os rótulos dão a margem de Lula em pontos, de 2022 para 2026.</p><p>Nas 27 capitais, a votação de Lula recuou de 45,5% para 44,9%. No resto do país, caiu de 49,3% para 45,2%.</p><p>A diferença aparece em volta do Rio. Na capital e em Niterói, a votação de Lula se manteve. Ao lado, na Baixada Fluminense e em São Gonçalo, o voto migrou para o campo bolsonarista. A votação de Lula em cada uma, de 2022 para 2026:</p>",
         "chart": {
           "title": "Votação de Lula: capitais e demais municípios",
           "labels": ["27 capitais", "Demais municípios"]
@@ -127,33 +132,33 @@
       },
       "goias": {
         "h": "Em Goiás, o candidato do Estado",
-        "t": "<p>A votação de Lula caiu mais em Goiás do que em qualquer outro Estado, 8,5 pontos. Ronaldo Caiado, ex-governador do Estado, teve 12,3% ali.</p>",
+        "t": "<p>Goiás teve a maior queda de Lula entre os Estados: 8,5 pontos. Ronaldo Caiado, ex-governador do Estado, teve 12,3% ali.</p><p class=\"howto\">Aqui cada município tem a cor da votação de Caiado, mais clara onde ele foi melhor.</p>",
         "notes": ["Aparecida de Goiânia −8,3", "Goiânia −4,9", "Anápolis −6,0"]
       },
       "south": {
         "h": "A maior queda de Lula, no Sul",
-        "t": "<p>A votação de Lula caiu mais no Sul do que em qualquer outra região, 5,5 pontos, e 6,6 pontos no Rio Grande do Sul. Em volta de Caxias do Sul, na Serra Gaúcha, a votação de Lula caiu cerca de cinco pontos. A abstenção ali também subiu.</p>",
+        "t": "<p>O Sul teve a maior queda de Lula entre as regiões: 5,5 pontos, e 6,6 no Rio Grande do Sul. Em volta de Caxias do Sul, na Serra Gaúcha, a votação de Lula caiu cerca de cinco pontos. A abstenção ali também subiu.</p>",
         "notes": ["Caxias do Sul −4,9"]
       },
       "sp-classes-ac": {
-        "h": "Em São Paulo, Lula cresceu nas áreas de renda mais alta",
-        "t": "<p>Na cidade de São Paulo como um todo, a votação de Lula caiu. Em volta dos locais de votação em áreas de renda mais alta, a votação dele subiu. Onde a renda média dos responsáveis pelo domicílio no entorno passa de quatro salários mínimos (R$ 4.848 por mês no Censo 2022), as faixas A a C, a votação de Lula subiu de 39,6% para 41,9%. O campo bolsonarista também cresceu, de 42,0% para 45,4%. Os candidatos menores, somados, perderam espaço. A abstenção subiu de 22,2% para 23,4%.</p><p class=\"n\">A renda aqui é a renda média dos responsáveis pelo domicílio nos setores censitários num raio de um quilômetro de cada local de votação. As faixas A a E seguem cortes em salários mínimos e só se aproximam das definições usuais de classe, que usam renda domiciliar ou consumo.</p>",
+        "h": "Em São Paulo, a votação de Lula subiu nas áreas de renda mais alta",
+        "t": "<p class=\"howto\">Com o zoom na cidade, cada círculo é um local de votação, não um município. Cor e tamanho se leem como antes.</p><p>Na cidade de São Paulo como um todo, a votação de Lula caiu. Em volta dos locais de votação em áreas de renda mais alta, a votação dele subiu. Onde a renda média dos responsáveis pelo domicílio no entorno passa de quatro salários mínimos (R$ 4.848 por mês no Censo 2022), as faixas A a C, a votação de Lula subiu de 39,6% para 41,9%. O campo bolsonarista também cresceu, de 42,0% para 45,4%. Os candidatos menores, somados, perderam espaço. A abstenção subiu de 22,2% para 23,4%.</p><p class=\"n\">A renda aqui é a renda média dos responsáveis pelo domicílio nos setores censitários num raio de um quilômetro de cada local de votação. As faixas A a E seguem cortes em salários mínimos e só se aproximam das definições usuais de classe, que usam renda domiciliar ou consumo.</p>",
         "chart": {
           "title": "Votação de Lula em São Paulo, pela renda no entorno",
           "labels": ["Até 2 SM", "2 a 4 SM", "Mais de 4 SM"]
         }
       },
       "sp-class-d": {
-        "h": "…e perdeu na faixa de 2 a 4 salários mínimos",
-        "t": "<p>Em volta dos locais de votação onde a renda média dos responsáveis pelo domicílio no entorno é de dois a quatro salários mínimos, a faixa D, a votação de Lula caiu de 47,0% para 45,5%. O campo bolsonarista subiu de 39,3% para 43,4%. A abstenção foi de 21,2% para 23,2%.</p>",
+        "h": "…e caiu na faixa de 2 a 4 salários mínimos",
+        "t": "<p>Nas áreas onde a renda média dos responsáveis pelo domicílio fica entre dois e quatro salários mínimos, a faixa D, a votação de Lula caiu de 47,0% para 45,5%. O campo bolsonarista subiu de 39,3% para 43,4%. A abstenção foi de 21,2% para 23,2%.</p>",
         "chart": {
           "title": "Votação de Lula em São Paulo, pela renda no entorno",
           "labels": ["Até 2 SM", "2 a 4 SM", "Mais de 4 SM"]
         }
       },
       "sp-class-e": {
-        "h": "…e perdeu mais abaixo de 2 salários mínimos",
-        "t": "<p>Lula ainda ficou à frente em volta dos locais de votação nas áreas de renda mais baixa, a faixa E, onde a renda média dos responsáveis pelo domicílio no entorno é de até dois salários mínimos. Mas a votação dele caiu de 58,4% para 54,5%, e o campo bolsonarista cresceu de 30,8% para 35,7%, seu maior ganho entre os três grupos. A abstenção também subiu mais aqui, de 20,2% para 23,7%.</p><p>Em São Paulo, as perdas de Lula vieram das áreas abaixo de quatro salários mínimos, e sobretudo das de renda mais baixa.</p>",
+        "h": "…e caiu mais abaixo de 2 salários mínimos",
+        "t": "<p>Lula ainda ficou à frente nas áreas de renda mais baixa, a faixa E, onde a renda média dos responsáveis pelo domicílio é de até dois salários mínimos. Mas a votação dele caiu de 58,4% para 54,5%, e o campo bolsonarista cresceu de 30,8% para 35,7%, seu maior ganho entre os três grupos. A abstenção também subiu mais aqui, de 20,2% para 23,7%.</p><p>Em São Paulo, a votação de Lula caiu nas áreas abaixo de quatro salários mínimos, e sobretudo nas de renda mais baixa.</p>",
         "chart": {
           "title": "Votação de Lula em São Paulo, pela renda no entorno",
           "labels": ["Até 2 SM", "2 a 4 SM", "Mais de 4 SM"]
@@ -168,8 +173,8 @@
         }
       },
       "smaller-candidates": {
-        "h": "Onde os candidatos menores foram melhor",
-        "t": "<p>Em locais de votação que reúnem cerca de um quinto do eleitorado, os candidatos além de Lula e Flávio Bolsonaro tiveram 10% ou mais dos votos válidos. Juntos, somaram 12,1% nesses locais, contra 7,8% no país. A maioria desses locais fica no Estado de São Paulo e em Goiás, Estado de Ronaldo Caiado, em áreas de renda acima da média. Ali, Flávio Bolsonaro teve 51,0%, contra 36,9% de Lula.</p><p>Augusto Cury, Renan Santos e Caiado somaram 8,7 milhões de votos. Uma pesquisa Genial/Quaest feita em 2 e 3 de outubro perguntou aos eleitores deles como votariam num segundo turno entre Lula e Flávio Bolsonaro. Se a divisão da pesquisa valer para esses eleitores, cerca de 3,9 milhões tenderiam a Flávio Bolsonaro, 1,6 milhão a Lula, e 3,2 milhões estariam indecisos ou não apoiariam nenhum dos dois. Os brasileiros voltam às urnas em 25 de outubro, quando Lula e Flávio Bolsonaro disputam o segundo turno.</p><p class=\"n\">A divisão da pesquisa para o segundo turno é nacional, aplicada aqui às contagens de votos. Não é medida local por local.</p>"
+        "h": "Onde os candidatos menores tiveram mais votos",
+        "t": "<p class=\"howto\">Este mapa agrupa os locais de votação em hexágonos de mesmo tamanho, mais claros onde a soma dos candidatos menores foi maior. Hexágonos vazios têm menos de 1.000 votos; aproxime para ver células menores.</p><p>Em locais de votação que reúnem cerca de um quinto do eleitorado, os demais candidatos, sem contar Lula e Flávio Bolsonaro, tiveram 10% ou mais dos votos válidos. Juntos, somaram 12,1% nesses locais, contra 7,8% no país. A maioria desses locais fica no Estado de São Paulo e em Goiás, Estado de Ronaldo Caiado, em áreas de renda acima da média. Ali, Flávio Bolsonaro teve 51,0%, contra 36,9% de Lula.</p><p>Augusto Cury, Renan Santos e Caiado somaram 8,7 milhões de votos. Uma pesquisa Genial/Quaest feita em 2 e 3 de outubro perguntou aos eleitores deles como votariam num segundo turno entre Lula e Flávio Bolsonaro. Se a divisão da pesquisa valer para esses eleitores, cerca de 3,9 milhões tenderiam a Flávio Bolsonaro, 1,6 milhão a Lula, e 3,2 milhões estariam indecisos ou não apoiariam nenhum dos dois. Os brasileiros voltam às urnas em 25 de outubro, quando Lula e Flávio Bolsonaro disputam o segundo turno.</p><p class=\"n\">A divisão da pesquisa para o segundo turno é nacional, aplicada aqui às contagens de votos. Não é medida local por local.</p>"
       },
       "find": {
         "h": "Encontre sua cidade",
@@ -181,7 +186,7 @@
       },
       "sp-income": {
         "h": "Em São Paulo, quanto menor a renda, maior a queda",
-        "t": "<p>Com uma divisão mais fina, a cidade mostra um gradiente contínuo. Nos 10% dos locais de votação em áreas de renda mais baixa, onde a renda média dos responsáveis pelo domicílio no entorno é de 1,3 a 1,7 salário mínimo, a votação de Lula caiu 4,6 pontos. A queda diminui à medida que a renda sobe e vira ganho acima de cerca de 3,4 salários mínimos. Nos 10% de renda mais alta, acima de 8,8 salários mínimos, ele ganhou 3,3 pontos.</p><p>No Brasil como um todo, o padrão é menos regular. As maiores quedas no país vieram de locais de votação em áreas de cerca de 1,5 a 2,5 salários mínimos, e não das de renda mais baixa.</p>",
+        "t": "<p>Dividida em faixas mais finas, a cidade mostra a queda acompanhando a renda. Nos 10% dos locais de votação em áreas de renda mais baixa, onde a renda média dos responsáveis pelo domicílio no entorno é de 1,3 a 1,7 salário mínimo, a votação de Lula caiu 4,6 pontos. A queda diminui à medida que a renda sobe e vira alta acima de cerca de 3,4 salários mínimos. Nos 10% de renda mais alta, acima de 8,8 salários mínimos, a votação dele subiu 3,3 pontos.</p><p>No Brasil como um todo, o padrão é menos regular. As maiores quedas no país vieram de locais de votação em áreas de cerca de 1,5 a 2,5 salários mínimos, e não das de renda mais baixa.</p>",
         "chart": {
           "title": "Variação da votação de Lula, pela renda no entorno (pontos)",
           "note": "Dez grupos de locais de votação com o mesmo número de votos, pela renda média dos responsáveis pelo domicílio no entorno, em salários mínimos"
@@ -189,7 +194,7 @@
       },
       "sp-vs-brazil": {
         "h": "Fora de São Paulo, a queda foi maior no meio",
-        "t": "<p>Fora de São Paulo, a votação de Lula caiu 3,4 pontos nas áreas de renda mais baixa, abaixo de um salário mínimo, e cerca de 4,7 pontos entre 1,5 e 2,5 salários mínimos. Ele só ganhou acima de seis salários mínimos.</p><p>Em São Paulo, a linha fica mais alta. Acima de dois salários mínimos, Lula foi melhor na cidade do que no resto do país com a mesma renda, por 1,3 a 2,5 pontos. As perdas dele na cidade se concentraram nas áreas de renda mais baixa, onde caiu 5,6 pontos.</p><p>A maior parte dos votos está onde ele mais perdeu. Fora de São Paulo, cerca de sete em cada dez votos válidos vêm de locais de votação em áreas com menos de 2,5 salários mínimos.</p><p>O mapa mantém apenas os locais de votação em áreas de 1,5 a 2,5 salários mínimos.</p>",
+        "t": "<p>Fora de São Paulo, a votação de Lula caiu 3,4 pontos nas áreas de renda mais baixa, abaixo de um salário mínimo, e cerca de 4,7 pontos entre 1,5 e 2,5 salários mínimos. A votação dele só subiu acima de seis salários mínimos.</p><p>Em São Paulo, a linha fica acima. Acima de dois salários mínimos, Lula teve desempenho melhor na cidade do que no resto do país com a mesma renda, por 1,3 a 2,5 pontos. Na cidade, a votação dele caiu mais nas áreas de renda mais baixa: 5,6 pontos.</p><p>A maior parte dos votos está onde a votação dele mais caiu. Fora de São Paulo, cerca de sete em cada dez votos válidos vêm de locais de votação em áreas com menos de 2,5 salários mínimos.</p><p>O mapa mantém apenas os locais de votação em áreas de 1,5 a 2,5 salários mínimos.</p>",
         "chart": {
           "title": "Variação da votação de Lula, pela renda no entorno (pontos)",
           "axis": "Renda média dos responsáveis no entorno, em salários mínimos",
@@ -210,7 +215,7 @@
       }
     },
     "cue": "Role para ler a reportagem",
-    "cueSwipe": "Deslize ou toque em › para a próxima parte",
+    "cueSwipe": "Deslize o cartão para o lado",
     "prev": "Parte anterior",
     "next": "Próxima parte",
     "resize": "Arraste para mudar o tamanho do painel de texto",
@@ -234,7 +239,9 @@
       "religion": "Religião",
       "abstention": "Abstenção",
       "runoff": "O segundo turno"
-    }
+    },
+    "cueKeys": "Ou use as setas do teclado",
+    "cueTap": "Ou toque em › para a próxima parte"
   },
   "explore": {
     "years": "Ano da eleição",
@@ -246,11 +253,11 @@
       "margins": "Cada município sombreado por <b>{name}</b>. Passe o mouse sobre um candidato para sombrear pela votação dele; clique num município para destacá-lo.",
       "hex": "Locais de votação agrupados em hexágonos de área igual, coloridos por <b>{name}</b>. Aproxime para células mais finas; passe o mouse sobre um candidato para colorir pela votação dele.",
       "scatter": "Um gráfico no lugar do mapa: cada círculo é um município, posicionado por <b>{name}</b> e pela mudança na votação de Lula, com área proporcional aos votos.",
-      "multiples": "Um mapa pequeno por faixa de <b>{name}</b>, cada um com os círculos de votos que mudaram de lado dessa faixa."
+      "multiples": "Um mapa pequeno por faixa de <b>{name}</b>, cada um com os círculos de saldo de votos dessa faixa."
     },
     "search": "Buscar município",
     "noMatch": "Nenhum município encontrado",
-    "rowsNote": "Use a chave para ocultar uma linha; clique na cor para trocá-la.",
+    "rowsNote": "Use o botão para ocultar uma linha; clique na cor para trocá-la.",
     "reset": "Restaurar"
   },
   "panel": {
@@ -436,7 +443,7 @@
     "mb": "{got} de {total} MB"
   },
   "viz": {
-    "label": "Com zoom",
+    "label": "Ao aproximar",
     "from": "Zoom a partir de",
     "always": "Sempre",
     "hintAlways": "Aparece em qualquer zoom",
@@ -455,7 +462,7 @@
     "keyCircles": "votos válidos",
     "colour": "Cor",
     "vc": {
-      "moved": "Votos que mudaram de lado",
+      "moved": "Saldo de votos",
       "change": "Variação de Lula",
       "margin": "Margem de quem lidera",
       "abst": "Abstenção",
@@ -475,26 +482,26 @@
     "didnt": "não votou",
     "keyGrain": "Linhas mais juntas: mais eleitores por km²",
     "same": "0",
-    "keyMoved": "Votos que mudaram de lado, 2022 → 2026",
-    "movedAway": "para longe de Lula",
-    "movedTo": "para Lula",
-    "keyMovedSize": "votos que mudaram",
+    "keyMoved": "Saldo de votos, 2022 → 2026",
+    "movedAway": "a favor do campo bolsonarista",
+    "movedTo": "a favor de Lula",
+    "keyMovedSize": "votos de saldo",
     "keyDabst": "Variação no número dos que não votaram, 2022 → 2026",
     "abstUp": "mais gente não votou",
     "abstDown": "menos gente não votou",
     "keyDabstSize": "pessoas",
     "keyDabstRate": "Variação da abstenção, 2022 → 2026, em pontos",
     "scatter": "Gráfico",
-    "scatterTitle": "Um gráfico no lugar do mapa: cada município por uma variável e pela mudança na fatia de Lula",
+    "scatterTitle": "Um gráfico no lugar do mapa: cada município por uma variável e pela mudança na votação de Lula",
     "multiples": "Painéis",
     "multiplesTitle": "Um mapa pequeno por faixa de uma variável, cada um com os círculos daquela faixa",
     "hex": "Hexágonos",
     "hexTitle": "Locais de votação agrupados em hexágonos de área igual, mais finos ao aproximar",
-    "keyHex": "Cada hexágono reúne os locais de votação dentro dele; vazado onde somam menos de 1.000 votos. Aproxime para células mais finas.",
+    "keyHex": "Cada hexágono reúne os locais de votação dentro dele; vazio onde somam menos de 1.000 votos. Aproxime para células mais finas.",
     "under": "Menos de {n}",
     "over": "{n} ou mais",
     "scatterX": "{name} (cada círculo é um município; sua área são os votos válidos)",
-    "scatterY": "Mudança na fatia de Lula, 2022 → 2026, em pontos",
+    "scatterY": "Variação da votação de Lula, 2022 → 2026, em pontos",
     "scatterTrend": "média de cada faixa, ponderada pelos votos",
     "lulaShare": "Lula",
     "nMuni": "{n} municípios",
@@ -503,5 +510,23 @@
     "scatterYAbst": "Mudança na taxa de abstenção, 2022 → 2026, em pontos",
     "keyRoll": "eleitores no cadastro",
     "scatterXShort": "{name} (área do círculo: eleitores)"
+  },
+  "tour": {
+    "title": "Como usar este mapa",
+    "replay": "Como usar este mapa",
+    "card": "Esta é a reportagem. Cada parte muda o mapa.<span class=\"tl\"><b>Role</b> para ir à próxima parte</span><span class=\"tl\">ou aperte <kbd>←</kbd> <kbd>→</kbd></span>",
+    "cardPhone": "Esta é a reportagem. Cada parte muda o mapa.<span class=\"tl\"><b>Deslize</b> o cartão para o lado</span><span class=\"tl\">ou toque em <kbd>›</kbd> para a próxima parte</span>",
+    "dots": "Cada bolinha é uma parte. Clique numa para ir direto a ela.",
+    "dotsPhone": "Cada bolinha é uma parte. Toque numa para ir direto a ela.",
+    "map": "Você também pode mexer no mapa.<span class=\"tl\"><b>Arraste</b> para mover</span><span class=\"tl\"><b>Role</b> para aproximar</span><span class=\"tl\"><b>Passe o mouse</b> sobre um lugar para ver os números</span>A próxima parte volta à vista original.",
+    "mapPhone": "Você também pode mexer no mapa.<span class=\"tl\"><b>Arraste</b> para mover</span><span class=\"tl\">Use <b>dois dedos</b> para aproximar</span><span class=\"tl\"><b>Toque</b> num lugar para ver os números</span>A próxima parte volta à vista original.",
+    "key": "A legenda explica o que cada marca significa. Ela muda junto com o mapa.",
+    "tabs": "No fim, abra <b>Explorar</b> para buscar qualquer cidade, comparar 2022 e 2026 e filtrar o mapa você mesmo.",
+    "replayHelp": "Aperte <b>?</b> a qualquer momento para ver isto de novo.",
+    "skip": "Pular o tour",
+    "close": "Entendi",
+    "next": "Próximo",
+    "prev": "Voltar",
+    "closeX": "Fechar o tour"
   }
 }

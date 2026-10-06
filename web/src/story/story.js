@@ -39,8 +39,10 @@ function showStep(i, smooth) {
     el.parentNode.scrollTo({ left: el.offsetLeft, behavior: beh });
     goStep(i);
   } else {
-    const aside = document.querySelector("aside");
-    aside.scrollTo({ top: el.offsetTop - aside.clientHeight * 0.4, behavior: beh });
+    // the card lands just under the sticky totals
+    const aside = document.querySelector("aside"),
+      under = document.getElementById("stot").getBoundingClientRect().bottom - aside.getBoundingClientRect().top;
+    aside.scrollTo({ top: el.offsetTop - under - 24, behavior: beh });
   }
 }
 let stepNow = -1;
@@ -67,10 +69,13 @@ function goStep(i) {
     if (i !== aim) return;
     aim = null;
   }
-  if (i > 0) hintDone("maphint");
+  if (i > 0) {
+    hintDone("maphint");
+    d3.select("#page").classed("moved", true); // the cues stop bouncing once the reader has found the way
+  }
   if (i === stepNow) return;
   stepNow = i;
-  steps.classed("on", (d, j) => j === i);
+  steps.classed("on", (d, j) => j === i).classed("past", (d, j) => j < i);
   prog.attr("aria-current", (d, j) => (j === i ? "step" : null));
   d3.select("#sprev").property("disabled", i === 0);
   d3.select("#snext").property("disabled", i === STORY.length - 1);
@@ -250,16 +255,22 @@ function fillSteps() {
       if (d.chart2) chart(this, { ...d.chart2, ...copyOf(d).chart2 });
       if (d.find) findStep(this);
     });
+  // the first card's cue: one way to move per line, each with its own sign, bouncing until the reader first moves
+  const ico = (d) => `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="${d}"/></svg>`,
+    lines = phone.matches
+      ? [
+          ["sw", ico("M6 4l-4 4 4 4M10 4l4 4-4 4"), t("story.cueSwipe")],
+          ["tp", `<kbd>›</kbd>`, t("story.cueTap")],
+        ]
+      : [
+          ["sc", ico("M4 6l4 4 4-4"), t("story.cue")],
+          ["ky", "<kbd>←</kbd><kbd>→</kbd>", t("story.cueKeys")],
+        ];
   steps
     .filter((d, i) => i === 0)
-    .append("p")
+    .append("div")
     .attr("class", "cue")
-    .html(
-      (phone.matches
-        ? '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l-4 4 4 4M10 4l4 4-4 4"/></svg>'
-        : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>') +
-        t(phone.matches ? "story.cueSwipe" : "story.cue"),
-    );
+    .html(lines.map(([c, i, s]) => `<p class="${c}"><span class="ci">${i}</span>${s}</p>`).join(""));
   prog.attr("aria-label", (d) => copyOf(d).h).attr("title", (d) => copyOf(d).h);
   d3.select("#toexplore").on("click", () => setTab(false));
 }
@@ -337,6 +348,28 @@ function resizer() {
   grip.addEventListener("pointercancel", end);
 }
 
+// Wider screens: the first card sits in the middle of the open space between the sticky totals and the bottom of
+// the screen, so it reads as the start and the empty map below it as room to scroll into
+function centreFirst() {
+  if (phone.matches) return;
+  const aside = document.querySelector("aside"),
+    stot = document.getElementById("stot"),
+    first = steps.node();
+  if (!first || stot.offsetParent === null) return;
+  const top = stot.getBoundingClientRect().bottom - aside.getBoundingClientRect().top,
+    gap = aside.clientHeight - top - first.offsetHeight;
+  document.documentElement.style.setProperty("--first-gap", Math.max(24, gap / 2) + "px");
+}
+
+// the keyboard: ← → (or Page Up / Down while the column isn't focused) move a step, outside text fields
+function keys(e) {
+  if (!d3.select("#page").classed("storymode") || e.target.closest("input, textarea, select, [role=slider]")) return;
+  const d = { ArrowRight: 1, ArrowLeft: -1, PageDown: 1, PageUp: -1 }[e.key];
+  if (!d || (e.key.startsWith("Page") && document.activeElement === document.querySelector("aside"))) return;
+  e.preventDefault();
+  showStep(Math.max(0, Math.min(STORY.length - 1, stepNow + d)), true);
+}
+
 export function initStory() {
   steps = d3.select("#steps").selectAll(".step").data(STORY).join("section").attr("class", "step");
   const aside = document.querySelector("aside");
@@ -351,26 +384,40 @@ export function initStory() {
   swipe();
   resizer();
   fillSteps();
+  addEventListener("keydown", keys);
+  const ro = new ResizeObserver(centreFirst);
+  ro.observe(document.getElementById("stot"));
+  ro.observe(steps.node());
+  ro.observe(aside);
   onLang(() => {
     fillSteps();
     fitPanel(stepNow);
     if (stepNow >= 0) setNotes(notesOf(stepNow));
   });
-  const io = new IntersectionObserver(
-    (es) => {
-      if (phone.matches) return;
-      const vis = es.filter((e) => e.isIntersecting);
-      if (vis.length) goStep(steps.nodes().indexOf(vis[0].target));
-    },
-    { root: aside, rootMargin: "-45% 0px -50% 0px" },
-  );
+  // wider screens: a card takes over the map once its top passes the middle of the open space between the sticky
+  // totals and the bottom of the screen, so a short scroll is enough to move on
+  let ticking = false;
+  const pick = () => {
+    ticking = false;
+    if (phone.matches || !d3.select("#page").classed("storymode")) return;
+    const a = aside.getBoundingClientRect(),
+      top = document.getElementById("stot").getBoundingClientRect().bottom,
+      line = top + (a.bottom - top) / 2;
+    let i = 0;
+    steps.each(function (d, j) {
+      if (this.getBoundingClientRect().top <= line) i = j;
+    });
+    goStep(i);
+  };
+  aside.addEventListener("scroll", () => ticking || ((ticking = true), requestAnimationFrame(pick)), {
+    passive: true,
+  });
   // a card lights up as soon as most of it is on screen, before it reaches the middle and changes the map
   const lit = new IntersectionObserver((es) => es.forEach((e) => e.target.classList.toggle("near", e.isIntersecting)), {
     root: aside,
     rootMargin: "-12% 0px -22% 0px",
   });
   steps.each(function () {
-    io.observe(this);
     lit.observe(this);
   });
   d3.select("#tab-story").on("click", () => setTab(true));

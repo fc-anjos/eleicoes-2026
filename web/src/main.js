@@ -16,9 +16,11 @@ import { initHash } from "./view/hash.js";
 import { initHints } from "./view/hints.js";
 import { done as loaded } from "./view/loader.js";
 import { initShare } from "./view/share.js";
+import { initTour } from "./view/tour.js";
 
 applyDom(); // the page's copy first: the modules below fill in parts of it
 initHints();
+initTour(); // reads the URL as it was opened, before the story writes a view into it
 initStudio();
 initMap();
 panel();
