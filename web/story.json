@@ -300,19 +300,19 @@
   ]
  },
  {
-  "view": "y=2026&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@4848~*",
+  "view": "y=cmp&split=0.5&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@4848~*",
   "h": "São Paulo: classes A to C",
-  "t": "<p>Inside one city, lit: São Paulo's polling places in neighbourhoods of classes A to C, where the average household head earns more than 4 minimum wages (R$ 4,848 a month at the 2022 Census), from Census tracts within 1 km. In the city they cluster in the centre and south-west.</p><p class=\"n\">Classes here use the household head's income, an approximation of the usual household-income definition. Totals for polling places are estimated from the dots.</p>"
+  "t": "<p>Inside one city, lit: São Paulo's polling places in neighbourhoods of classes A to C, where the average household head earns more than 4 minimum wages (R$ 4,848 a month at the 2022 Census), from Census tracts within 1 km. 2022 is left of the divider, 2026 right. Here Lula <b>rose</b>, 39.5% → 42.0%, while the Bolsonaro camp went 41.9% → 45.3%: both gained from the smaller candidates. Abstention rose 22.1% → 23.2%.</p><p class=\"n\">Classes here use the household head's income, an approximation of the usual household-income definition. Totals for polling places are estimated from the dots.</p>"
  },
  {
-  "view": "y=2026&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@*~2424",
+  "view": "y=cmp&split=0.5&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@*~2424",
   "h": "…and class E",
-  "t": "<p>And class E neighbourhoods, where the average household head earns up to 2 minimum wages. In São Paulo the periphery lights up and the centre goes dark. Compare the totals above with the last step: in the city, Lula's share rose in classes A to C and fell in class E.</p>"
+  "t": "<p>And class E neighbourhoods, where the average household head earns up to 2 minimum wages. Here Lula still wins, but he <b>fell</b>, 58.1% → 54.6%, and the Bolsonaro camp grew most, 30.9% → 35.8%. Abstention rose the most too, 20.0% → 23.5%. In the city, the shift came from the poorest neighbourhoods, not the richest.</p>"
  },
  {
-  "view": "y=2026&at=home&f=pct_catolica_2022:75-100",
+  "view": "y=cmp&split=0.5&at=home&f=pct_catolica_2022:75-100",
   "h": "Religion",
-  "t": "<p>Lit: the most Catholic quarter of municipalities, where 80% or more of residents are Catholic. They are mostly small and rural, and there Lula's share fell 5.3 points, against 2.6 in the least Catholic quarter, which is mostly big cities. The most Evangelical places didn't stand out: −3.3, the national figure.</p><p class=\"n\">Religion describes places, not voters: this doesn't show how Catholics voted.</p>",
+  "t": "<p>Lit: the most Catholic quarter of municipalities, where 80% or more of residents are Catholic. They are mostly small and rural, with 2022 left of the divider and 2026 right. There Lula's share fell 66.5% → 61.2% and the Bolsonaro camp's rose 27.7% → 33.5%, while abstention fell 20.6% → 19.5%. That fall of 5.3 points compares with 2.6 in the least Catholic quarter, which is mostly big cities. The most Evangelical places didn't stand out: −3.3, the national figure.</p><p class=\"n\">Religion describes places, not voters: this doesn't show how Catholics voted.</p>",
   "chart": {
    "title": "Lula's share by Catholic share of residents",
    "by": "pct_catolica_2022",

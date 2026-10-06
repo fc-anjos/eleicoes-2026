@@ -60,11 +60,21 @@ const FCACHE=new Map();
 const fsig=()=>VARS.filter(v=>v.lo>0||v.hi<100).map(v=>`${v.k}:${lo_(v)}:${hi_(v)}${v.dyn?":"+YEAR:""}`).join("|")+"|"+(INSET?[...INSET].join(","):"")+"|"+INC80;
 function refilter(){computeFilter();panelIfShown();repaint();}
 function panelIfShown(){if(!d3.select("#explore").property("hidden")||typeof storyTotals!=="function")panel();else storyTotals();}
+// what the current filter is, in words: the area, then each active filter with its bounds
+const hum=x=>x>=1e6?(x/1e6).toFixed(x>=1e7?0:1)+"M":x>=1e3?Math.round(x/1e3)+"k":String(Math.round(x));
+function describeFilter(){const out=[];
+ if(INSET){const ks=[...INSET],ufs=new Set(ks.map(k=>M[k]&&M[k].uf));
+  out.push(ks.length===1?M[ks[0]].n:ufs.size===1&&ks.length===Object.keys(M).filter(k=>M[k].uf===[...ufs][0]).length?"State: "+[...ufs][0]:fmt(ks.length)+" municipalities");}
+ for(const v of VARS){if(!(v.lo>0||v.hi<100))continue;const a=v.vlo!=null||v.lo>0,b=v.vhi!=null||v.hi<100,l=lo_(v),h=hi_(v);
+  out.push(`${v.n}${v.place?" (around polling place)":""}: ${a&&b?showVal(v,l)+" – "+showVal(v,h):a?"≥ "+showVal(v,l+(v.k==="setor_renda_resp_media"?1:0)):"≤ "+showVal(v,h-(v.k==="setor_renda_resp_media"?1:0))}`);}
+ return out;}
+function showFilter(){const d=describeFilter();
+ d3.select("#fbadge").property("hidden",!d.length).html(d.length?`<b>Showing only</b> ${d.map(x=>`<span>${x}</span>`).join("")}`:"");}
 function computeFilter(){
  const act=VARS.filter(v=>v.lo>0||v.hi<100),mact=act.filter(v=>!v.place),pact=act.filter(v=>v.place);
  FILTERED=act.length>0||!!INSET;PLACEF=pact.length>0;
  const key=fsig(),hit=FCACHE.get(key);let n=0;
- if(hit){PASS.set(hit.pass);for(const y of YS)DOT[y].GP.set(hit.gp[y]);d3.select("#fcount").text(hit.label);d3.select("#fclear").property("hidden",!FILTERED);return;}
+ if(hit){PASS.set(hit.pass);for(const y of YS)DOT[y].GP.set(hit.gp[y]);d3.select("#fcount").text(hit.label);d3.select("#fclear").property("hidden",!FILTERED);showFilter();return;}
  MG.features.forEach((f,fi)=>{const m=M[f.properties.codarea];let ok=!!m&&(!INSET||INSET.has(f.properties.codarea));
   for(const v of mact){if(!ok)break;const x=v.get(m);ok=x!=null&&x>=lo_(v)&&x<=hi_(v);}
   PASS[fi]=ok?1:0;if(ok)n++;});
@@ -75,7 +85,7 @@ function computeFilter(){
     for(const v of pact){if(!ok)break;const x=v.val(row);ok=x!=null&&x>=lo_(v)&&x<=hi_(v);}
     D.GP[g]=ok?1:0;if(y===YEAR&&row>=0){npt++;if(ok)np++;}}}}
  d3.select("#fcount").text(!FILTERED?"All municipalities":PLACEF?`${fmt(np)} of ${fmt(npt)} polling places`:`${fmt(n)} of ${fmt(Object.keys(M).length)} municipalities`);
- d3.select("#fclear").property("hidden",!FILTERED);
+ d3.select("#fclear").property("hidden",!FILTERED);showFilter();
  FCACHE.set(key,{pass:PASS.slice(),gp:Object.fromEntries(YS.map(y=>[y,DOT[y].GP.slice()])),label:d3.select("#fcount").text()});
  if(FCACHE.size>40)FCACHE.delete(FCACHE.keys().next().value);
 }
@@ -215,6 +225,11 @@ function project(){const k=proj.scale(),[tx,ty]=proj.translate();
  for(const y of YS){const {n,U,P}=DOT[y];for(let i=0;i<n;i++){P[2*i]=U[2*i]*k+tx;P[2*i+1]=U[2*i+1]*k+ty;}}}
 // compare mode: the older year left of the divider, the newer right; SPLIT is the divider's position (0–1)
 let COMPARE=false,SPLIT=.5;
+// first-visit hints: how to move the map, and that the year divider drags. Each goes once used.
+const TOUCH=matchMedia("(pointer:coarse)").matches;
+function hintDone(id){const n=document.getElementById(id);if(n)n.classList.add("gone");}
+setTimeout(()=>hintDone("maphint"),12000);
+if(TOUCH)d3.select(".mh-z").text("Pinch");
 function layers(){const sx=Math.round(SPLIT*w);
  return COMPARE?[{...DOT[YS[1]],x0:0,x1:sx},{...DOT[YS[0]],x0:sx,x1:w}]:[{...DOT[YEAR],x0:0,x1:w}];}
 const cv=document.getElementById("cv"),dpr=devicePixelRatio||1,cx=cv.getContext("2d");
@@ -365,6 +380,7 @@ let lastK=1;const CLEARK=1.5;
 const zoom=d3.zoom().scaleExtent([1,MAXK]).on("end",()=>saveSoon()).on("zoom",e=>{const t=e.transform;
  // zooming out by hand to near the whole-country view clears the selection
  if(sel&&e.sourceEvent&&t.k<lastK&&t.k<CLEARK)select(null);
+ if(e.sourceEvent)hintDone("maphint");
  lastK=t.k;
  g.attr("transform",t);placeLabels(t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<20?.5:Math.min(1.1,.5+.6*Math.log(t.k/20)/Math.log(3)));
  if(!pending)requestAnimationFrame(()=>{paint(pending);pending=null;});pending=t;});
@@ -412,7 +428,7 @@ d3.select("#years").selectAll("button").data([...YS,"cmp"]).join("button").text(
 d3.select("#swl").text(YS[1]);d3.select("#swr").text(YS[0]);
 function placeSwipe(){swipe.style("left",SPLIT*100+"%");swipe.select(".grip").attr("aria-valuenow",Math.round(SPLIT*100));}
 // dragging the divider (pointer or arrow keys); it never starts a pan
-let swRaf=0;const moveSplit=v=>{SPLIT=Math.max(.02,Math.min(.98,v));placeSwipe();if(!swRaf)swRaf=requestAnimationFrame(()=>{swRaf=0;repaint();});};
+let swRaf=0;const moveSplit=v=>{d3.select("#swipe").classed("used",true);SPLIT=Math.max(.02,Math.min(.98,v));placeSwipe();if(!swRaf)swRaf=requestAnimationFrame(()=>{swRaf=0;repaint();});};
 swipe.select(".grip").on("pointerdown",e=>{e.stopPropagation();e.preventDefault();const el=e.currentTarget;el.setPointerCapture(e.pointerId);
   const r=document.getElementById("wrap").getBoundingClientRect();
   const mv=ev=>moveSplit((ev.clientX-r.left)/r.width),up=()=>{el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);};
@@ -609,7 +625,7 @@ steps.filter((d,i)=>i===0).append("p").attr("class","cue").html('<svg viewBox="0
 const prog=d3.select("#prog").selectAll("button").data(STORY).join("button").attr("aria-label",d=>d.h)
  .attr("title",d=>d.h).on("click",(e,d)=>{const i=STORY.indexOf(d),a=document.querySelector("aside");a.scrollTo({top:steps.nodes()[i].offsetTop-a.clientHeight*.4,behavior:"smooth"});});
 let stepNow=-1;
-function goStep(i){if(i===stepNow)return;stepNow=i;steps.classed("on",(d,j)=>j===i);prog.attr("aria-current",(d,j)=>j===i?"step":null);
+function goStep(i){if(i>0)hintDone("maphint");if(i===stepNow)return;stepNow=i;steps.classed("on",(d,j)=>j===i);prog.attr("aria-current",(d,j)=>j===i?"step":null);
  // the card lights at once; the map's work waits for the next frame so the highlight paints first
  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(stepNow!==i)return;restoring=true;applyState(viewOf(i),true);restoring=false;
   NOTES=STORY[i].notes||[];drawNotes();saveSoon();}));}
@@ -624,11 +640,19 @@ function precompute(){const views=STORY.map((d,i)=>viewOf(i));
  (window.requestIdleCallback||setTimeout)(next);}
 const viewOf=i=>STORY[i].view;
 function storyTotals(){if(d3.select("#story").property("hidden"))return;
- const F=figures(YEAR),oy=YS.find(v=>v!==YEAR),G=figures(oy),r=(i,n,sh,pv)=>`<div class="sr${i===AB?" a":""}" style="--c:${COLS[i]}"><i></i><span>${n}</span><b>${(100*sh).toFixed(1)}%</b><em>${pv==null?"":((sh-pv)*100>=0?"+":"−")+Math.abs((sh-pv)*100).toFixed(1)+" vs "+oy}</em></div>`;
+ const F=figures(YEAR),oy=YS.find(v=>v!==YEAR),G=figures(oy),N=FILTERED?natFig(YEAR):null;
  const c22=CATS.findIndex(c=>c.k==="22"),c13=CATS.findIndex(c=>c.k==="13");
+ const r=(i,n,v,sh,pv,nv)=>`<div class="sr${i===AB?" a":""}" style="--c:${COLS[i]}"><i></i><span>${n}</span><b>${(100*sh).toFixed(1)}%</b><u>${hum(v)}${N?` <s>${Math.round(100*v/nv)}% of all</s>`:""}</u><em>${pv==null?"":((sh-pv)*100>=0?"+":"−")+Math.abs((sh-pv)*100).toFixed(1)+" vs "+oy}</em></div>`;
  d3.select("#stot").html(`<div class="sl">${COMPARE?`${YS[0]} totals`:YEAR}${INSET&&INSET.size===1?" · "+M[[...INSET][0]].n+(PLACEF?", lit polling places":""):FILTERED?(PLACEF?" · lit polling places":" · lit municipalities"):" · Brazil"}</div>`
-  +r(c22,nameOf(YEAR,"22"),F.c[c22]/F.valid,G.c[c22]/G.valid)+r(c13,"Lula",F.c[c13]/F.valid,G.c[c13]/G.valid)+r(AB,"Didn't vote",F.ab/F.all,G.ab/G.all));}
-const _panel=panel;panel=function(){_panel();storyTotals();};
+  +(N?`<div class="scope"><b>${hum(F.all)}</b> people on the roll here, <b>${Math.round(100*F.all/N.all)}%</b> of Brazil's ${hum(N.all)}</div>`:"")
+  +r(c22,nameOf(YEAR,"22"),F.c[c22],F.c[c22]/F.valid,G.c[c22]/G.valid,N&&N.c[c22])+r(c13,"Lula",F.c[c13],F.c[c13]/F.valid,G.c[c13]/G.valid,N&&N.c[c13])+r(AB,"Didn't vote",F.ab,F.ab/F.all,G.ab/G.all,N&&N.ab)
+  +(N?`<div class="fdesc">${describeFilter().map(x=>`<span>${x}</span>`).join("")}</div>`:""));}
+// the national figures, for "x% of all": computed with no filter, without touching what the map shows
+function natFig(y){const f=FILTERED,pf=PLACEF,ps=PASS.slice();FILTERED=PLACEF=false;PASS.fill(1);const t=figures(y);FILTERED=f;PLACEF=pf;PASS.set(ps);return t;}
+const _panel=panel;panel=function(){_panel();storyTotals();
+ // in Explore, the filter count also says how much of Brazil is lit
+ const fc=d3.select("#fcount");fc.select(".scope").remove();
+ if(FILTERED){const F=figures(YEAR),N=natFig(YEAR);fc.append("span").attr("class","scope").text(` · ${hum(F.all)} on the roll, ${Math.round(100*F.all/N.all)}% of Brazil`);}};
 const io=new IntersectionObserver(es=>{const vis=es.filter(e=>e.isIntersecting);if(vis.length)goStep(steps.nodes().indexOf(vis[0].target));},
  {root:document.querySelector("aside"),rootMargin:"-45% 0px -50% 0px"});
 steps.each(function(){io.observe(this);});
@@ -637,7 +661,7 @@ function setTab(story){d3.select("#tab-story").attr("aria-selected",String(story
  // the story gets the studio's width for the map; Explore brings the studio back
  if(!d3.select("#page").classed("embed")){d3.select("#page").classed("nostudio",story);d3.select("#studiox").attr("aria-expanded",String(!story));layout();
   zoom.translateExtent(story?[[-w*.4,0],[w,h]]:[[0,0],[w,h]]);}
- if(story){stepNow=-1;const a=document.querySelector("aside");a.scrollTop=0;goStep(0);}else{NOTES=[];drawNotes();panel();}}
+ if(story){stepNow=-1;const a=document.querySelector("aside");a.scrollTop=0;goStep(0);}else{NOTES=[];drawNotes();panel();svg.interrupt().call(zoom.transform,d3.zoomIdentity);repaint();}}
 d3.select("#tab-story").on("click",()=>setTab(true));d3.select("#tab-explore").on("click",()=>setTab(false));
 d3.select("#toexplore").on("click",()=>setTab(false));
 if(location.hash.length>1)setTab(false);else setTab(true);
