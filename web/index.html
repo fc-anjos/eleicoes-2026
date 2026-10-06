@@ -8,6 +8,7 @@
 /*__CSS__*/
 </style></head><body><div class="page" id="page">
  <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
+  <div class="akey" id="akey" hidden><span class="ar r">←</span> towards Lula <span class="ar b">→</span> towards the Bolsonaro camp · <i id="akl"></i> = 10 points of margin</div>
   <div id="swipe" hidden><span class="yl" id="swl"></span><span class="yl r" id="swr"></span><div class="grip" role="slider" tabindex="0" aria-label="Divider between years" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4 2 8l4 4M10 4l4 4-4 4"/></svg></div></div>
   <button id="share" class="share" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4h10V9"/></svg>Share view</button>
   <div class="mapbar">
@@ -18,6 +19,7 @@
   <div id="story" role="tabpanel" aria-labelledby="tab-story">
    <div class="stot" id="stot" aria-live="polite"></div>
    <div id="steps"></div>
+   <nav class="prog" id="prog" aria-label="Story steps"></nav>
   </div>
   <div id="explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
   <div class="years" id="years" role="group" aria-label="Election year"></div>
@@ -37,11 +39,16 @@
    <div class="lbl"><span>Dot size</span><div id="mode" role="group" aria-label="Dot sizing"><button data-m="a" aria-pressed="true" title="Sized to the dots in view">Adaptive</button><button data-m="f" aria-pressed="false" title="Sized by zoom only">By zoom</button></div></div>
    <label><span>Votes per dot</span><input id="vpd" type="range" min="0" max="5" step="1" value="0"><output id="vpdv">250</output></label>
    <label><span>Scale</span><input id="rad" type="range" min="-1" max="1" step=".05" value="0"><output id="radv">1×</output></label>
+   <label class="sec sw80 swa"><span class="fn">Swing arrows, 2022→2026</span><input type="checkbox" id="arrows" class="vis"></label>
    </div>
    <h3>Abstention</h3>
    <div class="sec"><span class="fn">Didn't vote</span><div id="asplit" class="seg" role="group" aria-label="Abstention"><button data-v="all" aria-pressed="true">Together</button><button data-v="age" aria-pressed="false">By age</button></div></div>
    <label class="sec sw80"><span class="fn">Count people aged 80+</span><input type="checkbox" id="inc80" class="vis" checked></label>
    <p class="note">Voting is optional at 70+ and 16–17. 80+ is shown apart: the 2026 roll lists 297,977 voters aged 100 or older, and 99% of that group didn't vote in 2022, so the band includes people no longer living. Leaving 80+ out takes them out of the dots and rates. Ages for 2026 are estimated.</p>
+   <h3>Area</h3>
+   <div class="sec"><span class="fn">Add up</span><div id="area" class="seg" role="group" aria-label="Area"><button data-a="br" aria-pressed="true">Brazil</button><button data-a="uf" aria-pressed="false">State</button><button data-a="mu" aria-pressed="false">Municipality</button></div></div>
+   <select id="areauf" class="areasel" aria-label="State" hidden></select>
+   <p class="note" id="areamu" hidden></p>
    <h3>Around each polling place</h3>
    <div id="pfilters"></div>
    <h3>Municipality</h3>

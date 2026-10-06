@@ -231,7 +231,7 @@ def pack(dots):
 # Neighbourhood variables per polling place (Censo 2022 tracts within 1 km of it, from the elections-abstentions
 # project, data/places_studio.csv), packed as one byte each: [column, label, unit, source, encode, decode-in-page]
 PLACE_VARS = [
-    ("setor_renda_resp_media", "Household-head income", "brl", "Censo 2022 tracts within 1 km, monthly mean", "log", [100, 30000]),
+    ("setor_renda_resp_media", "Household-head income", "brl", "Censo 2022 tracts within 1 km, monthly mean; class A–E by minimum wages", "log", [100, 30000]),
     ("setor_pct_urbana", "Urban", "pct", "Censo 2022 tracts within 1 km", "lin", [0, 100]),
     ("setor_dens_hab_km2", "Density", "dens", "Censo 2022 tracts within 1 km, people per km²", "log", [1, 50000]),
     ("setor_pct_70p", "Aged 70+", "pct", "Censo 2022 tracts within 1 km", "lin", [0, 40]),
