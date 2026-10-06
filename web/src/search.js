@@ -2,6 +2,7 @@
 import * as d3 from "d3";
 import { M, MG } from "./data.js";
 import { fold } from "./format.js";
+import { t as tr } from "./i18n/index.js";
 import { select } from "./map/base.js";
 import { votesCast } from "./stats.js";
 
@@ -40,7 +41,7 @@ export function initSearch() {
       .attr("id", (d, i) => "q" + i)
       .attr("role", (d) => (d ? "option" : null))
       .attr("class", (d) => (d ? null : "none"))
-      .html((d) => (d ? `${d.label}<span>${d.uf}</span>` : "No municipality found"))
+      .html((d) => (d ? `${d.label}<span>${d.uf}</span>` : tr("explore.noMatch")))
       .on("mousedown", (e, d) => {
         if (d) {
           e.preventDefault();

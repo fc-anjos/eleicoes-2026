@@ -1,6 +1,7 @@
 // Where Brazil Voted: the page's entry point. Modules set up their parts of the page in this order; the data has
 // loaded by the time any of them runs (see data.js).
 import "./styles/main.css";
+import { applyDom } from "./i18n/index.js";
 import { initArrows } from "./map/arrows.js";
 import { initMap } from "./map/base.js";
 import { initCompare } from "./map/compare.js";
@@ -15,6 +16,7 @@ import { initHash } from "./view/hash.js";
 import { initHints } from "./view/hints.js";
 import { initShare } from "./view/share.js";
 
+applyDom(); // the page's copy first: the modules below fill in parts of it
 initHints();
 initStudio();
 initMap();

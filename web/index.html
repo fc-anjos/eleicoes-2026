@@ -13,11 +13,8 @@
   <body>
     <div class="page" id="page">
       <div id="wrap">
-        <canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
-        <div class="akey" id="akey" hidden>
-          <span class="ar r">←</span> towards Lula <span class="ar b">→</span> towards the Bolsonaro camp ·
-          <i id="akl"></i> = 10 points of margin
-        </div>
+        <canvas id="cv"></canvas><svg id="map" data-i18n-attr="aria-label:map.aria"></svg>
+        <div class="akey" id="akey" data-i18n-html="map.arrowKey" hidden></div>
         <div class="maphint" id="maphint" aria-hidden="true">
           <svg viewBox="0 0 40 40">
             <rect class="mh-frame" x="3" y="3" width="34" height="34" rx="6" />
@@ -26,7 +23,7 @@
                 d="M17 30v-9.5a2 2 0 0 1 4 0V25m0-3.5v-1a2 2 0 0 1 4 0V25m0-2.5a2 2 0 0 1 4 0V27a6 6 0 0 1-6 6h-2.5a6 6 0 0 1-4.8-2.4L12 27.5a2 2 0 0 1 3-2.6l2 2"
               />
             </g></svg
-          ><span><b class="mh-t">Drag</b> to pan<br /><b class="mh-z">Scroll</b> to zoom</span>
+          ><span data-i18n-html="map.hint"></span>
         </div>
         <div class="fbadge" id="fbadge" role="status" hidden></div>
         <div id="swipe" hidden>
@@ -35,48 +32,45 @@
             class="grip"
             role="slider"
             tabindex="0"
-            aria-label="Divider between years"
+            data-i18n-attr="aria-label:map.divider"
             aria-valuemin="0"
             aria-valuemax="100"
             aria-valuenow="50"
           >
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4 2 8l4 4M10 4l4 4-4 4" /></svg
-            ><span class="gl">Drag to compare</span>
+            ><span class="gl" data-i18n="map.dragCompare"></span>
           </div>
         </div>
         <button id="share" class="share" aria-haspopup="dialog">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4h10V9" /></svg>Share view
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4h10V9" /></svg
+          ><span data-i18n="map.share"></span>
         </button>
         <div class="mapbar">
-          <div class="key">
-            <span class="k-dot"></span><b>1 dot = <span class="vpd"></span> votes</b><br />Votes placed around their
-            polling place<br /><span class="hint">Scroll to zoom · drag to pan</span>
-          </div>
-          <div class="credit">
-            Created by <b>Felipe dos Anjos</b><br /><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> ·
-            <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br />Data:
-            <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a>
-          </div>
+          <div class="key"><span class="k-dot"></span><span data-i18n-html="map.key"></span></div>
+          <div class="credit" data-i18n-html="map.credit"></div>
         </div>
       </div>
       <aside>
-        <div class="tabs" role="tablist" aria-label="Mode">
-          <button role="tab" id="tab-story" aria-selected="true" aria-controls="story">Story</button
-          ><button role="tab" id="tab-explore" aria-selected="false" aria-controls="explore">Explore</button>
+        <div class="tabs" role="tablist" data-i18n-attr="aria-label:tabs.aria">
+          <button role="tab" id="tab-story" aria-selected="true" aria-controls="story" data-i18n="tabs.story"></button
+          ><button
+            role="tab"
+            id="tab-explore"
+            aria-selected="false"
+            aria-controls="explore"
+            data-i18n="tabs.explore"
+          ></button>
         </div>
         <div id="story" role="tabpanel" aria-labelledby="tab-story">
           <div class="stot" id="stot" aria-live="polite"></div>
           <div id="steps"></div>
-          <nav class="prog" id="prog" aria-label="Story steps"></nav>
+          <nav class="prog" id="prog" data-i18n-attr="aria-label:story.steps"></nav>
         </div>
         <div id="explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
-          <div class="years" id="years" role="group" aria-label="Election year"></div>
+          <div class="years" id="years" role="group" data-i18n-attr="aria-label:explore.years"></div>
           <p class="eyebrow" id="date"></p>
-          <h1>Brazil's presidential election, first round</h1>
-          <p class="deck">
-            1 dot = <b><span class="vpd"></span> votes</b>, placed around the polling place where they were cast. Hover
-            a candidate to show only their votes; click a municipality to outline it.
-          </p>
+          <h1 data-i18n="explore.h1"></h1>
+          <p class="deck" data-i18n-html="explore.deck"></p>
           <div class="search">
             <svg viewBox="0 0 16 16" aria-hidden="true">
               <circle cx="7" cy="7" r="5" />
@@ -88,89 +82,88 @@
               aria-expanded="false"
               aria-controls="qlist"
               aria-autocomplete="list"
-              placeholder="Search a municipality"
+              data-i18n-attr="placeholder:explore.search"
               autocomplete="off"
             />
             <ul id="qlist" role="listbox" hidden></ul>
           </div>
           <div id="cands"></div>
           <p class="studio-note">
-            Toggle a row to hide it; click its swatch to change its colour.
-            <button id="reset" class="link">Reset</button>
+            <span data-i18n="explore.rowsNote"></span>
+            <button id="reset" class="link" data-i18n="explore.reset"></button>
           </p>
         </div>
       </aside>
-      <section class="studio" id="studio" aria-label="Studio">
+      <section class="studio" id="studio" data-i18n-attr="aria-label:studio.aria">
         <div class="sh">
-          <button id="studiox" aria-expanded="true" aria-controls="studiob" title="Hide the studio">
+          <button id="studiox" aria-expanded="true" aria-controls="studiob" data-i18n-attr="title:studio.hide">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" /></svg>
           </button>
-          <h2>Studio</h2>
+          <h2 data-i18n="studio.title"></h2>
         </div>
         <div id="studiob">
-          <h3>Display</h3>
+          <h3 data-i18n="studio.display"></h3>
           <div class="disp">
             <div class="lbl">
-              <span>Dot size</span>
-              <div id="mode" role="group" aria-label="Dot sizing">
-                <button data-m="a" aria-pressed="true" title="Sized to the dots in view">Adaptive</button
-                ><button data-m="f" aria-pressed="false" title="Sized by zoom only">By zoom</button>
+              <span data-i18n="studio.dotSize"></span>
+              <div id="mode" role="group" data-i18n-attr="aria-label:studio.dotSizing">
+                <button
+                  data-m="a"
+                  aria-pressed="true"
+                  data-i18n-attr="title:studio.adaptiveTitle"
+                  data-i18n="studio.adaptive"
+                ></button
+                ><button
+                  data-m="f"
+                  aria-pressed="false"
+                  data-i18n-attr="title:studio.byZoomTitle"
+                  data-i18n="studio.byZoom"
+                ></button>
               </div>
             </div>
             <label
-              ><span>Votes per dot</span><input id="vpd" type="range" min="0" max="5" step="1" value="0" /><output
-                id="vpdv"
-                >250</output
-              ></label
+              ><span data-i18n="studio.votesPerDot"></span
+              ><input id="vpd" type="range" min="0" max="5" step="1" value="0" /><output id="vpdv">250</output></label
             >
             <label
-              ><span>Scale</span><input id="rad" type="range" min="-1" max="1" step=".05" value="0" /><output id="radv"
-                >1×</output
-              ></label
+              ><span data-i18n="studio.scale"></span
+              ><input id="rad" type="range" min="-1" max="1" step=".05" value="0" /><output id="radv">1×</output></label
             >
             <label class="sec sw80 swa"
-              ><span class="fn">Swing arrows, 2022→2026</span><input type="checkbox" id="arrows" class="vis"
+              ><span class="fn" data-i18n="studio.arrows"></span><input type="checkbox" id="arrows" class="vis"
             /></label>
           </div>
-          <h3>Abstention</h3>
+          <h3 data-i18n="studio.abstention"></h3>
           <div class="sec">
-            <span class="fn">Didn't vote</span>
-            <div id="asplit" class="seg" role="group" aria-label="Abstention">
-              <button data-v="all" aria-pressed="true">Together</button
-              ><button data-v="age" aria-pressed="false">By age</button>
+            <span class="fn" data-i18n="cats.didntVote"></span>
+            <div id="asplit" class="seg" role="group" data-i18n-attr="aria-label:studio.abstention">
+              <button data-v="all" aria-pressed="true" data-i18n="studio.together"></button
+              ><button data-v="age" aria-pressed="false" data-i18n="studio.byAge"></button>
             </div>
           </div>
           <label class="sec sw80"
-            ><span class="fn">Count people aged 80+</span><input type="checkbox" id="inc80" class="vis" checked
+            ><span class="fn" data-i18n="studio.count80"></span><input type="checkbox" id="inc80" class="vis" checked
           /></label>
-          <p class="note">
-            Voting is optional at 70+ and 16–17. 80+ is shown apart: the 2026 roll lists 297,977 voters aged 100 or
-            older, and 99% of that group didn't vote in 2022, so the band includes people no longer living. Leaving 80+
-            out takes them out of the dots and rates. Ages for 2026 are estimated.
-          </p>
-          <h3>Area</h3>
+          <p class="note" data-i18n="studio.note80"></p>
+          <h3 data-i18n="studio.area"></h3>
           <div class="sec">
-            <span class="fn">Add up</span>
-            <div id="area" class="seg" role="group" aria-label="Area">
-              <button data-a="br" aria-pressed="true">Brazil</button
-              ><button data-a="uf" aria-pressed="false">State</button
-              ><button data-a="mu" aria-pressed="false">Municipality</button>
+            <span class="fn" data-i18n="studio.addUp"></span>
+            <div id="area" class="seg" role="group" data-i18n-attr="aria-label:studio.area">
+              <button data-a="br" aria-pressed="true" data-i18n="studio.brazil"></button
+              ><button data-a="uf" aria-pressed="false" data-i18n="studio.state"></button
+              ><button data-a="mu" aria-pressed="false" data-i18n="studio.municipality"></button>
             </div>
           </div>
-          <select id="areauf" class="areasel" aria-label="State" hidden></select>
+          <select id="areauf" class="areasel" data-i18n-attr="aria-label:studio.state" hidden></select>
           <p class="note" id="areamu" hidden></p>
-          <h3>Around each polling place</h3>
+          <h3 data-i18n="studio.aroundPlace"></h3>
           <div id="pfilters"></div>
-          <h3>Municipality</h3>
+          <h3 data-i18n="studio.municipalHead"></h3>
           <div id="filters"></div>
           <div class="fstat">
-            <span id="fcount"></span><button id="fclear" class="link" hidden>Clear filters</button>
+            <span id="fcount"></span><button id="fclear" class="link" data-i18n="studio.clear" hidden></button>
           </div>
-          <p class="note">
-            Ranges move by number of municipalities. Totals add up the municipalities that pass; rates in small places
-            swing widely. Every filter describes places, not voters: a municipality that is 40% Evangelical and voted
-            Flávio doesn't show how Evangelicals voted.
-          </p>
+          <p class="note" data-i18n="studio.filtersNote"></p>
         </div>
       </section>
     </div>
@@ -178,21 +171,18 @@
     <dialog id="sharedlg" aria-labelledby="sharet">
       <form method="dialog" class="sd">
         <div class="sdh">
-          <h2 id="sharet">Share this view</h2>
-          <button id="shareclose" type="button" class="x" aria-label="Close">×</button>
+          <h2 id="sharet" data-i18n="share.title"></h2>
+          <button id="shareclose" type="button" class="x" data-i18n-attr="aria-label:share.close">×</button>
         </div>
-        <p>The link opens the map exactly as you see it: year, place, zoom, filters, colours and settings.</p>
+        <p data-i18n="share.body"></p>
         <div class="sdr">
-          <input id="shareurl" type="text" readonly aria-label="Link to this view" /><button
+          <input id="shareurl" type="text" readonly data-i18n-attr="aria-label:share.link" /><button
             id="sharecopy"
             type="button"
-          >
-            Copy
-          </button>
+            data-i18n="share.copy"
+          ></button>
         </div>
-        <label class="sde"
-          ><input type="checkbox" id="shareembed" /> Map only, for embedding (hides the side panels)</label
-        >
+        <label class="sde"><input type="checkbox" id="shareembed" /> <span data-i18n="share.embed"></span></label>
       </form>
     </dialog>
   </body>

@@ -1,5 +1,6 @@
 // Share: a dialog with this view's link (optionally map only, for embedding) and a copy button
 import * as d3 from "d3";
+import { t } from "../i18n/index.js";
 import { stateHash } from "./hash.js";
 
 export function initShare() {
@@ -8,7 +9,7 @@ export function initShare() {
     copy = d3.select("#sharecopy");
   const refresh = () => {
     surl.value = location.href.split("#")[0] + "#" + stateHash(document.getElementById("shareembed").checked);
-    copy.text("Copy");
+    copy.text(t("share.copy"));
   };
   d3.select("#share").on("click", () => {
     refresh();
@@ -29,7 +30,7 @@ export function initShare() {
         /* the reader copies it by hand */
       }
     }
-    copy.text(ok ? "Copied" : "Select and copy");
+    copy.text(t(ok ? "share.copied" : "share.manual"));
   });
   d3.select("#shareclose").on("click", () => dlg.close());
   dlg.addEventListener("click", (e) => {

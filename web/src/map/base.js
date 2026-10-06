@@ -5,7 +5,8 @@ import { M, MG, SG, YEARS } from "../data.js";
 import { project } from "../dots.js";
 import { PASS } from "../filters/filter.js";
 import { fmt, pct } from "../format.js";
-import { A8, AO, S, otherYear } from "../state.js";
+import { t } from "../i18n/index.js";
+import { A8, AO, S, candName, otherYear } from "../state.js";
 import { tally } from "../stats.js";
 import { hintDone } from "../view/hints.js";
 import { saveSoon } from "../view/hash.js";
@@ -52,16 +53,21 @@ function showTip(e, f) {
       top
         .map((i) =>
           line(
-            `<span>${YEARS[YEAR].cands.find((c) => c.i === i).n}</span>`,
+            `<span>${candName(YEARS[YEAR].cands.find((c) => c.i === i))}</span>`,
             pct(a.d.c[i], a.valid),
             o && has(oy, i) ? pct(o.d.c[i], o.valid) : "–",
           ),
         )
         .join("") +
-      line("<span>Didn't vote</span>", pct(a.ab, a.all), o ? pct(o.ab, o.all) : "–", "l a") +
-      line('<span class="sub">of whom optional</span>', pct(a.d.c[AO], a.ab), o ? pct(o.d.c[AO], o.ab) : "–") +
-      line('<span class="sub">of whom 80+</span>', pct(a.d.c[A8], a.ab), o ? pct(o.d.c[A8], o.ab) : "–") +
-      `<div class="t">${fmt(a.valid)} valid votes in ${YEAR}${PASS[MG.features.indexOf(f)] ? "" : " · outside the filters"}</div>`,
+      line(`<span>${t("cats.didntVote")}</span>`, pct(a.ab, a.all), o ? pct(o.ab, o.all) : "–", "l a") +
+      line(
+        `<span class="sub">${t("tip.ofWhomOptional")}</span>`,
+        pct(a.d.c[AO], a.ab),
+        o ? pct(o.d.c[AO], o.ab) : "–",
+      ) +
+      line(`<span class="sub">${t("tip.ofWhom80")}</span>`, pct(a.d.c[A8], a.ab), o ? pct(o.d.c[A8], o.ab) : "–") +
+      `<div class="t">${t("tip.validVotes", { n: fmt(a.valid), year: YEAR })}` +
+      `${PASS[MG.features.indexOf(f)] ? "" : t("tip.outside")}</div>`,
   );
 }
 

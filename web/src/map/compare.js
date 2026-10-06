@@ -6,6 +6,7 @@ import { refilter } from "../filters/filter.js";
 import { VARS } from "../filters/vars.js";
 import { panelIfShown, setFocus } from "../panel/results.js";
 import { requantile } from "../panel/studio.js";
+import { t } from "../i18n/index.js";
 import { S, YS } from "../state.js";
 import { repaint } from "./render.js";
 
@@ -50,7 +51,7 @@ export function initCompare() {
     .selectAll("button")
     .data([...YS, "cmp"])
     .join("button")
-    .text((y) => (y === "cmp" ? "Compare" : y))
+    .text((y) => (y === "cmp" ? t("map.compare") : y))
     .attr("aria-pressed", (y) => String(y === S.YEAR))
     .on("click", (e, y) => setMode(y));
   d3.select("#swl").text(YS[1]);

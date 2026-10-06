@@ -17,7 +17,8 @@ pipeline/              Python data pipeline (run as modules from the repo root)
 web/                   the page (Vite root)
   index.html           markup
   src/main.js          entry point: sets up each part of the page in order
-  src/data.js          loads map.json; story/story.json holds the story's steps
+  src/data.js          loads map.json; story/story.json holds the story's steps (views, charts, note positions)
+  src/i18n/            every string the reader sees (en.json) and t(), the lookup the modules use
   src/state.js         shared view state (year, filters, focus…), colour categories and their colours
   src/format.js, stats.js, totals.js, dots.js       formatting, per-municipality figures, totals, packed dots
   src/filters/         filter variables and the filter itself
@@ -30,6 +31,13 @@ data/                  inputs (committed; data/raw/ is not)
   br-mun.geojson, br-states.geojson   IBGE outlines
 tests/smoke.mjs        opens the built page in headless Chromium and checks each mode draws
 ```
+
+## Translating
+
+All copy lives in `web/src/i18n/en.json`: the page's labels, the story's text by step id (`story.steps.<id>`), chart
+titles and the filter variables' names. To add a language, copy it to `web/src/i18n/xx.json` (e.g. `pt.json`),
+translate the values and open the page with `?lang=xx`. Keys left out fall back to English; `{name}` placeholders
+must stay. Numbers follow the locale.
 
 ## Building
 

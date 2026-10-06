@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { CATS, YEARS } from "./data.js";
+import { t, tOr } from "./i18n/index.js";
 
 export const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
@@ -13,6 +14,9 @@ export const K = CATS.length,
   A8 = K - 1,
   YS = Object.keys(YEARS).sort().reverse();
 export const nameOf = (y, k) => YEARS[y].names[k] || k;
+// labels from the data that the locale may override: "Others", and each election's date
+export const candName = (c) => (c.k ? c.n : t("cats.others"));
+export const dateOf = (y) => tOr(`years.${y}.date`, YEARS[y].date);
 export const CI = (k) => CATS.findIndex((c) => c.k === k);
 export const catOf = (k) => CATS.findIndex((c) => (c.k || "others") === k);
 export const otherYear = (y) => YS.find((v) => v !== y);

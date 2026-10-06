@@ -3,9 +3,10 @@
 // them. "Others" stays last. Each row also shows its change since the other year.
 import * as d3 from "d3";
 import { YEARS } from "../data.js";
-import { fmt, hum } from "../format.js";
+import { fmt, hum, pctN, signed } from "../format.js";
+import { t } from "../i18n/index.js";
 import { repaint } from "../map/render.js";
-import { A8, AB, AO, COLS, HID, S, otherYear, packCols, store } from "../state.js";
+import { A8, AB, AO, COLS, HID, S, candName, dateOf, otherYear, packCols, store } from "../state.js";
 import { storyTotals } from "../story/story.js";
 import { figures, natFig } from "../totals.js";
 
@@ -34,7 +35,7 @@ export function panel() {
       N = natFig(S.YEAR);
     fc.append("span")
       .attr("class", "scope")
-      .text(` · ${hum(F.all)} on the roll, ${Math.round((100 * F.all) / N.all)}% of Brazil`);
+      .text(t("panel.scope", { n: hum(F.all), p: Math.round((100 * F.all) / N.all) }));
   }
 }
 
@@ -45,7 +46,7 @@ function drawRows() {
     oy = otherYear(YEAR),
     F = figures(YEAR),
     G = figures(oy);
-  d3.select("#date").text(Y.date);
+  d3.select("#date").text(dateOf(YEAR));
   list.selectAll(".cand").remove();
   const has = (y, i) => YEARS[y].cands.some((c) => c.i === i);
   const ar = (v, i, n, unit, extra) => ({
@@ -60,43 +61,36 @@ function drawRows() {
   });
   const abRows = SPLITA
     ? [
-        ar(F.c[AB], AB, "Didn't vote, had to", "people aged 18–69 on the roll didn't vote"),
+        ar(F.c[AB], AB, t("cats.didntVoteHad"), t("panel.abHad")),
         ar(
           F.c[AO],
           AO,
-          "Didn't vote, optional",
-          "people aged 70–79 or 16–17 didn't vote",
-          YEAR === "2026" ? "Age split estimated for 2026" : "",
+          t("cats.didntVoteOptional"),
+          t("panel.abOptional"),
+          YEAR === "2026" ? t("panel.estimated2026") : "",
         ),
         ...(INC80
           ? [
               ar(
                 F.c[A8],
                 A8,
-                "Didn't vote, 80+",
-                "people aged 80+ didn't vote",
-                "Includes people likely no longer living who are still on the roll" +
-                  (YEAR === "2026" ? "; estimated for 2026" : ""),
+                t("cats.didntVote80"),
+                t("panel.ab80"),
+                t("panel.note80") + (YEAR === "2026" ? t("panel.note80est") : ""),
               ),
             ]
           : []),
       ]
-    : [
-        ar(
-          F.ab,
-          AB,
-          "Didn't vote",
-          INC80 ? "people on the roll didn't vote" : "people on the roll under 80 didn't vote",
-        ),
-      ];
+    : [ar(F.ab, AB, t("cats.didntVote"), t(INC80 ? "panel.ab" : "panel.abUnder80"))];
   const rows = [
     ...abRows,
     ...Y.cands.map((c) => ({
       ...c,
+      n: candName(c),
       v: F.c[c.i],
       share: F.c[c.i] / F.valid,
       prev: has(oy, c.i) ? G.c[c.i] / G.valid : null,
-      unit: "votes",
+      unit: t("panel.votes"),
     })),
   ].sort((a, b) => (a.k === "") - (b.k === "") || b.v - a.v);
   rows.forEach((c) => {
@@ -113,7 +107,7 @@ function drawRows() {
       .attr("type", "checkbox")
       .attr("class", "vis")
       .property("checked", !HID[i])
-      .attr("aria-label", `Show ${c.n}`)
+      .attr("aria-label", t("panel.show", { name: c.n }))
       .on("change", (e) => {
         HID[i] = e.target.checked ? 0 : 1;
         r.classed("off", !!HID[i]);
@@ -125,10 +119,10 @@ function drawRows() {
       .attr("class", "body")
       .attr("aria-pressed", String(S.focus === i));
     const d = c.prev == null ? "" : (c.share - c.prev) * 100,
-      ds = d === "" ? "" : `<span class="dl">${d >= 0 ? "+" : "−"}${Math.abs(d).toFixed(1)} pp vs ${oy}</span>`;
+      ds = d === "" ? "" : `<span class="dl">${t("panel.vs", { d: signed(d), year: oy })}</span>`;
     b.append("div")
       .attr("class", "row")
-      .html(`<span class="nm">${c.n}</span><span class="pc">${(100 * c.share).toFixed(1)}%</span>`);
+      .html(`<span class="nm">${c.n}</span><span class="pc">${pctN(100 * c.share)}</span>`);
     b.append("div")
       .attr("class", "vt")
       .html(`${fmt(c.v)} ${c.unit}${ds}`);
@@ -141,7 +135,7 @@ function drawRows() {
       .attr("type", "color")
       .attr("class", "col")
       .property("value", COLS[i])
-      .attr("aria-label", `Colour for ${c.n}`)
+      .attr("aria-label", t("panel.colour", { name: c.n }))
       .on("input", (e) => {
         COLS[i] = e.target.value;
         r.style("--c", COLS[i]);

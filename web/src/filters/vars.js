@@ -2,6 +2,7 @@
 // computed here: the change in Lula's share, the abstention rate in the year shown and its change since the other.
 import * as d3 from "d3";
 import { M, MG, PLACES, STUDIO } from "../data.js";
+import { tOr } from "../i18n/index.js";
 import { S, YS } from "../state.js";
 import { abRate, lulaShift } from "../stats.js";
 
@@ -30,22 +31,16 @@ const PVARS = PLACES.vars.map((v, j) => {
   };
 });
 
+// names and sources come from the locale (i18n "vars"), falling back to the data's own English
+const named = (v) => ({ ...v, n: tOr(`vars.${v.k}.n`, v.n), src: tOr(`vars.${v.k}.src`, v.src) });
 export const VARS = [
   ...PVARS,
   ...STUDIO.map((v, j) => ({ ...v, get: (m) => (m.x ? m.x[j] : null) })),
-  {
-    k: "dlula",
-    n: "Change in Lula's share",
-    u: "pp",
-    src: "TSE, 2026 minus 2022, share of valid votes",
-    get: (m) => lulaShift(m),
-  },
-  { k: "abst", n: "Abstention rate", u: "pct", src: "TSE, year shown", get: (m) => abRate(S.YEAR, m), dyn: true },
+  { k: "dlula", u: "pp", get: (m) => lulaShift(m) },
+  { k: "abst", u: "pct", get: (m) => abRate(S.YEAR, m), dyn: true },
   {
     k: "dabst",
-    n: "Change in abstention",
     u: "pp",
-    src: "TSE, year shown vs the other",
     get: (m) => {
       const a = abRate(YS[0], m),
         b = abRate(YS[1], m);
@@ -53,7 +48,7 @@ export const VARS = [
     },
     dyn: true,
   },
-];
+].map(named);
 
 // sliders move by municipality count (0–100 = quantiles of the values): income and population are very skewed
 export function quantiles(v) {

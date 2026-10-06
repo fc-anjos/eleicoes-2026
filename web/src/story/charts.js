@@ -4,16 +4,17 @@
 import * as d3 from "d3";
 import { M, MG } from "../data.js";
 import { VARS } from "../filters/vars.js";
-import { signed } from "../format.js";
+import { pctN, signed } from "../format.js";
+import { t } from "../i18n/index.js";
 import { CI, COLS, YS, css } from "../state.js";
 import { tally } from "../stats.js";
 
 const REGION = {
-  ...Object.fromEntries(["AC", "AM", "AP", "PA", "RO", "RR", "TO"].map((u) => [u, "North"])),
-  ...Object.fromEntries(["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"].map((u) => [u, "Northeast"])),
-  ...Object.fromEntries(["DF", "GO", "MS", "MT"].map((u) => [u, "Centre-West"])),
-  ...Object.fromEntries(["ES", "MG", "RJ", "SP"].map((u) => [u, "Southeast"])),
-  ...Object.fromEntries(["PR", "RS", "SC"].map((u) => [u, "South"])),
+  ...Object.fromEntries(["AC", "AM", "AP", "PA", "RO", "RR", "TO"].map((u) => [u, "N"])),
+  ...Object.fromEntries(["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"].map((u) => [u, "NE"])),
+  ...Object.fromEntries(["DF", "GO", "MS", "MT"].map((u) => [u, "CW"])),
+  ...Object.fromEntries(["ES", "MG", "RJ", "SP"].map((u) => [u, "SE"])),
+  ...Object.fromEntries(["PR", "RS", "SC"].map((u) => [u, "S"])),
 };
 // state capitals, by IBGE code
 const CAPITALS = new Set(
@@ -23,7 +24,7 @@ const CAPITALS = new Set(
   ).split(" "),
 );
 
-// spec.by: "region", "capital", or a variable key with spec.cuts between groups
+// spec.by: "region" (spec.keys: region codes), "capital", or a variable key with spec.cuts between groups
 function groupShares(spec) {
   const groups = new Map(),
     add = (key, m) => {
@@ -56,7 +57,7 @@ function groupShares(spec) {
     const i = spec.cuts.findIndex((c) => x < c);
     add(i < 0 ? spec.cuts.length : i, m);
   }
-  const keys = spec.by === "region" ? spec.labels : spec.labels.map((_, i) => i);
+  const keys = spec.by === "region" ? spec.keys : spec.labels.map((_, i) => i);
   return keys.map((k, i) => {
     const g = groups.get(k) || { a: [0, 1], b: [0, 1] };
     return { label: spec.labels[i], a: (100 * g.a[0]) / g.a[1], b: (100 * g.b[0]) / g.b[1] };
@@ -131,7 +132,7 @@ export function chart(el, spec) {
     .attr("class", "tk")
     .attr("x", x)
     .attr("y", top - 8)
-    .text((d) => d + "%");
+    .text((d) => pctN(d, 0));
   const r = s
     .append("g")
     .selectAll("g")
@@ -153,7 +154,7 @@ export function chart(el, spec) {
   d3.select(el)
     .append("p")
     .attr("class", "ck lula")
-    .html(`<i class="was"></i>${YS[1]} → ${YS[0]} · Lula's share of valid votes`);
+    .html(`<i class="was"></i>${t("charts.lulaLegend", { from: YS[1], to: YS[0] })}`);
 }
 
 // a small column chart for a series given in the step (e.g. abstention by election), the last column highlighted
@@ -188,7 +189,7 @@ function seriesChart(el, spec) {
     .attr("x", x.bandwidth() / 2)
     .attr("y", (p) => y(p[1]) - 4)
     .attr("text-anchor", "middle")
-    .text((p) => p[1].toFixed(1) + "%");
+    .text((p) => pctN(p[1]));
   g.append("text")
     .attr("class", "tk")
     .attr("x", x.bandwidth() / 2)

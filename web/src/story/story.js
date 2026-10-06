@@ -5,7 +5,8 @@ import * as d3 from "d3";
 import { CATS, M, STORY } from "../data.js";
 import { computeFilter, describeFilter } from "../filters/filter.js";
 import { VARS } from "../filters/vars.js";
-import { hum } from "../format.js";
+import { hum, pctN, signed } from "../format.js";
+import { t } from "../i18n/index.js";
 import { layout, panLimits, svg, zoom } from "../map/base.js";
 import { setNotes } from "../map/notes.js";
 import { repaint } from "../map/render.js";
@@ -18,6 +19,9 @@ import { chart } from "./charts.js";
 import { findStep } from "./find.js";
 
 const viewOf = (i) => STORY[i].view;
+// a step's copy (i18n story.steps.<id>): headline h, text t, note labels in order, chart title and labels
+const copyOf = (d) => t(`story.steps.${d.id}`);
+const notesOf = (i) => (STORY[i].notes || []).map((n, j) => ({ ...n, t: copyOf(STORY[i]).notes[j] }));
 let steps, prog;
 let stepNow = -1;
 
@@ -32,7 +36,7 @@ function goStep(i) {
     requestAnimationFrame(() => {
       if (stepNow !== i) return;
       restoring(() => applyState(viewOf(i), true));
-      setNotes(STORY[i].notes);
+      setNotes(notesOf(i));
       saveSoon();
     }),
   );
@@ -76,30 +80,31 @@ export function storyTotals() {
     c13 = CATS.findIndex((c) => c.k === "13");
   const row = (i, n, v, sh, pv, nv) => {
     const d = (sh - pv) * 100,
-      change = pv == null ? "" : (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(1) + " vs " + oy,
-      ofAll = N ? ` <s>${Math.round((100 * v) / nv)}% of all</s>` : "";
+      change = pv == null ? "" : t("story.vs", { d: signed(d), year: oy }),
+      ofAll = N ? ` <s>${t("story.ofAll", { v: Math.round((100 * v) / nv) })}</s>` : "";
     return (
       `<div class="sr${i === AB ? " a" : ""}" style="--c:${COLS[i]}"><i></i><span>${n}</span>` +
-      `<b>${(100 * sh).toFixed(1)}%</b><u>${hum(v)}${ofAll}</u><em>${change}</em></div>`
+      `<b>${pctN(100 * sh)}</b><u>${hum(v)}${ofAll}</u><em>${change}</em></div>`
     );
   };
-  const where =
-    INSET && INSET.size === 1
-      ? " · " + M[[...INSET][0]].n + (PLACEF ? ", lit polling places" : "")
-      : FILTERED
+  const one = INSET && INSET.size === 1 ? M[[...INSET][0]].n : null,
+    where =
+      " · " +
+      (one
         ? PLACEF
-          ? " · lit polling places"
-          : " · lit municipalities"
-        : " · Brazil";
+          ? t("story.inLitPlaces", { place: one })
+          : one
+        : FILTERED
+          ? t(PLACEF ? "story.litPlaces" : "story.litMunis")
+          : t("story.brazil"));
   d3.select("#stot").html(
-    `<div class="sl">${COMPARE ? `${YS[0]} totals` : YEAR}${where}</div>` +
+    `<div class="sl">${COMPARE ? t("story.totals", { year: YS[0] }) : YEAR}${where}</div>` +
       (N
-        ? `<div class="scope"><b>${hum(F.all)}</b> people on the roll here, ` +
-          `<b>${Math.round((100 * F.all) / N.all)}%</b> of Brazil's ${hum(N.all)}</div>`
+        ? `<div class="scope">${t("story.scope", { n: hum(F.all), p: Math.round((100 * F.all) / N.all), all: hum(N.all) })}</div>`
         : "") +
       row(c22, nameOf(YEAR, "22"), F.c[c22], F.c[c22] / F.valid, G.c[c22] / G.valid, N && N.c[c22]) +
-      row(c13, "Lula", F.c[c13], F.c[c13] / F.valid, G.c[c13] / G.valid, N && N.c[c13]) +
-      row(AB, "Didn't vote", F.ab, F.ab / F.all, G.ab / G.all, N && N.ab) +
+      row(c13, t("cats.lula"), F.c[c13], F.c[c13] / F.valid, G.c[c13] / G.valid, N && N.c[c13]) +
+      row(AB, t("cats.didntVote"), F.ab, F.ab / F.all, G.ab / G.all, N && N.ab) +
       (N
         ? `<div class="fdesc">${describeFilter()
             .map((x) => `<span>${x}</span>`)
@@ -141,24 +146,24 @@ export function initStory() {
     .data(STORY)
     .join("section")
     .attr("class", "step")
-    .html((d) => `<h2>${d.h}</h2>${d.t}`)
+    .html((d) => `<h2>${copyOf(d).h}</h2>${copyOf(d).t}`)
     .each(function (d) {
-      if (d.chart) chart(this, d.chart);
+      if (d.chart) chart(this, { ...d.chart, ...copyOf(d).chart });
       if (d.find) findStep(this);
     });
   steps
     .filter((d, i) => i === 0)
     .append("p")
     .attr("class", "cue")
-    .html('<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Scroll to read the story');
+    .html('<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>' + t("story.cue"));
   const aside = document.querySelector("aside");
   prog = d3
     .select("#prog")
     .selectAll("button")
     .data(STORY)
     .join("button")
-    .attr("aria-label", (d) => d.h)
-    .attr("title", (d) => d.h)
+    .attr("aria-label", (d) => copyOf(d).h)
+    .attr("title", (d) => copyOf(d).h)
     .on("click", (e, d) => {
       const i = STORY.indexOf(d);
       aside.scrollTo({ top: steps.nodes()[i].offsetTop - aside.clientHeight * 0.4, behavior: "smooth" });

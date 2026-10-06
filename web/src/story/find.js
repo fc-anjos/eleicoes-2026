@@ -4,6 +4,8 @@ import * as d3 from "d3";
 import { CATS, M, YEARS } from "../data.js";
 import { MAXK, path, proj, select } from "../map/base.js";
 import { AB, COLS, OT, S, YS, nameOf } from "../state.js";
+import { num, pctN, signed } from "../format.js";
+import { t } from "../i18n/index.js";
 import { find } from "../search.js";
 import { changeArrows } from "./charts.js";
 import { tally } from "../stats.js";
@@ -23,15 +25,15 @@ function placeRows(m) {
     sh = (y, i) => (t[y] ? (100 * t[y].d.c[i]) / t[y].valid : null);
   const rows = CAMPS.map((k) => ({
     i: ci(k),
-    label: k === "22" ? "Bolsonaro camp" : "Lula",
+    label: t(k === "22" ? "cats.bolsonaroCamp" : "cats.lula"),
     a: sh(old, ci(k)),
     b: sh(now, ci(k)),
     n: pct(N, ci(k)),
   }));
   const rest = (y) => (t[y] ? 100 - rows[0][y === old ? "a" : "b"] - rows[1][y === old ? "a" : "b"] : null);
-  rows.push({ i: OT, label: "Everyone else", a: rest(old), b: rest(now), n: 100 - rows[0].n - rows[1].n });
+  rows.push({ i: OT, label: t("cats.everyoneElse"), a: rest(old), b: rest(now), n: 100 - rows[0].n - rows[1].n });
   const ab = (y) => (t[y] ? (100 * t[y].ab) / t[y].all : null);
-  rows.push({ i: AB, label: "Didn't vote", a: ab(old), b: ab(now), n: (100 * N.ab) / N.all });
+  rows.push({ i: AB, label: t("cats.didntVote"), a: ab(old), b: ab(now), n: (100 * N.ab) / N.all });
   // everyone else, by name: the candidates with a colour of their own that year, then the rest as "others"
   const field = (y) => {
     if (!t[y]) return [];
@@ -39,7 +41,7 @@ function placeRows(m) {
       .filter((c) => c.k && !CAMPS.includes(c.k) && c.i < OT)
       .map((c) => ({ label: nameOf(y, c.k), v: sh(y, c.i) }))
       .sort((p, q) => q.v - p.v);
-    return [...named, { label: "others", v: sh(y, OT) }];
+    return [...named, { label: t("find.others"), v: sh(y, OT) }];
   };
   return { rows, field: { [old]: field(old), [now]: field(now) } };
 }
@@ -70,7 +72,7 @@ function placeChart(el, title, rows) {
     .attr("class", "tk")
     .attr("x", x)
     .attr("y", top - 8)
-    .text((d) => d + "%");
+    .text((d) => pctN(d, 0));
   const r = s
     .append("g")
     .selectAll("g")
@@ -95,29 +97,40 @@ function placeChart(el, title, rows) {
     .attr("x", W)
     .attr("text-anchor", "end")
     .attr("y", 4)
-    .text((d) => (d.b == null ? "–" : d.a == null ? "new" : (d.b >= d.a ? "+" : "−") + Math.abs(d.b - d.a).toFixed(1)));
+    .text((d) => (d.b == null ? "–" : d.a == null ? t("charts.new") : signed(d.b - d.a)));
   d3.select(el)
     .append("p")
     .attr("class", "ck all")
-    .html(
-      `<i class="was"></i>${YS[1]} → ${YS[0]} <i class="nat"></i>Brazil ${YS[0]} · ` +
-        "share of valid votes; didn't vote: of the roll",
-    );
+    .html(`<i class="was"></i>${t("charts.placeLegend", { from: YS[1], to: YS[0] })}`);
 }
 
 // the card's sentence: the two camps, everyone else and abstention, here against the country
 function summary(label, rows) {
-  const ch = (r) => (r.a == null ? "" : ` (${r.b >= r.a ? "+" : "−"}${Math.abs(r.b - r.a).toFixed(1)})`),
+  const ch = (r) => (r.a == null ? "" : ` (${signed(r.b - r.a)})`),
     vs = (r) =>
-      Math.abs(r.b - r.n) < 0.5 ? "about the national" : r.b > r.n ? "above the national" : "below the national";
+      t(Math.abs(r.b - r.n) < 0.5 ? "find.aboutNational" : r.b > r.n ? "find.aboveNational" : "find.belowNational"),
+    f = (v) => num(v, 1);
   const [bol, lula, rest, ab] = rows;
   const [first, second] = bol.b > lula.b ? [bol, lula] : [lula, bol],
-    name = (r) => (r === bol ? "the Bolsonaro camp" : "Lula");
-  return (
-    `<p><b>${label}</b> in ${YS[0]}: ${name(first)} led ${name(second)}, ${first.b.toFixed(1)}%${ch(first)} to ` +
-    `${second.b.toFixed(1)}%${ch(second)}. Everyone else took ${rest.b.toFixed(1)}%${ch(rest)}, ${vs(rest)} ` +
-    `${rest.n.toFixed(1)}%. ${ab.b.toFixed(1)}% of the roll didn't vote${ch(ab)}, ${vs(ab)} ${ab.n.toFixed(1)}%.</p>`
-  );
+    name = (r) => t(r === bol ? "find.bolsonaroCamp" : "find.lula");
+  return t("find.summary", {
+    place: label,
+    year: YS[0],
+    first: name(first),
+    second: name(second),
+    a: f(first.b),
+    ca: ch(first),
+    b: f(second.b),
+    cb: ch(second),
+    rest: f(rest.b),
+    cr: ch(rest),
+    vsRest: vs(rest),
+    restN: f(rest.n),
+    ab: f(ab.b),
+    cab: ch(ab),
+    vsAb: vs(ab),
+    abN: f(ab.n),
+  });
 }
 
 // who "everyone else" was: different candidates each year, so listed, not compared
@@ -125,12 +138,12 @@ function fieldLine(el, field) {
   const list = (y) =>
     field[y]
       .filter((c) => c.v >= 0.05)
-      .map((c) => `${c.label} ${c.v.toFixed(1)}%`)
+      .map((c) => `${c.label} ${pctN(c.v)}`)
       .join(", ");
   d3.select(el)
     .append("p")
     .attr("class", "ck")
-    .html(`<b>Everyone else</b> · ${YS[0]}: ${list(YS[0])} · ${YS[1]}: ${list(YS[1])}`);
+    .html(t("find.fieldLine", { y0: YS[0], l0: list(YS[0]), y1: YS[1], l1: list(YS[1]) }));
 }
 
 export function findStep(el) {
@@ -138,8 +151,8 @@ export function findStep(el) {
   const inp = box
     .append("input")
     .attr("type", "text")
-    .attr("placeholder", "Type a municipality")
-    .attr("aria-label", "Find a municipality");
+    .attr("placeholder", t("find.placeholder"))
+    .attr("aria-label", t("find.aria"));
   const ul = box.append("ul").attr("class", "fl"),
     res = box.append("div").attr("class", "fres").attr("aria-live", "polite");
   inp.on("input", () => {
@@ -169,7 +182,7 @@ export function findStep(el) {
     select(d.f);
     const { rows, field } = placeRows(m);
     res.html(summary(d.label, rows));
-    placeChart(res.node(), `${d.label}, ${YS[1]} → ${YS[0]}`, rows);
+    placeChart(res.node(), t("find.title", { place: d.label, from: YS[1], to: YS[0] }), rows);
     fieldLine(res.node(), field);
   }
 }

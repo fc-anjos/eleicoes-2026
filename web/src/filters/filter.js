@@ -5,6 +5,7 @@ import * as d3 from "d3";
 import { M, MG, ORDER } from "../data.js";
 import { DOT } from "../dots.js";
 import { fmt, showVal } from "../format.js";
+import { t } from "../i18n/index.js";
 import { repaint } from "../map/render.js";
 import { panelIfShown } from "../panel/results.js";
 import { S, YS } from "../state.js";
@@ -40,8 +41,8 @@ export function describeFilter() {
       ks.length === 1
         ? M[ks[0]].n
         : ufs.size === 1 && ks.length === Object.keys(M).filter((k) => M[k].uf === [...ufs][0]).length
-          ? "State: " + [...ufs][0]
-          : fmt(ks.length) + " municipalities",
+          ? t("filters.state", { uf: [...ufs][0] })
+          : t("filters.nMunis", { n: fmt(ks.length) }),
     );
   }
   for (const v of VARS) {
@@ -54,7 +55,7 @@ export function describeFilter() {
     const nudge = v.k === "setor_renda_resp_media" ? 1 : 0;
     const range =
       a && b ? showVal(v, l) + " – " + showVal(v, h) : a ? "≥ " + showVal(v, l + nudge) : "≤ " + showVal(v, h - nudge);
-    const where = !v.place ? "" : v.at ? " (at polling place)" : " (around polling place)";
+    const where = !v.place ? "" : t(v.at ? "filters.atPlace" : "filters.aroundPlace");
     out.push(`${v.n}${where}: ${range}`);
   }
   return out;
@@ -64,7 +65,7 @@ function showFilter() {
   const d = describeFilter();
   d3.select("#fbadge")
     .property("hidden", !d.length)
-    .html(d.length ? `<b>Showing only</b> ${d.map((x) => `<span>${x}</span>`).join("")}` : "");
+    .html(d.length ? `<b>${t("filters.showingOnly")}</b> ${d.map((x) => `<span>${x}</span>`).join("")}` : "");
 }
 
 function showCount(label) {
@@ -122,10 +123,10 @@ export function computeFilter() {
     }
   }
   const label = !S.FILTERED
-    ? "All municipalities"
+    ? t("filters.all")
     : S.PLACEF
-      ? `${fmt(np)} of ${fmt(npt)} polling places`
-      : `${fmt(n)} of ${fmt(Object.keys(M).length)} municipalities`;
+      ? t("filters.places", { n: fmt(np), total: fmt(npt) })
+      : t("filters.munis", { n: fmt(n), total: fmt(Object.keys(M).length) });
   showCount(label);
   FCACHE.set(key, {
     pass: PASS.slice(),

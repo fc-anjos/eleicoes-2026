@@ -4,7 +4,8 @@ import * as d3 from "d3";
 import { CATS, M, VPD } from "../data.js";
 import { refilter } from "../filters/filter.js";
 import { VARS, hi_, isOn, lo_, quantiles, resetVar } from "../filters/vars.js";
-import { fmt, showVal } from "../format.js";
+import { fmt, num, showVal, unit } from "../format.js";
+import { t } from "../i18n/index.js";
 import { repaint } from "../map/render.js";
 import { A8, AB, AO, COLS, HID, K, S, css, packCols, store } from "../state.js";
 import { saveSoon } from "../view/hash.js";
@@ -66,7 +67,7 @@ function initFilters() {
       .attr("max", 100)
       .attr("step", 1)
       .attr("class", end)
-      .attr("aria-label", (v) => `${v.n}, ${end === "lo" ? "minimum" : "maximum"}`)
+      .attr("aria-label", (v) => t(end === "lo" ? "studio.min" : "studio.max", { name: v.n }))
       .property("value", (v) => v[end])
       .on("input", function (e, v) {
         v.vlo = v.vhi = null;
@@ -91,7 +92,7 @@ function initFilters() {
     });
     refilter();
   });
-  d3.select("#fcount").text("All municipalities");
+  d3.select("#fcount").text(t("filters.all"));
 }
 
 // Area: add up Brazil, one state or one municipality (the one selected on the map or by search). It limits the map
@@ -134,8 +135,7 @@ function initArea() {
     else if (a === "uf")
       setArea("uf", sel ? M[sel.properties.codarea].uf : d3.select("#areauf").property("value") || UFS[0]);
     else if (sel) setArea("mu", sel.properties.codarea);
-    else
-      d3.select("#areamu").property("hidden", false).text("Click a municipality on the map or search for one first.");
+    else d3.select("#areamu").property("hidden", false).text(t("studio.pickFirst"));
   });
   d3.select("#areauf").on("change", (e) => setArea("uf", e.target.value));
   drawArea();
@@ -162,7 +162,7 @@ function initDisplay() {
   d3.select("#rad").on("input", (e) => {
     const m = 2 ** +e.target.value;
     S.SIZE = m;
-    d3.select("#radv").text(m.toFixed(m < 1 ? 2 : 1).replace(/\.?0+$/, "") + "×");
+    d3.select("#radv").text(unit("times", num(m, m < 1 ? 2 : 1).replace(/[.,]?0+$/, "")));
     repaint();
   });
   d3.select("#reset").on("click", () => {
@@ -181,7 +181,7 @@ export function initStudio() {
   d3.select("#studiox").on("click", (e) => {
     const o = e.currentTarget.getAttribute("aria-expanded") !== "true";
     e.currentTarget.setAttribute("aria-expanded", o);
-    e.currentTarget.title = o ? "Hide the studio" : "Show the studio";
+    e.currentTarget.title = t(o ? "studio.hide" : "studio.show");
     d3.select("#page").classed("nostudio", !o);
     dispatchEvent(new Event("resize"));
   });
