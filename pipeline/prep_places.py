@@ -8,10 +8,10 @@ Inputs (TSE open data, unzipped into data/raw/, or data/raw/y2022/ for 2022):
   y2024/eleitorado_local_votacao_2024.csv  2024 coordinates (and, for 2022, 2026's): a fallback for places whose own are missing or wrong
                                            (matched on municipality, place number and name)
 Output: data/places_YYYY.json
-  {"nat": {key: votes}, "names": {key: TSE name}, "muns": {ibge_code: {"p": [[lon, lat, {key: votes}, alt], ...],
+  {"nat": {key: votes}, "names": {key: TSE name}, "muns": {ibge_code: {"p": [[lon, lat, {key: votes}, alt, id], ...],
    "u": {key: votes}, "bn": blank and null votes}}}
   Keys are candidate numbers, plus "A" for abstentions (people on the roll who didn't vote), which are placed at
-  their section's polling place like votes. alt is the fallback [lon, lat] (or null). "u" holds votes from places
+  their section's polling place like votes. alt is the fallback [lon, lat] (or null); id is "UF-municipality-zone-place" (TSE codes). "u" holds votes from places
   with no coordinates in either year. "nat" includes votes cast abroad; "muns" doesn't.
 """
 import csv, glob, json, sys
@@ -98,7 +98,7 @@ out = defaultdict(lambda: {"p": [], "u": {}, "bn": 0})
 for place, votes in place_votes.items():
     xy, alt = place_xy[place]; xy = xy or alt  # no coordinates of its own: use the fallback
     alt = [round(alt[0], 5), round(alt[1], 5)] if alt and alt != xy else None
-    out[ibge[place[:2]]]["p"].append([round(xy[0], 5), round(xy[1], 5), dict(votes), alt])
+    out[ibge[place[:2]]]["p"].append([round(xy[0], 5), round(xy[1], 5), dict(votes), alt, "%s-%d-%d-%d" % place])
 for code, votes in unplaced.items(): out[code]["u"] = dict(votes)
 for code, v in bn.items(): out[code]["bn"] = v
 json.dump({"nat": nat, "names": names, "muns": out}, open(f"data/places_{YEAR}.json", "w"), ensure_ascii=False, separators=(",", ":"))

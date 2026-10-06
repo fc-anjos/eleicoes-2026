@@ -9,6 +9,7 @@
 </style></head><body><div class="page" id="page">
  <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
   <div id="swipe" hidden><span class="yl" id="swl"></span><span class="yl r" id="swr"></span><div class="grip" role="slider" tabindex="0" aria-label="Divider between years" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4 2 8l4 4M10 4l4 4-4 4"/></svg></div></div>
+  <button id="share" class="share" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4h10V9"/></svg>Share view</button>
   <div class="mapbar">
    <div class="key"><span class="k-dot"></span><b>1 dot = <span class="vpd">__VPD__</span> votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
    <div class="credit">Created by <b>Felipe dos Anjos</b><br><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> · <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br>Data: <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a></div></div></div>
@@ -34,7 +35,9 @@
    <div class="sec"><span class="fn">Didn't vote</span><div id="asplit" class="seg" role="group" aria-label="Abstention"><button data-v="all" aria-pressed="true">Together</button><button data-v="age" aria-pressed="false">By age</button></div></div>
    <label class="sec sw80"><span class="fn">Count people aged 80+</span><input type="checkbox" id="inc80" class="vis" checked></label>
    <p class="note">Voting is optional at 70+ and 16–17. 80+ is shown apart: the 2026 roll lists 297,977 voters aged 100 or older, and 99% of that group didn't vote in 2022, so the band includes people no longer living. Leaving 80+ out takes them out of the dots and rates. Ages for 2026 are estimated.</p>
-   <h3>Filter places</h3>
+   <h3>Around each polling place</h3>
+   <div id="pfilters"></div>
+   <h3>Municipality</h3>
    <div id="filters"></div>
    <div class="fstat"><span id="fcount"></span><button id="fclear" class="link" hidden>Clear filters</button></div>
    <p class="note">Ranges move by number of municipalities. Totals add up the municipalities that pass; rates in small places swing widely. Every filter describes places, not voters: a municipality that is 40% Evangelical and voted Flávio doesn't show how Evangelicals voted.</p>
@@ -42,7 +45,13 @@
  </section>
 </div>
 <div id="tip"></div>
+<dialog id="sharedlg" aria-labelledby="sharet"><form method="dialog" class="sd">
+ <div class="sdh"><h2 id="sharet">Share this view</h2><button id="shareclose" type="button" class="x" aria-label="Close">×</button></div>
+ <p>The link opens the map exactly as you see it: year, place, zoom, filters, colours and settings.</p>
+ <div class="sdr"><input id="shareurl" type="text" readonly aria-label="Link to this view"><button id="sharecopy" type="button">Copy</button></div>
+ <label class="sde"><input type="checkbox" id="shareembed"> Map only, for embedding (hides the side panels)</label>
+</form></dialog>
 <script>
-const MG=__MGEO__, SG=__SGEO__, M=__MUNS__, CATS=__CATS__, YEARS=__YEARS__, ORDER=__ORDER__, STUDIO=__STUDIO__;
+const MG=__MGEO__, SG=__SGEO__, M=__MUNS__, CATS=__CATS__, YEARS=__YEARS__, ORDER=__ORDER__, STUDIO=__STUDIO__, PLACES=__PLACES__;
 /*__JS__*/
 </script></body></html>

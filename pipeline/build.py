@@ -145,9 +145,11 @@ def municipality_summaries(places, cats_y, studio):
 
 def make_dots(mgeo, places, cat, others, opt, order, n_ref):
     """Flat [lon*1000, lat*1000, category, ...] list (abstentions are dots too, at their polling place), grouped by
-    municipality so the page can filter whole municipalities, and the dot count of each, in `order` (indices into
-    mgeo's features). Municipalities come in a fixed random order and dots are shuffled within each, so no colour
-    systematically paints over another. opt(code) gives the age-band shares of the municipality's abstainers.
+    municipality (in `order`, indices into mgeo's features) and within it by polling place, so the page can filter
+    whole municipalities or single places. Returns (dots, groups per municipality, dots per group, each group's
+    polling place as (id, lon, lat), or None for votes spread over the municipality). Groups come in a fixed random
+    order and dots are shuffled within each, so no colour systematically paints over another. opt(code) gives the
+    age-band shares of the municipality's abstainers.
 
     Placement is stable across years (see geometry.cells): each municipality's lattice is seeded by its code and
     sized for n_ref[code] places, and each polling place lays its dots in a fixed order seeded by its location,
@@ -164,11 +166,12 @@ def make_dots(mgeo, places, cat, others, opt, order, n_ref):
         for k, v in votes.items(): cats[cat.get(k, others)] += v
         return [c for c, v in enumerate(cats) for _ in range(int(v // VPD) + (random.random() < v % VPD / VPD))]
 
-    dots, counts, spacing = [], [], []
+    dots, counts, gcnt, gplace, spacing = [], [], [], [], []
     stats = {"place": 0, "spread": 0, "reassigned_votes": 0, "dropped_far_places": 0, "used_2024": 0, "empty_cells": 0}
     for fi in order:
         f = mgeo["features"][fi]; code = f["properties"]["codarea"]
         if code not in places: counts.append(0); continue
+        ids = [p[4] for p in places[code]["p"]]
         E = edges(polygons(f["geometry"])); box = bbox(E)
         p_opt = opt(code)
         pl = [[*p[:2], split_abstention(dict(p[2]), p_opt), p[3]] for p in places[code]["p"]]
@@ -184,7 +187,7 @@ def make_dots(mgeo, places, cat, others, opt, order, n_ref):
             if not good:
                 for n, v in p[2].items(): spread[n] = spread.get(n, 0) + v
         stats["dropped_far_places"] += int((~ok).sum())
-        keep = [dict(p[2]) for p, good in zip(pl, ok) if good]; P = P[ok]
+        keep = [dict(p[2]) for p, good in zip(pl, ok) if good]; P = P[ok]; kid = [i for i, good in zip(ids, ok) if good]
         if keep and spread:  # reassign unplaceable votes to the known places, weighted by their votes
             w = np.array([sum(k.values()) for k in keep], float); w /= w.sum()
             for n, v in spread.items():
@@ -202,11 +205,16 @@ def make_dots(mgeo, places, cat, others, opt, order, n_ref):
         us = ndots(spread)  # no usable polling place at all: spread over the municipality
         upts = uniform(E, box, len(us), np.random.default_rng(int(code) + 1)) if us else np.zeros((0, 2))
         stats["place"] += len(owner); stats["spread"] += len(us)
-        mine = [[round(x * 1000), round(y * 1000), c] for (x, y), c in zip(np.vstack([pts, upts]), cs + us)]
-        random.shuffle(mine); counts.append(len(mine))
-        for d in mine: dots += d
+        allp = np.vstack([pts, upts]); grp = owner + [-1] * len(us); allc = cs + us
+        groups = {}
+        for (x, y), c, gi in zip(allp, allc, grp): groups.setdefault(gi, []).append([round(x * 1000), round(y * 1000), c])
+        gl = list(groups.items()); random.shuffle(gl); counts.append(len(gl))
+        for gi, mine in gl:
+            random.shuffle(mine); gcnt.append(len(mine))
+            gplace.append((kid[gi], float(P[gi][0]), float(P[gi][1])) if gi >= 0 else None)
+            for d in mine: dots += d
     print(stats, "lattice spacing km: median %.3f, p5 %.3f, p95 %.3f" % tuple(np.percentile(spacing, [50, 5, 95])))
-    return dots, counts
+    return dots, counts, gcnt, gplace
 
 
 def pack(dots):
@@ -218,6 +226,55 @@ def pack(dots):
     assert a[:, 0].max() - x0 < 65536 and a[:, 1].max() - y0 < 65536
     raw = (a[:, 0] - x0).astype("<u2").tobytes() + (a[:, 1] - y0).astype("<u2").tobytes() + a[:, 2].astype("u1").tobytes()
     return {"n": len(a), "x0": x0, "y0": y0, "b": base64.b64encode(raw).decode()}
+
+
+# Neighbourhood variables per polling place (Censo 2022 tracts within 1 km of it, from the elections-abstentions
+# project, data/places_studio.csv), packed as one byte each: [column, label, unit, source, encode, decode-in-page]
+PLACE_VARS = [
+    ("setor_renda_resp_media", "Household-head income", "brl", "Censo 2022 tracts within 1 km, monthly mean", "log", [100, 30000]),
+    ("setor_pct_urbana", "Urban", "pct", "Censo 2022 tracts within 1 km", "lin", [0, 100]),
+    ("setor_dens_hab_km2", "Density", "dens", "Censo 2022 tracts within 1 km, people per km²", "log", [1, 50000]),
+    ("setor_pct_70p", "Aged 70+", "pct", "Censo 2022 tracts within 1 km", "lin", [0, 40]),
+    ("setor_pct_preta_parda", "Black or Brown", "pct", "Censo 2022 tracts within 1 km", "lin", [0, 100]),
+    ("pct_excess_2026", "Excess abstention", "pp", "2026 abstention minus expected from age, education and neighbourhood (model)", "lin", [-25, 25])]
+NEAR_KM = 2  # a 2022 polling place takes the neighbourhood values of the nearest 2026 place within this distance
+
+
+def load_places_studio():
+    """data/places_studio.csv by place id ("UF-municipality-zone-place"), with coordinates, as byte-coded rows."""
+    rows, xy = {}, {}
+    for r in csv.DictReader(open("data/places_studio.csv")):
+        pid = "%s-%d-%d-%d" % (r["uf"], int(r["cd_tse"]), int(r["zona"]), int(r["nr_local"]))
+        code = []
+        for col, _, _, _, enc, (lo, hi) in PLACE_VARS:
+            v = r[col]
+            if v in ("", None): code.append(255); continue
+            v = float(v)
+            t = (np.log(max(v, lo)) - np.log(lo)) / (np.log(hi) - np.log(lo)) if enc == "log" else (v - lo) / (hi - lo)
+            code.append(int(round(min(1, max(0, t)) * 254)))
+        rows[pid] = code; xy[pid] = (float(r["lon"]), float(r["lat"]))
+    return rows, xy
+
+
+def place_rows(gplace, rows, xy, exact):
+    """Each group's row in the place table: its own place's (exact id match, 2026), or the nearest 2026 place in the
+    same municipality within NEAR_KM (2022: numbering changes between elections); -1 if none."""
+    ids = list(rows); index = {pid: i for i, pid in enumerate(ids)}
+    by_mun = {}
+    for pid in ids: by_mun.setdefault(pid.rsplit("-", 2)[0], []).append(pid)
+    out, hit = [], 0
+    for g in gplace:
+        if g is None: out.append(-1); continue
+        pid, lon, lat = g
+        if exact and pid in index: out.append(index[pid]); hit += 1; continue
+        cand = by_mun.get(pid.rsplit("-", 2)[0], [])
+        if cand:
+            C = np.array([xy[c] for c in cand]); d = np.hypot((C[:, 0] - lon) * np.cos(np.radians(lat)), C[:, 1] - lat) * 111
+            j = int(d.argmin())
+            if d[j] <= NEAR_KM: out.append(index[cand[j]]); hit += 1; continue
+        out.append(-1)
+    print("place groups matched to neighbourhood data:", hit, "of", sum(1 for g in gplace if g))
+    return out
 
 
 def summary_stats(muns):
@@ -242,6 +299,7 @@ def render(data):
 def main():
     places = {y: json.load(open(f"data/places_{y}.json")) for y in YEARS}
     studio = load_studio()
+    prow, pxy = load_places_studio()
     mgeo, sgeo = load_geometry()
     keys, cats_y = categories(places)
     order = list(range(len(mgeo["features"]))); random.shuffle(order)
@@ -250,13 +308,19 @@ def main():
     for y in YEARS:
         cat = cats_y[y]
         opt = lambda code: (studio.get(code, {}).get("opt", {}).get(y) or SHARE_DEFAULT)
-        dots, counts = make_dots(mgeo, places[y]["muns"], cat, cat[""], opt, order, n_ref)
-        print(y, len(dots) // 3, "dots")
-        years[y] = {**year_summary(y, places[y], keys, cat), "dots": pack(dots), "cnt": counts}
+        dots, counts, gcnt, gplace = make_dots(mgeo, places[y]["muns"], cat, cat[""], opt, order, n_ref)
+        print(y, len(dots) // 3, "dots in", len(gcnt), "groups")
+        pr = place_rows(gplace, prow, pxy, exact=(y == 2026))
+        assert max(gcnt) < 65536
+        groups = np.array(pr, "<i4").tobytes() + np.array(gcnt, "<u2").tobytes()  # place rows, then dot counts
+        years[y] = {**year_summary(y, places[y], keys, cat), "dots": pack(dots), "cnt": counts, "ng": len(gcnt),
+                    "groups": base64.b64encode(groups).decode()}
     muns = municipality_summaries(places, cats_y, studio)
     cats = [{"k": k, "col": COLOR[k]} for k in keys]
     open(OUT, "w").write(render({"__MGEO__": mgeo, "__SGEO__": sgeo, "__MUNS__": muns, "__CATS__": cats,
-                                 "__YEARS__": years, "__ORDER__": order, "__STUDIO__": summary_stats(muns), "__VPD__": VPD}))
+                                 "__YEARS__": years, "__ORDER__": order, "__STUDIO__": summary_stats(muns), "__VPD__": VPD,
+                                 "__PLACES__": {"n": len(prow), "b": base64.b64encode(np.array(list(prow.values()), "u1").T.tobytes()).decode(),
+                                                "vars": [{"k": c, "n": n, "u": u, "src": s_, "enc": e, "r": r} for c, n, u, s_, e, r in PLACE_VARS]}}))
     print("ok", len(muns), "municipalities;", sum(1 for f in mgeo["features"] if f["properties"]["codarea"] not in muns), "unmatched shapes;",
           sum(1 for c in muns if c not in studio), "without studio data")
 
