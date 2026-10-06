@@ -776,3 +776,57 @@
     opacity: 0.6;
   }
 }
+
+/* the zoomed-in view's key (map/marks.js): bottom right, above the credits */
+.akey.vkey {
+  top: auto;
+  left: auto;
+  right: 20px;
+  bottom: 104px;
+  display: grid;
+  gap: 4px;
+}
+.vkey .ramp {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.vkey .ramp span {
+  margin: 0 6px;
+  font: 11px var(--mono);
+}
+.vkey .sw {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+}
+.vkey .sizes {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+.vkey .sizes span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font: 11px var(--mono);
+}
+.vkey .cc {
+  border: 1px solid var(--haze);
+  border-radius: 50%;
+}
+
+/* the margins key's hatched swatch, as on the map */
+.vkey .hk {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vkey .sw.hatch {
+  background: repeating-linear-gradient(135deg, currentColor 0 1.4px, transparent 1.4px 5px);
+}
+.vkey .ends {
+  display: flex;
+  justify-content: space-between;
+}

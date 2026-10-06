@@ -13,6 +13,7 @@ import { layers } from "../dots.js";
 import { A8, DC, HID, PX, S, hidden } from "../state.js";
 import { saveSoon } from "../view/hash.js";
 import { drawArrows } from "./arrows.js";
+import { blend, drawKey, drawMarks, fixedDots } from "./marks.js";
 import { svg } from "./base.js";
 
 const cv = document.getElementById("cv"),
@@ -56,7 +57,7 @@ function radius(t) {
   const k = t.k,
     rz = R0 * Math.sqrt(k),
     { w, h, STEP, SIZE } = S;
-  if (!S.ADAPT) return Math.min(RMAX, R0 * k) * SIZE;
+  if (!S.ADAPT || fixedDots(k)) return Math.min(RMAX, R0 * k) * SIZE;
   const gw = Math.ceil(w / CELL);
   cnt.fill(0);
   for (const { P, C, S: GS, GP, x0, x1 } of layers())
@@ -141,7 +142,7 @@ let pending = null;
 
 function paint(t) {
   const target = radius(t);
-  rCur = rCur && S.ADAPT ? rCur * Math.pow(target / rCur, 0.3) : target;
+  rCur = rCur && S.ADAPT && !fixedDots(t.k) ? rCur * Math.pow(target / rCur, 0.3) : target;
   if (Math.abs(Math.log(rCur / target)) > 0.01) {
     if (!easing) {
       easing = true;
@@ -250,7 +251,9 @@ function paint(t) {
     const v = TI[j];
     if (v) hist[((v - ilo) * sc) | 0]++;
   }
-  const dim = S.ARROWS ? 0.3 : 1; // under swing arrows the dots recede
+  // under swing arrows the dots recede; under circles or margins they fade to a faint texture
+  const b = S.VIZ === "circles" || S.VIZ === "margins" ? blend(t.k) : 0,
+    dim = (S.ARROWS ? 0.3 : 1) * (1 - 0.85 * b);
   for (let b = 0, below = 0; b < 1024; b++) {
     LUT[b] = 255 * dim * (ALO + ((1 - ALO) * below) / Math.max(1, m));
     below += hist[b];
@@ -267,6 +270,8 @@ function paint(t) {
     out[j] = ((LUT[b] << 24) | PX[TOP[j]]) >>> 0;
   }
   cx.putImageData(img, 0, 0);
+  drawMarks(cx, t, W, H, dpr);
+  drawKey(t);
   if (S.ARROWS) drawArrows(cx, t, W, H);
   drawn = t;
   cv.style.transform = "";

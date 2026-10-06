@@ -84,7 +84,7 @@
       },
       "small-towns": {
         "h": "Quanto menor a cidade, maior a mudança",
-        "t": "<p>Estes são os 25% dos municípios com menos habitantes, cada um com menos de cerca de 5.200 habitantes. 2022 fica à esquerda do divisor. A queda de Lula cresce de forma contínua à medida que os lugares ficam menores.</p>",
+        "t": "<p>Cada círculo é um município, com tamanho pelos votos válidos e cor pela variação da votação de Lula. Os 25% dos municípios com menos habitantes têm menos de cerca de 5.200 habitantes cada. A queda de Lula cresce de forma contínua à medida que os lugares ficam menores.</p>",
         "chart": {
           "title": "Votação de Lula por porte do município (habitantes)",
           "labels": ["Até 10 mil", "10 mil–50 mil", "50 mil–200 mil", "200 mil–1 mi", "Mais de 1 mi"]
@@ -129,7 +129,7 @@
       },
       "goias": {
         "h": "Em Goiás, o candidato do Estado",
-        "t": "<p>A votação de Lula caiu mais em Goiás do que em qualquer outro Estado, 8,5 pontos. Ronaldo Caiado, ex-governador do Estado, teve 12,3% ali. Os votos dele estão entre os pontos cinza do lado de 2026.</p>",
+        "t": "<p>A votação de Lula caiu mais em Goiás do que em qualquer outro Estado, 8,5 pontos. Ronaldo Caiado, ex-governador do Estado, teve 12,3% ali. O mapa colore cada município pela parcela dos votos válidos que ele teve.</p>",
         "notes": ["Aparecida de Goiânia −8,3", "Goiânia −4,9", "Anápolis −6,0"]
       },
       "south": {
@@ -412,5 +412,37 @@
     ],
     "drawing": "Desenhando o mapa",
     "mb": "{got} de {total} MB"
+  },
+  "viz": {
+    "label": "Com zoom",
+    "from": "Zoom a partir de",
+    "always": "Sempre",
+    "hintAlways": "Aparece em qualquer zoom",
+    "hintOn": "Aparecendo (a partir de {k}× de zoom)",
+    "hintOff": "Aproxime além de {k}× para ver, ou diminua “Zoom a partir de”",
+    "fromTitle": "O zoom em que a visualização começa a aparecer sobre os pontos (por completo em pouco mais que o dobro)",
+    "dots": "Pontos",
+    "dotsTitle": "Pontos em qualquer zoom",
+    "outline": "Contornos",
+    "outlineTitle": "Pontos de tamanho fixo, sobre o contorno de cada município na cor de quem lidera",
+    "circles": "Círculos",
+    "circlesTitle": "Um círculo por município: tamanho são os votos, cor quem lidera, intensidade a margem",
+    "margins": "Margens",
+    "marginsTitle": "Cada município preenchido pela margem de quem lidera, hachurado onde mora pouca gente",
+    "keyMargin": "Margem de quem lidera sobre o segundo, em pontos",
+    "keyCircles": "votos válidos (área do círculo)",
+    "colour": "Cor",
+    "vc": {
+      "change": "Variação de Lula",
+      "margin": "Margem de quem lidera",
+      "abst": "Abstenção"
+    },
+    "small": "Candidatos menores (todos menos os dois primeiros)",
+    "keyChange": "Variação da votação de Lula, 2022 → 2026, em pontos",
+    "lost": "perdeu {n}+",
+    "gained": "ganhou {n}+",
+    "keyAbst": "Abstenção, parcela do eleitorado",
+    "keyShare": "{name}: parcela dos votos válidos",
+    "keyFlip": "Hachurado: quem lidera mudou desde 2022"
   }
 }

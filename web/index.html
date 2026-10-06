@@ -28,6 +28,7 @@
       <div id="wrap">
         <canvas id="cv"></canvas><canvas id="cvg" aria-hidden="true"></canvas
         ><svg id="map" data-i18n-attr="aria-label:map.aria"></svg>
+        <div class="akey vkey" id="vkey" hidden></div>
         <div class="akey" id="akey" data-i18n-html="map.arrowKey" hidden></div>
         <div class="maphint" id="maphint" aria-hidden="true">
           <svg viewBox="0 0 40 40">
@@ -143,6 +144,21 @@
                 ></button>
               </div>
             </div>
+            <div class="lbl">
+              <span data-i18n="viz.label"></span>
+              <div id="viz" class="seg" role="group" data-i18n-attr="aria-label:viz.label">
+                <button data-v="dots" aria-pressed="true" data-i18n-attr="title:viz.dotsTitle" data-i18n="viz.dots"></button><button data-v="outline" aria-pressed="false" data-i18n-attr="title:viz.outlineTitle" data-i18n="viz.outline"></button><button data-v="circles" aria-pressed="false" data-i18n-attr="title:viz.circlesTitle" data-i18n="viz.circles"></button><button data-v="margins" aria-pressed="false" data-i18n-attr="title:viz.marginsTitle" data-i18n="viz.margins"></button>
+              </div>
+              <p id="vizhint" class="vizhint" hidden></p>
+            </div>
+            <label
+              ><span data-i18n="viz.colour"></span
+              ><select id="vcol" data-i18n-attr="aria-label:viz.colour"></select
+            ></label>
+            <label
+              ><span data-i18n="viz.from" data-i18n-attr="title:viz.fromTitle"></span
+              ><input id="vizk" type="range" min="0" max="4.33" step=".05" value="1.58" /><output id="vizkv">3×</output></label
+            >
             <label
               ><span data-i18n="studio.votesPerDot"></span
               ><input id="vpd" type="range" min="0" max="5" step="1" value="0" /><output id="vpdv">250</output></label

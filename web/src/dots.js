@@ -67,8 +67,8 @@ export function layers() {
     sx = Math.round(S.SPLIT * w);
   return S.COMPARE
     ? [
-        { ...DOT[YS[1]], x0: 0, x1: sx },
-        { ...DOT[YS[0]], x0: sx, x1: w },
+        { ...DOT[YS[1]], year: YS[1], x0: 0, x1: sx },
+        { ...DOT[YS[0]], year: YS[0], x0: sx, x1: w },
       ]
-    : [{ ...DOT[S.YEAR], x0: 0, x1: w }];
+    : [{ ...DOT[S.YEAR], year: S.YEAR, x0: 0, x1: w }];
 }

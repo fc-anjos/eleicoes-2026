@@ -185,3 +185,9 @@
     animation: none;
   }
 }
+/* compare mode: the divider's year labels and drag hint sit at the top centre, so the badge drops below them and
+   over the divider's line */
+.page:has(#swipe:not([hidden])) .fbadge {
+  top: 68px;
+  z-index: 4;
+}

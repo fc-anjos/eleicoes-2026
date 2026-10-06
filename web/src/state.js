@@ -36,6 +36,10 @@ export const S = {
   SIZE: 1, // dot radius multiplier
   STEP: 1, // draw every STEP-th dot
   ADAPT: true, // adaptive dot size (else by zoom)
+  VIZALL: false, // the zoomed-in view at every zoom (viz=margins* in the view)
+  VIZK: 3, // the zoom where the zoomed-in view starts to fade in (fully in at 7/3 of it)
+  VCOL: "change", // what the zoomed-in view's colour shows: change, margin, abst or share-<ballot number> (map/marks.js)
+  VIZ: "dots", // zoomed in: dots, outline (dots + winner), circles or margins (see map/marks.js)
   sel: null, // the selected municipality (a feature of MG)
   NOTES: [], // map notes of the current story step
   restoring: true, // applying a view: don't write the hash back meanwhile

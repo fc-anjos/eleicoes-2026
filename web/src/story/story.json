@@ -5,7 +5,7 @@
   },
   {
     "id": "overview",
-    "view": "y=cmp&split=0.5&at=home"
+    "view": "y=cmp&split=0.5&at=home&viz=margins*&vc=margin"
   },
   {
     "id": "arrows",
@@ -13,7 +13,7 @@
   },
   {
     "id": "held",
-    "view": "y=2026&at=home&f=dlula@0~*",
+    "view": "y=2026&at=home&f=dlula@0~*&viz=margins*",
     "notes": [
       {
         "at": [-43.2, -22.9],
@@ -44,15 +44,15 @@
   },
   {
     "id": "slipped",
-    "view": "y=2026&at=home&f=dlula@-5~0"
+    "view": "y=2026&at=home&f=dlula@-5~0&viz=margins*"
   },
   {
     "id": "shifted",
-    "view": "y=2026&at=home&f=dlula@*~-5"
+    "view": "y=2026&at=home&f=dlula@*~-5&viz=margins*"
   },
   {
     "id": "small-towns",
-    "view": "y=cmp&split=0.5&at=home&f=pop_2022:0-25",
+    "view": "y=2026&at=home&viz=circles*",
     "chart": {
       "by": "pop_2022",
       "cuts": [10000, 50000, 200000, 1000000]
@@ -76,7 +76,7 @@
   },
   {
     "id": "northeast",
-    "view": "y=cmp&split=0.5&at=-39.8,-8.6,2.6",
+    "view": "y=cmp&split=0.5&at=-39.8,-8.6,2.6&viz=margins*&vc=margin",
     "chart": {
       "by": "region",
       "keys": ["NE", "N", "SE", "CW", "S"]
@@ -106,7 +106,7 @@
   },
   {
     "id": "capitals",
-    "view": "y=cmp&split=0.5&at=-43.25,-22.85,12",
+    "view": "y=2026&at=-43.25,-22.85,12&viz=circles*",
     "notes": [
       {
         "at": [-43.2, -22.91],
@@ -140,7 +140,7 @@
   },
   {
     "id": "goias",
-    "view": "y=cmp&split=0.5&at=-49.3,-16.72,13",
+    "view": "y=2026&at=-49.6,-16.0,5&in=uf:GO&viz=margins*&vc=share-55",
     "notes": [
       {
         "at": [-49.25, -16.82],
@@ -161,7 +161,7 @@
   },
   {
     "id": "south",
-    "view": "y=cmp&split=0.5&at=-51.1,-29.75,9",
+    "view": "y=2026&at=-53.2,-29.9,4.5&viz=margins*",
     "notes": [
       {
         "at": [-51.18, -29.17],
@@ -227,7 +227,7 @@
   },
   {
     "id": "religion",
-    "view": "y=cmp&split=0.5&at=home&f=pct_catolica_2022:75-100",
+    "view": "y=2026&at=home&f=pct_catolica_2022:75-100&viz=margins*",
     "chart": {
       "by": "pct_catolica_2022",
       "cuts": [58.4, 69.9, 79.9]
@@ -243,7 +243,7 @@
   },
   {
     "id": "smaller-candidates",
-    "view": "y=2026&at=home&f=small_2026@10~*"
+    "view": "y=2026&at=home&f=small_2026@10~*&viz=margins*&vc=share-small"
   },
   {
     "id": "find",

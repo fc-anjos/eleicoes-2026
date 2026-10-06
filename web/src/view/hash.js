@@ -12,7 +12,7 @@ import { MAXK, getView, layout, mapH, panLimits, proj, svg, zoom } from "../map/
 import { placeSwipe, setMode } from "../map/compare.js";
 import { repaint } from "../map/render.js";
 import { panelIfShown, setFocus } from "../panel/results.js";
-import { STEPS, drawArea, drawRange } from "../panel/studio.js";
+import { STEPS, drawArea, drawRange, setVcol, setViz } from "../panel/studio.js";
 import { COLS, DEF_COLS, HID, S, YS, catOf, packCols } from "../state.js";
 
 export function stateHash(embed) {
@@ -41,6 +41,9 @@ export function stateHash(embed) {
   ).filter(Boolean);
   if (col.length) q.set("col", col.join(","));
   if (!S.ADAPT) q.set("size", "zoom");
+  if (S.VIZ !== "dots") q.set("viz", S.VIZ + (S.VIZALL ? "*" : ""));
+  if (S.VCOL !== "change") q.set("vc", S.VCOL);
+  if (Math.abs(S.VIZK - 3) > 0.01) q.set("vizk", +S.VIZK.toFixed(2));
   if (S.STEP !== 1) q.set("vpd", S.STEP * VPD);
   if (S.SIZE !== 1) q.set("scale", (+d3.select("#rad").property("value")).toFixed(2));
   if (d3.select("#page").classed("nostudio")) q.set("studio", "0");
@@ -156,6 +159,10 @@ export function applyState(str, animate) {
       return String((this.dataset.m === "a") === S.ADAPT);
     });
   }
+  setViz(q.get("viz"), false);
+  setVcol(q.get("vc"), false);
+  if (q.has("vizk") && +q.get("vizk") > 0)
+    d3.select("#vizk").property("value", Math.log2(+q.get("vizk"))).node().dispatchEvent(new Event("input"));
   if (q.has("vpd")) {
     const i = STEPS.indexOf(Math.round(+q.get("vpd") / VPD));
     if (i >= 0) d3.select("#vpd").property("value", i).node().dispatchEvent(new Event("input"));

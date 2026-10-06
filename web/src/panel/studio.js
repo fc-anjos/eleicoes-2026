@@ -6,6 +6,7 @@ import { refilter } from "../filters/filter.js";
 import { VARS, hi_, isOn, lo_, quantiles, resetVar } from "../filters/vars.js";
 import { fmt, num, showVal, unit } from "../format.js";
 import { onLang, t } from "../i18n/index.js";
+import { VIZS, vcolName, vcols, vizHint } from "../map/marks.js";
 import { repaint } from "../map/render.js";
 import { A8, AB, AO, COLS, HID, K, S, css, packCols, store } from "../state.js";
 import { saveSoon } from "../view/hash.js";
@@ -141,7 +142,37 @@ function initArea() {
   drawArea();
 }
 
+// the zoomed-in view (see map/marks.js)
+export function setViz(v, paint = true) {
+  S.VIZALL = !!v && v.endsWith("*");
+  if (S.VIZALL) v = v.slice(0, -1);
+  S.VIZ = VIZS.includes(v) ? v : "dots";
+  d3.selectAll("#viz button").attr("aria-pressed", function () {
+    return String(this.dataset.v === S.VIZ);
+  });
+  vizHint();
+  if (paint) repaint(false); // no crossfade: it reads as the map pulsing
+}
+
+// what the zoomed-in view's colour shows
+export function setVcol(v, paint = true) {
+  S.VCOL = vcols().includes(v) ? v : "change";
+  d3.select("#vcol").property("value", S.VCOL);
+  if (paint) repaint(false);
+}
+function drawVcol() {
+  d3.select("#vcol")
+    .selectAll("option")
+    .data(vcols())
+    .join("option")
+    .attr("value", (v) => v)
+    .text(vcolName);
+  d3.select("#vcol").property("value", S.VCOL);
+}
+
 function initDisplay() {
+  drawVcol();
+  d3.select("#vcol").on("change", (e) => setVcol(e.target.value));
   d3.selectAll(".vpd").text(fmt(VPD));
   d3.selectAll("#mode button").on("click", (e) => {
     S.ADAPT = e.currentTarget.dataset.m === "a";
@@ -150,6 +181,7 @@ function initDisplay() {
     });
     repaint();
   });
+  d3.selectAll("#viz button").on("click", (e) => setViz(e.currentTarget.dataset.v));
   let vpdTimer;
   d3.select("#vpd").on("input", (e) => {
     S.STEP = STEPS[+e.target.value];
@@ -158,6 +190,12 @@ function initDisplay() {
     d3.select("#vpdv").text(v);
     clearTimeout(vpdTimer);
     vpdTimer = setTimeout(repaint, 120); // repaint once the slider settles
+  });
+  d3.select("#vizk").on("input", (e) => {
+    S.VIZK = 2 ** +e.target.value;
+    d3.select("#vizkv").text(S.VIZK <= 1.01 ? t("viz.always") : unit("times", num(S.VIZK, 1).replace(/[.,]?0+$/, "")));
+    vizHint();
+    repaint(false);
   });
   d3.select("#rad").on("input", (e) => {
     const m = 2 ** +e.target.value;
@@ -187,6 +225,8 @@ function relabel() {
   d3.selectAll(".vpd").text(v);
   d3.select("#vpdv").text(v);
   d3.select("#rad").dispatch("input");
+  d3.select("#vizk").dispatch("input");
+  drawVcol();
   const st = d3.select("#studiox");
   st.attr("title", t(st.attr("aria-expanded") === "true" ? "studio.hide" : "studio.show"));
   drawArea();

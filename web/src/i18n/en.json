@@ -84,7 +84,7 @@
       },
       "small-towns": {
         "h": "The smaller the town, the bigger the shift",
-        "t": "<p>These are the smallest quarter of municipalities, each with fewer than about 5,200 residents. 2022 is on the left of the divider. The fall in Lula's share grows steadily as places get smaller.</p>",
+        "t": "<p>Each circle is a municipality, sized by its valid votes and coloured by the change in Lula's share. The smallest quarter of municipalities have fewer than about 5,200 residents each. The fall in Lula's share grows steadily as places get smaller.</p>",
         "chart": {
           "title": "Lula's share by municipality size (residents)",
           "labels": ["Under 10k", "10k–50k", "50k–200k", "200k–1M", "Over 1M"]
@@ -129,7 +129,7 @@
       },
       "goias": {
         "h": "In Goiás, the state's own candidate",
-        "t": "<p>Lula's share fell more in Goiás than in any other state, by 8.5 points. Ronaldo Caiado, a former governor of the state, won 12.3 percent there. His votes are among the grey dots on the 2026 side.</p>",
+        "t": "<p>Lula's share fell more in Goiás than in any other state, by 8.5 points. Ronaldo Caiado, a former governor of the state, won 12.3 percent there. The map shades each municipality by his share of the valid vote.</p>",
         "notes": ["Aparecida de Goiânia −8.3", "Goiânia −4.9", "Anápolis −6.0"]
       },
       "south": {
@@ -412,5 +412,37 @@
     ],
     "drawing": "Drawing the map",
     "mb": "{got} of {total} MB"
+  },
+  "viz": {
+    "label": "Zoomed in",
+    "from": "Zoomed in from",
+    "always": "Always",
+    "hintAlways": "Showing at every zoom",
+    "hintOn": "Showing (from {k}× zoom)",
+    "hintOff": "Zoom in past {k}× to see it, or lower “Zoomed in from”",
+    "fromTitle": "The zoom where the zoomed-in view starts to fade in over the dots (fully in at about twice it)",
+    "dots": "Dots",
+    "dotsTitle": "Dots at every zoom",
+    "outline": "Outlines",
+    "outlineTitle": "Dots at a fixed size, over each municipality outlined in its leader's colour",
+    "circles": "Circles",
+    "circlesTitle": "One circle per municipality: size is votes, colour the leader, strength the margin",
+    "margins": "Margins",
+    "marginsTitle": "Each municipality filled by its leader's margin, hatched where few people live",
+    "keyMargin": "Leader's margin over the runner-up, in points",
+    "keyCircles": "valid votes (circle area)",
+    "colour": "Colour by",
+    "vc": {
+      "change": "Change in Lula's share",
+      "margin": "Leader's margin",
+      "abst": "Abstention"
+    },
+    "small": "Smaller candidates (all but the top two)",
+    "keyChange": "Change in Lula's share, 2022 → 2026, in points",
+    "lost": "he lost {n}+",
+    "gained": "he gained {n}+",
+    "keyAbst": "Abstention, share of the roll",
+    "keyShare": "{name}: share of valid votes",
+    "keyFlip": "Hatched: the leader changed since 2022"
   }
 }
