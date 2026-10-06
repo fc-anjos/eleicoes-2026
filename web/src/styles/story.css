@@ -566,7 +566,7 @@
     padding: 6px 12px 0;
   }
   .storymode .stot {
-    top: 39px;
+    top: 46px;
     padding: 6px 12px 8px;
     margin-bottom: 62vh;
     display: flex;
@@ -622,5 +622,157 @@
   }
   .dumb {
     margin-top: 10px;
+  }
+}
+/* Phones: a stepper, not a scroll. The map keeps the top of the screen to itself; the totals sit above it and one
+   step at a time sits in a panel below it. Readers swipe the panel (or tap ‹ ›) between steps; a long step scrolls
+   inside the panel, never over the map. */
+.pstep {
+  display: none;
+}
+@media (max-width: 900px) {
+  .storymode aside {
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .storymode aside > *,
+  .storymode #story > * {
+    pointer-events: auto;
+  }
+  .storymode #story {
+    pointer-events: none;
+  }
+  .storymode .stot {
+    margin-bottom: 0;
+  }
+  .storymode #steps {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--panel-h);
+    display: flex;
+    overflow: hidden;
+    touch-action: pan-y;
+    pointer-events: none;
+  }
+  .storymode #steps::-webkit-scrollbar {
+    display: none;
+  }
+  .storymode .step,
+  .storymode .step:first-child,
+  .storymode .step:last-child {
+    flex: 0 0 100%;
+    box-sizing: border-box;
+    margin: 0;
+    /* a short step only takes the room it needs, at the panel's bottom; a long one fills it and scrolls */
+    align-self: flex-end;
+    height: auto;
+    max-height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    pointer-events: auto;
+    opacity: 1;
+    border-radius: 14px 14px 0 0;
+    border-bottom: 0;
+    padding: 24px 18px calc(18px + env(safe-area-inset-bottom));
+    background: var(--dusk);
+  }
+  .storymode .prog {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    left: 56px;
+    right: 56px;
+    top: auto;
+    bottom: calc(var(--card-h) + 10px);
+    transform: none;
+  }
+  .storymode .prog button {
+    width: 7px;
+    height: 7px;
+  }
+  .storymode .pstep {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    bottom: calc(var(--card-h) + 4px);
+    z-index: 6;
+    width: 36px;
+    height: 28px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--dusk) 92%, transparent);
+    color: var(--ink);
+    font: 600 18px/1 var(--body);
+  }
+  .storymode #sprev {
+    left: 12px;
+  }
+  .storymode #snext {
+    right: 12px;
+  }
+  .storymode .pstep:disabled {
+    opacity: 0.3;
+  }
+}
+:root {
+  --panel-h: 50dvh; /* the most a step may take; a shorter one sets --card-h to its own height */
+  --card-h: var(--panel-h);
+}
+/* desktop: a step's title beside its dot, on hover */
+@media (hover: hover) and (min-width: 901px) {
+  .storymode .prog button {
+    position: relative;
+  }
+  .storymode .prog button:hover::after,
+  .storymode .prog button:focus-visible::after {
+    content: attr(aria-label);
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font: 500 12px/1 var(--body);
+    color: var(--ink);
+    background: var(--dusk);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 6px 8px;
+    pointer-events: none;
+  }
+}
+#pgrip {
+  display: none;
+}
+@media (max-width: 900px) {
+  /* the panel's top edge: drag it up or down to give the text or the map more room */
+  .storymode #pgrip {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--card-h) - 22px);
+    height: 22px;
+    z-index: 7;
+    touch-action: none;
+    cursor: ns-resize;
+  }
+  .storymode #pgrip::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 9px;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: var(--haze);
+    opacity: 0.6;
   }
 }

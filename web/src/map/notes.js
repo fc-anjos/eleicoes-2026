@@ -9,8 +9,8 @@ let notesG = null;
 export function drawNotes(t) {
   if (!notesG) return;
   t = t || d3.zoomTransform(svg.node());
-  const sel = notesG
-    .selectAll("g.note")
+  notesG
+    .selectAll("g.note:not(.gone)")
     .data(S.NOTES, (d) => d.t)
     .join(
       (en) => {
@@ -22,9 +22,10 @@ export function drawNotes(t) {
         return g;
       },
       undefined,
-      (ex) => ex.transition().duration(300).style("opacity", 0).remove(),
+      (ex) => ex.classed("gone", true).transition().duration(300).style("opacity", 0).remove(),
     );
-  sel.each(function (d) {
+  // every note follows the map, those fading out included
+  notesG.selectAll("g.note").each(function (d) {
     const p = proj(d.at),
       x = p[0] * t.k + t.x,
       y = p[1] * t.k + t.y,

@@ -42,7 +42,7 @@ const moveSplit = (v) => {
   if (!swRaf)
     swRaf = requestAnimationFrame(() => {
       swRaf = 0;
-      repaint();
+      repaint(false);
     });
 };
 

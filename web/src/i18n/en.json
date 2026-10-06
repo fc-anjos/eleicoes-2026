@@ -59,7 +59,7 @@
     "steps": {
       "intro": {
         "h": "How Brazil voted in 2026",
-        "t": "<p>Each dot on this map stands for 250 votes or 250 people who did not vote, scattered around the polling place where they are registered. <b class=\"sb\">Blue</b> dots are votes for the Bolsonaro camp, <b class=\"sr\">red</b> for Luiz Inácio Lula da Silva, <b class=\"sa\">amber</b> for people on the roll who did not vote, and grey for votes for the other candidates.</p><p>Scroll down to see where the vote moved between the first rounds of 2022 and 2026.</p>"
+        "t": "<p>Each dot on this map stands for 250 votes or 250 people who did not vote, scattered around the polling place where they are registered. <b class=\"sb\">Blue</b> dots are votes for the Bolsonaro camp, <b class=\"sr\">red</b> for Luiz Inácio Lula da Silva, <b class=\"sa\">amber</b> for people on the roll who did not vote, and grey for votes for the other candidates.</p><p>What follows shows where the vote moved between the first rounds of 2022 and 2026.</p>"
       },
       "overview": {
         "h": "Lula lost ground almost everywhere",
@@ -209,6 +209,10 @@
       }
     },
     "cue": "Scroll to read the story",
+    "cueSwipe": "Swipe or tap › for the next part",
+    "prev": "Previous part",
+    "next": "Next part",
+    "resize": "Drag to resize the text panel",
     "totals": "{year} totals",
     "brazil": "Brazil",
     "litPlaces": "lit polling places",

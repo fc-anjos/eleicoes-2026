@@ -268,6 +268,8 @@ function paint(t) {
   }
   cx.putImageData(img, 0, 0);
   if (S.ARROWS) drawArrows(cx, t, W, H);
+  drawn = t;
+  cv.style.transform = "";
 }
 
 // Cross-fade: the old frame is copied to the ghost canvas on top, which fades out while the new one shows beneath.
@@ -292,8 +294,19 @@ function cutFade() {
 }
 
 // paint on the next frame (during zoom gestures)
+// The view the canvas was last painted at. A paint can take longer than a frame, so between paints the canvas is
+// moved and scaled by CSS to the current view: the dots then keep pace with the borders and names, drawn in SVG.
+let drawn = null;
+function follow(t) {
+  if (!drawn) return;
+  const r = t.k / drawn.k;
+  cv.style.transformOrigin = "0 0";
+  cv.style.transform = `translate(${t.x - drawn.x * r}px,${t.y - drawn.y * r}px) scale(${r})`;
+}
+
 export function schedulePaint(t) {
   cutFade();
+  follow(t);
   if (!pending)
     requestAnimationFrame(() => {
       paint(pending);
@@ -303,9 +316,11 @@ export function schedulePaint(t) {
 }
 
 // paint now, at the current zoom, and record the view in the URL
-export function repaint() {
+// fade: false for direct manipulation (dragging the divider), which should follow the hand without a fade
+export function repaint(fade = true) {
   if (!W) return; // before the first layout
-  crossfade();
+  if (fade) crossfade();
+  else cutFade();
   paint(d3.zoomTransform(svg.node()));
   saveSoon();
 }

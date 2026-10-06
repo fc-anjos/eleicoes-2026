@@ -13,7 +13,7 @@ import { repaint } from "../map/render.js";
 import { panel } from "../panel/results.js";
 import { AB, COLS, S, YS, nameOf, otherYear } from "../state.js";
 import { figures, natFig } from "../totals.js";
-import { applyState, restoring, saveSoon, setFiltersFrom } from "../view/hash.js";
+import { PANEL, applyState, restoring, saveSoon, setFiltersFrom } from "../view/hash.js";
 import { hintDone } from "../view/hints.js";
 import { tween } from "../view/tween.js";
 import { chart } from "./charts.js";
@@ -24,17 +24,58 @@ const viewOf = (i) => STORY[i].view;
 const copyOf = (d) => t(`story.steps.${d.id}`);
 const notesOf = (i) => (STORY[i].notes || []).map((n, j) => ({ ...n, t: copyOf(STORY[i]).notes[j] }));
 let steps, prog;
+// phones step through the story sideways (see the end of story.css); wider screens scroll it
+const phone = matchMedia("(max-width: 900px)");
+// bring step i on screen, in the column or in the phone's panel
+function showStep(i, smooth) {
+  if (smooth && i !== stepNow) {
+    aim = i;
+    clearTimeout(aimT);
+    aimT = setTimeout(() => (aim = null), 2000); // in case the scroll is cut short
+  }
+  const el = steps.nodes()[i],
+    beh = smooth ? "smooth" : "instant";
+  if (phone.matches) {
+    el.parentNode.scrollTo({ left: el.offsetLeft, behavior: beh });
+    goStep(i);
+  }
+  else {
+    const aside = document.querySelector("aside");
+    aside.scrollTo({ top: el.offsetTop - aside.clientHeight * 0.4, behavior: beh });
+  }
+}
 let stepNow = -1;
 
 // the first view (on opening the story, or a shared link to a step) is set in place, not flown to
 let jump = false;
 
+// phones: the panel takes the step's own height (up to the panel's set height); the map frames its view above
+function fitPanel(i) {
+  if (!phone.matches || i < 0) return;
+  const h = steps.nodes()[i].offsetHeight;
+  document.documentElement.style.setProperty("--card-h", h + "px");
+  PANEL.f = h / innerHeight;
+}
+
+const SETTLE = 350;
+let settleT = 0,
+  // a step the reader jumped to (by a dot or ‹ ›): the steps scrolled past on the way there are skipped
+  aim = null,
+  aimT = 0;
+
 function goStep(i) {
+  if (aim != null) {
+    if (i !== aim) return;
+    aim = null;
+  }
   if (i > 0) hintDone("maphint");
   if (i === stepNow) return;
   stepNow = i;
   steps.classed("on", (d, j) => j === i);
   prog.attr("aria-current", (d, j) => (j === i ? "step" : null));
+  d3.select("#sprev").property("disabled", i === 0);
+  d3.select("#snext").property("disabled", i === STORY.length - 1);
+  fitPanel(i);
   if (jump) {
     jump = false;
     restoring(() => applyState(viewOf(i), false));
@@ -42,15 +83,15 @@ function goStep(i) {
     saveSoon();
     return;
   }
-  // the card lights at once; the map's work waits for the next frame so the highlight paints first
-  requestAnimationFrame(() =>
-    requestAnimationFrame(() => {
-      if (stepNow !== i) return;
-      restoring(() => applyState(viewOf(i), true));
-      setNotes(notesOf(i));
-      saveSoon();
-    }),
-  );
+  // the card lights at once; the map moves only once the reader stops on a step, so a fast scroll doesn't play
+  // every step's animation on the way
+  clearTimeout(settleT);
+  settleT = setTimeout(() => {
+    if (stepNow !== i) return;
+    restoring(() => applyState(viewOf(i), true));
+    setNotes(notesOf(i));
+    saveSoon();
+  }, SETTLE);
 }
 
 // The story's order is fixed, so each step's filters are computed in idle time after load and cached: reaching a
@@ -161,10 +202,9 @@ function openAtStep() {
   history.replaceState(history.state, "", u);
   const i = STORY.findIndex((d) => d.id === id);
   if (i < 0 || !d3.select("#page").classed("storymode")) return;
-  const aside = document.querySelector("aside");
   stepNow = -1;
   jump = true;
-  requestAnimationFrame(() => (aside.scrollTop = steps.nodes()[i].offsetTop - aside.clientHeight * 0.4));
+  requestAnimationFrame(() => showStep(i, false));
 }
 
 function setTab(story) {
@@ -175,10 +215,12 @@ function setTab(story) {
   d3.select("#story").property("hidden", !story);
   d3.select("#explore").property("hidden", story);
   page.classed("storymode", story);
-  // the story gets the studio's width for the map; Explore brings the studio back
+  // the story gets the studio's width for the map; Explore brings the studio back (folded on phones)
   if (!page.classed("embed")) {
-    page.classed("nostudio", story);
-    d3.select("#studiox").attr("aria-expanded", String(!story));
+    // phones open Explore with the studio folded, so the years and the results come first
+    const fold = story || phone.matches;
+    page.classed("nostudio", fold);
+    d3.select("#studiox").attr("aria-expanded", String(!fold));
     layout();
     panLimits(story);
   }
@@ -186,6 +228,7 @@ function setTab(story) {
     stepNow = -1;
     jump = true;
     document.querySelector("aside").scrollTop = 0;
+    document.getElementById("steps").scrollLeft = 0;
     goStep(0);
   } else {
     setNotes([]);
@@ -207,9 +250,76 @@ function fillSteps() {
     .filter((d, i) => i === 0)
     .append("p")
     .attr("class", "cue")
-    .html('<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>' + t("story.cue"));
+    .html(
+      '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>' +
+        t(phone.matches ? "story.cueSwipe" : "story.cue"),
+    );
   prog.attr("aria-label", (d) => copyOf(d).h).attr("title", (d) => copyOf(d).h);
   d3.select("#toexplore").on("click", () => setTab(false));
+}
+
+// Phones: a sideways swipe on the panel moves to the next or previous step. The panel follows the finger, then
+// settles on the step it was swiped to; a mostly vertical drag scrolls the step's text instead.
+function swipe() {
+  const box = document.getElementById("steps");
+  let x0, y0, sl0, dir;
+  box.addEventListener(
+    "touchstart",
+    (e) => {
+      if (!phone.matches) return;
+      ({ clientX: x0, clientY: y0 } = e.touches[0]);
+      sl0 = box.scrollLeft;
+      dir = null;
+    },
+    { passive: true },
+  );
+  box.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!phone.matches || x0 == null) return;
+      const dx = e.touches[0].clientX - x0,
+        dy = e.touches[0].clientY - y0;
+      if (!dir && Math.hypot(dx, dy) > 8) dir = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      if (dir !== "x") return;
+      e.preventDefault();
+      box.scrollLeft = sl0 - dx;
+    },
+    { passive: false },
+  );
+  box.addEventListener("touchend", (e) => {
+    if (!phone.matches || x0 == null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    x0 = null;
+    if (dir !== "x") return;
+    const w = box.clientWidth,
+      from = Math.round(sl0 / w),
+      to = Math.abs(dx) > w * 0.18 ? from - Math.sign(dx) : from;
+    showStep(Math.max(0, Math.min(STORY.length - 1, to)), true);
+  });
+}
+
+// Phones: dragging the panel's top edge sets the most it may take (a fifth to four fifths of the screen); the map
+// then reframes the step's view in the space left above it
+function resizer() {
+  const grip = document.getElementById("pgrip"),
+    root = document.documentElement.style;
+  let on = false;
+  const set = (y) => {
+    root.setProperty("--panel-h", (100 * Math.max(0.2, Math.min(0.8, 1 - y / innerHeight))).toFixed(1) + "dvh");
+    fitPanel(stepNow);
+  };
+  grip.addEventListener("pointerdown", (e) => {
+    on = true;
+    grip.setPointerCapture(e.pointerId);
+  });
+  grip.addEventListener("pointermove", (e) => on && set(e.clientY));
+  const end = () => {
+    if (!on) return;
+    on = false;
+    if (stepNow >= 0) restoring(() => applyState(viewOf(stepNow), true));
+  };
+  grip.addEventListener("pointerup", end);
+  grip.addEventListener("pointercancel", end);
 }
 
 export function initStory() {
@@ -220,17 +330,20 @@ export function initStory() {
     .selectAll("button")
     .data(STORY)
     .join("button")
-    .on("click", (e, d) => {
-      const i = STORY.indexOf(d);
-      aside.scrollTo({ top: steps.nodes()[i].offsetTop - aside.clientHeight * 0.4, behavior: "smooth" });
-    });
+    .on("click", (e, d) => showStep(STORY.indexOf(d), true));
+  d3.select("#sprev").on("click", () => showStep(Math.max(0, stepNow - 1), true));
+  d3.select("#snext").on("click", () => showStep(Math.min(STORY.length - 1, stepNow + 1), true));
+  swipe();
+  resizer();
   fillSteps();
   onLang(() => {
     fillSteps();
+    fitPanel(stepNow);
     if (stepNow >= 0) setNotes(notesOf(stepNow));
   });
   const io = new IntersectionObserver(
     (es) => {
+      if (phone.matches) return;
       const vis = es.filter((e) => e.isIntersecting);
       if (vis.length) goStep(steps.nodes().indexOf(vis[0].target));
     },

@@ -59,7 +59,7 @@
     "steps": {
       "intro": {
         "h": "Como o Brasil votou em 2026",
-        "t": "<p>Cada ponto neste mapa representa 250 votos ou 250 pessoas que não votaram, distribuídos em volta do local de votação onde estão inscritas. Pontos <b class=\"sb\">azuis</b> são votos no campo bolsonarista, <b class=\"sr\">vermelhos</b> em Luiz Inácio Lula da Silva, <b class=\"sa\">amarelos</b> são eleitores que não votaram, e cinza, votos nos demais candidatos.</p><p>Role a página para ver onde o voto mudou entre o primeiro turno de 2022 e o de 2026.</p>"
+        "t": "<p>Cada ponto neste mapa representa 250 votos ou 250 pessoas que não votaram, distribuídos em volta do local de votação onde estão inscritas. Pontos <b class=\"sb\">azuis</b> são votos no campo bolsonarista, <b class=\"sr\">vermelhos</b> em Luiz Inácio Lula da Silva, <b class=\"sa\">amarelos</b> são eleitores que não votaram, e cinza, votos nos demais candidatos.</p><p>A seguir, onde o voto mudou entre o primeiro turno de 2022 e o de 2026.</p>"
       },
       "overview": {
         "h": "Lula perdeu terreno em quase todo o país",
@@ -209,6 +209,10 @@
       }
     },
     "cue": "Role para ler a reportagem",
+    "cueSwipe": "Deslize ou toque em › para a próxima parte",
+    "prev": "Parte anterior",
+    "next": "Próxima parte",
+    "resize": "Arraste para mudar o tamanho do painel de texto",
     "totals": "Totais de {year}",
     "brazil": "Brasil",
     "litPlaces": "locais de votação destacados",

@@ -125,6 +125,12 @@ export const zoom = d3
   });
 
 // panning stays within the map; in the story it may also move left under the cards
+// the projected country's height at zoom 1, for fitting it into the band above the phone story's cards
+export const mapH = () => {
+  const b = path.bounds(SG);
+  return b[1][1] - b[0][1];
+};
+
 export function panLimits(story) {
   const phone = story && innerWidth <= 900;
   zoom.translateExtent([
@@ -140,7 +146,7 @@ export function layout() {
   S.w = r.width;
   S.h = r.height;
   const { w, h } = S,
-    pad = Math.min(w, h) * 0.05;
+    pad = innerWidth <= 900 ? 6 : Math.min(w, h) * 0.05; // phones: every pixel of width goes to the map
   proj.fitExtent(
     [
       [pad, pad],

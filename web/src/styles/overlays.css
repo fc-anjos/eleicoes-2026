@@ -68,8 +68,7 @@
   .storymode .fbadge {
     left: 50%;
     max-width: calc(100% - 32px);
-    top: auto;
-    bottom: 70px;
+    top: 112px; /* under the totals, clear of the cards */
   }
 }
 
