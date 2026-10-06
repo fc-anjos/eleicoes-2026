@@ -294,7 +294,7 @@
   margin-bottom: 45vh;
 }
 .storymode .mapbar {
-  left: 476px;
+  left: calc(var(--story-w) + 16px);
 }
 @media (max-width: 900px) {
   .storymode aside {
