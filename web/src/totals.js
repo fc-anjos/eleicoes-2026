@@ -1,14 +1,14 @@
 // Totals for the panel and the story cards. Unfiltered, the figures are the official national ones (including votes
 // cast abroad); filtered, they are the totals of the municipalities that pass.
 import * as d3 from "d3";
-import { M, MG, ORDER, VPD, YEARS } from "./data.js";
+import { M, MG, ORDER, YEARS } from "./data.js";
 import { DOT } from "./dots.js";
 import { PASS, codeOf } from "./filters/filter.js";
 import { A8, AB, AO, K, S } from "./state.js";
 
-// With neighbourhood filters on, totals come from the dots of the passing groups (each dot is VPD people);
-// blank/null votes and 80+ eligible voters are added in each municipality's own proportion.
-function dotTotals(y) {
+// With neighbourhood filters on, totals add up the exact votes of the passing groups (polling places); blank/null
+// votes and 80+ eligible voters, known per municipality only, are added in each municipality's own proportion.
+function placeTotals(y) {
   const D = DOT[y],
     c = new Array(K).fill(0);
   let bn = 0,
@@ -21,7 +21,7 @@ function dotTotals(y) {
     for (let g = D.GM[r]; g < D.GM[r + 1]; g++) {
       if (!D.GP[g]) continue;
       any = 1;
-      for (let i = D.S[g]; i < D.S[g + 1]; i++) cm[D.C[i]] += VPD;
+      for (let i = 0, o = g * K; i < K; i++) cm[i] += D.GV[o + i];
     }
     if (!any) continue;
     cm.forEach((v, i) => (c[i] += v));
@@ -36,7 +36,7 @@ function dotTotals(y) {
 }
 
 function totals(y) {
-  if (S.PLACEF) return dotTotals(y);
+  if (S.PLACEF) return placeTotals(y);
   const c = new Array(K).fill(0);
   let bn = 0,
     e80 = 0;

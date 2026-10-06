@@ -218,13 +218,17 @@ def make_dots(mgeo, places, cat, others, opt, order, n_ref):
     the municipality's other places in proportion to their votes.
     """
 
-    def ndots(votes):  # one category per dot; random rounding keeps totals unbiased
+    def catvec(votes):  # votes by colour category
         cats = [0] * (max(cat.values()) + 1)
         for k, v in votes.items():
             cats[cat.get(k, others)] += v
+        return cats
+
+    def ndots(votes):  # one category per dot; random rounding keeps totals unbiased
+        cats = catvec(votes)
         return [c for c, v in enumerate(cats) for _ in range(int(v // VPD) + (random.random() < v % VPD / VPD))]
 
-    dots, counts, gcnt, gplace, spacing = [], [], [], [], []
+    dots, counts, gcnt, gplace, gvotes, spacing = [], [], [], [], [], []
     stats = {"place": 0, "spread": 0, "reassigned_votes": 0, "dropped_far_places": 0, "used_2024": 0, "empty_cells": 0}
     for fi in order:
         f = mgeo["features"][fi]
@@ -285,7 +289,10 @@ def make_dots(mgeo, places, cat, others, opt, order, n_ref):
         allp = np.vstack([pts, upts])
         grp = owner + [-1] * len(us)
         allc = cs + us
-        groups = {}
+        # every place is a group, even one too small to get a dot, so its exact votes still count in the totals
+        groups = {gi: [] for gi in range(len(keep))}
+        if sum(spread.values()):
+            groups[-1] = []
         for (x, y), c, gi in zip(allp, allc, grp, strict=True):
             groups.setdefault(gi, []).append([round(x * 1000), round(y * 1000), c])
         gl = list(groups.items())
@@ -294,13 +301,14 @@ def make_dots(mgeo, places, cat, others, opt, order, n_ref):
         for gi, mine in gl:
             random.shuffle(mine)
             gcnt.append(len(mine))
+            gvotes.append(catvec(keep[gi] if gi >= 0 else spread))
             gplace.append((kid[gi], float(P[gi][0]), float(P[gi][1])) if gi >= 0 else None)
             for d in mine:
                 dots += d
     print(
         stats, "lattice spacing km: median {:.3f}, p5 {:.3f}, p95 {:.3f}".format(*np.percentile(spacing, [50, 5, 95]))
     )
-    return dots, counts, gcnt, gplace
+    return dots, counts, gcnt, gplace, gvotes
 
 
 def pack(dots):
@@ -425,10 +433,13 @@ def main():
     for y in YEARS:
         cat = cats_y[y]
         opt = lambda code, y=y: studio.get(code, {}).get("opt", {}).get(y) or SHARE_DEFAULT
-        dots, counts, gcnt, gplace = make_dots(mgeo, places[y]["muns"], cat, cat[""], opt, order, n_ref)
+        dots, counts, gcnt, gplace, gvotes = make_dots(mgeo, places[y]["muns"], cat, cat[""], opt, order, n_ref)
         print(y, len(dots) // 3, "dots in", len(gcnt), "groups")
         pr = place_rows(gplace, prow, pxy, exact=(y == 2026))
         assert max(gcnt) < 65536
+        gv = np.array(gvotes, "<u4")
+        assert gv.shape[1] == len(keys)
+        gv16 = gv.max() < 65536  # exact votes per group and category, uint16 when they fit
         groups = np.array(pr, "<i4").tobytes() + np.array(gcnt, "<u2").tobytes()  # place rows, then dot counts
         years[y] = {
             **year_summary(y, places[y], keys, cat),
@@ -436,6 +447,8 @@ def main():
             "cnt": counts,
             "ng": len(gcnt),
             "groups": base64.b64encode(groups).decode(),
+            "gvotes": base64.b64encode(gv.astype("<u2" if gv16 else "<u4").tobytes()).decode(),
+            "gv16": bool(gv16),
         }
     muns = municipality_summaries(places, cats_y, studio)
     cats = [{"k": k, "col": COLOR[k]} for k in keys]

@@ -28,7 +28,8 @@ for (const y of YS) {
     U[2 * i + 1] = -Math.log(Math.tan(Math.PI / 4 + ((Y[i] + D.y0) * rad) / 2));
   }
   // dots come grouped by municipality (in ORDER, feature indices) and within it by polling place: GM holds each
-  // municipality's first group, S each group's first dot, GR its row in the place table (-1: none), GP whether it passes
+  // municipality's first group, S each group's first dot, GR its row in the place table (-1: none), GP whether it
+  // passes
   const cnt = YEARS[y].cnt,
     ng = YEARS[y].ng,
     gbytes = decode(YEARS[y].groups);
@@ -38,9 +39,13 @@ for (const y of YS) {
     GM = new Uint32Array(cnt.length + 1);
   for (let g = 0; g < ng; g++) Sg[g + 1] = Sg[g] + GC[g];
   for (let r = 0; r < cnt.length; r++) GM[r + 1] = GM[r] + cnt[r];
-  DOT[y] = { n, U, C, S: Sg, GM, GR, GP: new Uint8Array(ng).fill(1), P: new Float32Array(2 * n) };
+  // GV: each group's exact votes by colour category (K per group), for totals under polling-place filters
+  const vb = decode(YEARS[y].gvotes),
+    GV = YEARS[y].gv16 ? new Uint16Array(vb.buffer) : new Uint32Array(vb.buffer);
+  DOT[y] = { n, U, C, S: Sg, GM, GR, GV, GP: new Uint8Array(ng).fill(1), P: new Float32Array(2 * n) };
   delete D.b;
   delete YEARS[y].groups;
+  delete YEARS[y].gvotes;
 }
 
 // screen positions (before zoom) for the current projection scale and offset
