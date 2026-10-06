@@ -84,7 +84,15 @@
       },
       "small-towns": {
         "h": "Quanto menor a cidade, maior a mudança",
-        "t": "<p>Estes são os 25% dos municípios com menos habitantes, cada um com menos de cerca de 5.200 habitantes. 2022 fica à esquerda do divisor. A queda de Lula cresce de forma contínua à medida que os lugares ficam menores.</p>",
+        "t": "<p>Cada círculo é um município, posicionado pela população e pelo quanto a fatia de Lula mudou. Quanto maior o círculo, mais votos ele teve. A linha passa pela média de cada faixa de tamanho, ponderada pelos votos: ela cai de forma constante conforme os lugares ficam menores, de cerca de um ponto perdido nas maiores cidades a sete nas cidades com menos de 10 mil habitantes.</p>",
+        "chart": {
+          "title": "Votação de Lula por porte do município (habitantes)",
+          "labels": ["Até 10 mil", "10 mil–50 mil", "50 mil–200 mil", "200 mil–1 mi", "Mais de 1 mi"]
+        }
+      },
+      "small-towns-multiples": {
+        "h": "A mesma mudança, um mapa por tamanho de cidade",
+        "t": "<p>Os mesmos municípios, divididos em cinco mapas por população. Cada círculo são os votos líquidos que se moveram, azul para longe de Lula e vermelho na direção dele. As cidades pequenas são muitas e espalhadas pelo interior, e quase todas são azuis; entre as grandes cidades, vermelho e azul se misturam, e a fatia de Lula ali quase não se moveu.</p>",
         "chart": {
           "title": "Votação de Lula por porte do município (habitantes)",
           "labels": ["Até 10 mil", "10 mil–50 mil", "50 mil–200 mil", "200 mil–1 mi", "Mais de 1 mi"]
@@ -92,7 +100,7 @@
       },
       "abstention": {
         "h": "A abstenção quase não mudou",
-        "t": "<p>Em 2026, 33,5 milhões de pessoas inscritas não votaram, mais do que os votos de qualquer candidato, exceto os dois primeiros colocados. A abstenção subiu em todos os primeiros turnos presidenciais desde 2006, de 16,8% para 21,1%.</p><p>Desde 2022, ela subiu só 0,1 ponto e, por isso, não explica as perdas de Lula. Ele perdeu 3,4 milhões de votos, e o campo bolsonarista ganhou 5,0 milhões. Nos 25% dos municípios de menor renda média, onde Lula é mais forte, a abstenção caiu 2,5 pontos. Nos 25% de maior renda média, a abstenção subiu 0,9 ponto.</p><p>Cada círculo é um município. O tamanho é a variação no número de pessoas que não votaram. Ele é amarelo onde mais gente deixou de votar do que em 2022 e verde onde menos gente deixou.</p>",
+        "t": "<p>Em 2026, 33,5 milhões de pessoas inscritas não votaram, mais do que os votos de qualquer candidato, exceto os dois primeiros colocados. A abstenção subiu em todos os primeiros turnos presidenciais desde 2006, de 16,8% para 21,1%.</p><p>Desde 2022, ela subiu só 0,1 ponto e, por isso, não explica as perdas de Lula. Ele perdeu 3,4 milhões de votos, e o campo bolsonarista ganhou 5,0 milhões. Nos 25% dos municípios de menor renda média, onde Lula é mais forte, a abstenção caiu 2,5 pontos. Nos 25% de maior renda média, a abstenção subiu 0,9 ponto.</p><p>O mapa mostra a mudança na taxa de abstenção em cada município: âmbar onde mais gente ficou em casa do que em 2022, verde onde menos, cinza onde variou menos de um ponto. Os dois movimentos se anulam: a abstenção caiu no Norte e no Nordeste e subiu no Sul e no Sudeste. Ao lado, cada município é posicionado pela renda média e por essa mudança: a abstenção caiu nos lugares mais pobres e subiu nos mais ricos.</p>",
         "chart": {
           "title": "Abstenção no primeiro turno presidencial (% do eleitorado)",
           "note": "Fonte: TSE. Inclui eleitores no exterior."
@@ -478,6 +486,22 @@
     "abstUp": "mais gente não votou",
     "abstDown": "menos gente não votou",
     "keyDabstSize": "pessoas",
-    "keyDabstRate": "Variação da abstenção, 2022 → 2026, em pontos"
+    "keyDabstRate": "Variação da abstenção, 2022 → 2026, em pontos",
+    "scatter": "Gráfico",
+    "scatterTitle": "Um gráfico no lugar do mapa: cada município por uma variável e pela mudança na fatia de Lula",
+    "multiples": "Painéis",
+    "multiplesTitle": "Um mapa pequeno por faixa de uma variável, cada um com os círculos daquela faixa",
+    "under": "Menos de {n}",
+    "over": "{n} ou mais",
+    "scatterX": "{name} (cada círculo é um município; sua área são os votos válidos)",
+    "scatterY": "Mudança na fatia de Lula, 2022 → 2026, em pontos",
+    "scatterTrend": "média de cada faixa, ponderada pelos votos",
+    "lulaShare": "Lula",
+    "nMuni": "{n} municípios",
+    "keyMultiples": "Municípios por {name}",
+    "keyMarginNames": "Nomes: margem de Lula em pontos, 2022 → 2026",
+    "scatterYAbst": "Mudança na taxa de abstenção, 2022 → 2026, em pontos",
+    "keyRoll": "eleitores no cadastro",
+    "scatterXShort": "{name} (área do círculo: eleitores)"
   }
 }

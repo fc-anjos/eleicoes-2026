@@ -90,7 +90,16 @@
   {
     "id": "small-towns",
     "block": "size",
-    "view": "y=cmp&split=0.5&at=home&f=pop_2022:0-25",
+    "view": "y=2026&at=home&viz=scatter*&vc=moved&vx=pop_2022&vcuts=10000,50000,200000,1000000",
+    "chart": {
+      "by": "pop_2022",
+      "cuts": [10000, 50000, 200000, 1000000]
+    }
+  },
+  {
+    "id": "small-towns-multiples",
+    "block": "size",
+    "view": "y=2026&at=home&viz=multiples*&vc=moved&vx=pop_2022&vcuts=10000,50000,200000,1000000",
     "chart": {
       "by": "pop_2022",
       "cuts": [10000, 50000, 200000, 1000000]
@@ -99,7 +108,7 @@
   {
     "id": "capitals",
     "block": "size",
-    "view": "y=2026&at=-43.25,-22.85,12&viz=circles*&vc=moved&big=1",
+    "view": "y=2026&at=-43.25,-22.85,12&viz=circles*&vc=margin&big=1",
     "chart": {
       "by": "capital"
     }
@@ -241,7 +250,7 @@
   {
     "id": "abstention",
     "block": "abstention",
-    "view": "y=2026&at=home&viz=circles*&vc=dabst",
+    "view": "y=2026&at=home&viz=margins*&vc=dabst&panel=scatter&vx=renda_dom_pc_media_2022&vy=dabst",
     "chart": {
       "by": "series",
       "min": 10,

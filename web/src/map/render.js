@@ -14,6 +14,7 @@ import { A8, DC, HID, PX, S, hidden } from "../state.js";
 import { saveSoon } from "../view/hash.js";
 import { drawArrows } from "./arrows.js";
 import { blend, drawKey, drawMarks, fixedDots } from "./marks.js";
+import { drawPanels, flat } from "./panels.js";
 import { svg } from "./base.js";
 
 const cv = document.getElementById("cv"),
@@ -251,10 +252,10 @@ function paint(t) {
     const v = TI[j];
     if (v) hist[((v - ilo) * sc) | 0]++;
   }
-  // under swing arrows the dots recede; under margins they fade to a faint texture; under circles they go, so a
-  // map never shows two kinds of round mark at once
-  const b = S.VIZ === "circles" || S.VIZ === "margins" ? blend(t.k) : 0,
-    dim = (S.ARROWS ? 0.3 : 1) * (1 - (S.VIZ === "circles" ? 1 : 0.85) * b);
+  // under swing arrows the dots recede; under margins they fade to a faint texture; under circles (and the chart
+  // views) they go, so a map never shows two kinds of round mark at once
+  const b = S.VIZ === "circles" || S.VIZ === "margins" || flat() ? blend(t.k) : 0,
+    dim = (S.ARROWS ? 0.3 : 1) * (1 - (S.VIZ === "circles" || flat() ? 1 : 0.85) * b);
   for (let b = 0, below = 0; b < 1024; b++) {
     LUT[b] = 255 * dim * (ALO + ((1 - ALO) * below) / Math.max(1, m));
     below += hist[b];
@@ -271,7 +272,11 @@ function paint(t) {
     out[j] = ((LUT[b] << 24) | PX[TOP[j]]) >>> 0;
   }
   cx.putImageData(img, 0, 0);
-  drawMarks(cx, t, W, H, dpr);
+  if (flat()) drawPanels(cx, S.YEAR, dpr);
+  else {
+    drawMarks(cx, t, W, H, dpr);
+    if (S.PANEL) drawPanels(cx, S.YEAR, dpr);
+  }
   drawKey(t);
   if (S.ARROWS) drawArrows(cx, t, W, H);
   drawn = t;

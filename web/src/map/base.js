@@ -17,14 +17,14 @@ import { resizeCanvas, schedulePaint } from "./render.js";
 export const proj = d3.geoMercator(),
   path = d3.geoPath(proj);
 export const svg = d3.select("#map");
-const tip = d3.select("#tip"),
-  g = svg.append("g");
+export const tip = d3.select("#tip");
+const g = svg.append("g");
 export const MAXK = 400; // deep enough for the smallest municipalities to fill the screen
 
 let mu, uf, outer, mskIn, hl, sl;
 
 // the tooltip: this year's top candidates, then the same camps in the other year, and abstention in both
-function showTip(e, f) {
+export function showTip(e, f) {
   const { YEAR } = S,
     m = M[f.properties.codarea],
     a = tally(YEAR, m);
@@ -137,7 +137,7 @@ export function panLimits(story) {
     [story && !phone ? -S.w * 0.4 : phone ? -S.w * 0.3 : 0, phone ? -S.h * 0.2 : 0],
     [phone ? S.w * 1.3 : S.w, phone ? S.h * 1.5 : S.h],
   ]);
-  zoom.scaleExtent([phone ? 0.5 : 1, MAXK]);
+  zoom.scaleExtent([phone || S.PANEL ? 0.5 : 1, MAXK]); // a chart panel beside the map leaves it less than the window
 }
 
 // the map fills its container: on load and on resize, refit the projection and reallocate the pixel buffers

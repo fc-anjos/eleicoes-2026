@@ -25,8 +25,10 @@ import { A8, AB, AO, CI, COLS, K, S, YS, css } from "../state.js";
 import { CAPITALS, abRate, lulaShift, tally } from "../stats.js";
 import { DOT, layers } from "../dots.js";
 import { path, svg } from "./base.js";
+import { cellK, flat, panelVar } from "./panels.js";
 
-export const VIZS = ["dots", "outline", "circles", "margins"];
+// scatter and multiples leave the map for a chart (see panels.js)
+export const VIZS = ["dots", "outline", "circles", "margins", "scatter", "multiples"];
 // what the colour shows; candidates' shares are added as share-<ballot number>
 export const VCOLS = ["moved", "change", "margin", "mix", "abst", "dabst"];
 // the fade between dots and the comparison view, by zoom: it starts at S.VIZK (Studio → Display) and is
@@ -34,7 +36,7 @@ export const VCOLS = ["moved", "change", "margin", "mix", "abst", "dabst"];
 // 0: dots only, 1: the comparison view fully in
 export function blend(k) {
   if (S.VIZ === "dots") return 0;
-  if (S.VIZALL || S.VIZK <= 1.01) return 1;
+  if (flat() || S.VIZALL || S.VIZK <= 1.01) return 1;
   const k0 = S.VIZK,
     k1 = (k0 * 7) / 3,
     u = Math.max(0, Math.min(1, (k - k0) / (k1 - k0)));
@@ -48,7 +50,7 @@ export const fixedDots = (k) => S.VIZ === "outline" && blend(k) > 0;
 // Cleared when the 80+ switch changes the abstention.
 const RES = {};
 let resInc = null;
-function results(y) {
+export function results(y) {
   if (resInc !== S.INC80) for (const k in RES) delete RES[k];
   resInc = S.INC80;
   if (RES[y]) return RES[y];
@@ -183,7 +185,7 @@ const flipped = (i) => {
 // projected shapes (Path2D at zoom 1), centroids, bounds and areas, refreshed on each layout
 let GEO = null,
   geoGen = -1;
-function geo() {
+export function geo() {
   if (geoGen === S.layoutGen) return GEO;
   geoGen = S.layoutGen;
   const shapes = MG.features.map((f) => new Path2D(path(f) || "")),
@@ -194,29 +196,35 @@ function geo() {
   return (GEO = { shapes, cen, bb, area, perim });
 }
 
-// margin → how far the colour goes from the background towards the leader's (40+ points: all the way)
-const MSAT = 40;
-const tint = (col, margin, bg) => d3.interpolateRgb(bg, col)(0.18 + 0.82 * Math.min(1, margin / MSAT));
-// change: a grey midpoint (no change) out to Lula's colour where he gained and the Bolsonaro camp's where he lost,
-// full at ±CSAT points; a sequential ramp from near the background to one hue for shares and abstention
-const CSAT = 12,
-  MID = "#3d4048";
-const diverge = (v) => d3.interpolateRgb(MID, COLS[v >= 0 ? CI("13") : CI("22")])(Math.min(1, Math.abs(v) / CSAT));
+// Diverging scales: two hues either side of a neutral grey midpoint, in classes with equal colour steps per arm
+// (Brewer's rule), so a close race or a small change reads as grey, not as a faint tint of a side. The grey keeps
+// a 2:1 contrast on the night background. Steps are in Lab, so each is as far from the last as the eye sees it.
+const MID = "#5a5d66";
+const arm = (col, u) => d3.interpolateLab(MID, col)(u);
+// the leader's margin: within MCUTS[0] points is grey, then three classes of each side
+const MCUTS = [5, 15, 30],
+  MSTEP = [0, 0.42, 0.72, 1];
+const mclass = (m) => MCUTS.filter((c) => m >= c).length;
+const marginCol = (lead, m) => (mclass(m) ? arm(COLS[lead], MSTEP[mclass(m)]) : MID);
+// change in Lula's share: grey out to Lula's colour where he gained and the Bolsonaro camp's where he lost, full at
+// ±CSAT points (continuous, for the dots' companion views)
+const CSAT = 12;
+const diverge = (v) => arm(COLS[v >= 0 ? CI("13") : CI("22")], Math.min(1, Math.abs(v) / CSAT));
+// a sequential ramp from near the background to one hue, for shares and abstention
 const seq = (col, u, bg) => d3.interpolateRgb(bg, col)(0.15 + 0.85 * Math.max(0, Math.min(1, u)));
-const DSAT = 8; // abstention change, points
+// the change in the abstention rate: within ±DCUTS[0] points grey, then two classes each way, amber where more
+// stayed home and green where fewer did
+const DCUTS = [1, 3],
+  DSTEP = [0, 0.55, 1];
+const dclass = (d) => DCUTS.filter((c) => Math.abs(d) >= c).length;
+const dabstCol = (d) => (dclass(d) ? arm(d > 0 ? COLS[CI("A")] : SHARE, DSTEP[dclass(d)]) : MID);
 const ABR = [10, 35]; // abstention range, %
-const SHARE = "#3fbf8f";
+export const SHARE = "#3fbf8f";
 // the measure behind the colour: {col(r) → colour or null, hatch(i)}
-function measure(y, bg) {
+export function measure(y, bg) {
   const v = S.VCOL;
   if (v === "change" || v === "moved") return { col: (r) => (r.dl == null ? null : diverge(r.dl)) };
-  if (v === "dabst")
-    return {
-      col: (r) =>
-        r.da == null
-          ? null
-          : d3.interpolateRgb(MID, r.da > 0 ? COLS[CI("A")] : SHARE)(Math.min(1, Math.abs(r.da) / DSAT)),
-    };
+  if (v === "dabst") return { col: (r) => (r.da == null ? null : dabstCol(r.da)) };
   if (v === "abst")
     return { col: (r) => (r.ab == null ? null : seq(COLS[CI("A")], (r.ab - ABR[0]) / (ABR[1] - ABR[0]), bg)) };
   if (v.startsWith("share-")) {
@@ -224,7 +232,7 @@ function measure(y, bg) {
     return { col: (r) => (get(r) == null ? null : seq(col, SSTEP[sclass(get(r))], bg)) };
   }
   if (v === "mix") return { col: (r) => COLS[r.lead], layers: hatchMix };
-  return { col: (r) => tint(COLS[r.lead], r.margin, bg), hatch: flipped };
+  return { col: (r) => marginCol(r.lead, r.margin), hatch: flipped };
 }
 // a candidate's (or the smaller candidates') share: its getter, colour and the top of its scale (the highest value
 // over both years, so the two sides of the divider share one scale). One hue for every candidate, since some
@@ -240,8 +248,8 @@ export function shareOf(k) {
 }
 // circle radius in css px: area ∝ votes (a sqrt scale, as in Bostock's bubble maps), following the zoom gently so a
 // city doesn't swallow the screen. One national scale whatever the filter, so a small town always looks small: the
-// circles of all municipalities together cover about a third of the country's land at zoom 1.
-const COVER = { votes: 0.33, moved: 0.14 };
+// circles of all municipalities together cover about a fifth of the country's land at zoom 1.
+const COVER = { votes: 0.2, moved: 0.14 };
 // the scale: css px per √vote at zoom K0 (1 for the country; for one municipality's polling places, the zoom at which
 // it fills the window, so its circles cover the same share of it as the country's do of the country)
 let RC = 0.012,
@@ -256,9 +264,9 @@ const NET = {
   moved: { val: (r) => (Math.abs(r.dl || 0) / 100) * r.valid, col: (r) => COLS[CI(r.dl < 0 ? "22" : "13")] },
   dabst: { val: (r) => (Math.abs(r.da || 0) / 100) * r.roll, col: (r) => (r.da > 0 ? COLS[CI("A")] : SHARE) },
 };
-const moved = () => NET[S.VCOL];
+export const moved = () => NET[S.VCOL];
 const sizeOf = (r) => (moved() ? moved().val(r) : r.valid);
-function fitScale(y) {
+export function fitScale(y) {
   const one = byPlace(),
     key = [S.layoutGen, S.VCOL, one ? [...S.INSET][0] : "", S.w, S.h].join("|");
   if (rcKey === key) return RC;
@@ -280,7 +288,7 @@ function fitScale(y) {
   }
   return (RC = v ? Math.sqrt((cover * a) / (Math.PI * v)) : RC);
 }
-const rad = (v, k) => RC * Math.sqrt(k / K0) * Math.sqrt(v);
+export const rad = (v, k) => RC * Math.sqrt(k / K0) * Math.sqrt(v);
 
 // Inside one municipality (a view limited to it, as the São Paulo steps are) the circles are its polling places: one
 // per place at the middle of its dots, from each place's exact votes in both years (matched by the place's row), so
@@ -346,9 +354,9 @@ function places(y) {
   return (PL[y] = out);
 }
 
-const RMIN = 1.3,
+export const RMIN = 1.3,
   GHOST = 0.06;
-function disc(cx, x, y, r, fills) {
+export function disc(cx, x, y, r, fills) {
   cx.beginPath();
   cx.arc(x, y, Math.max(0.5, r), 0, 2 * Math.PI);
   for (const f of fills) {
@@ -383,6 +391,7 @@ export function cityNotes(t) {
     R = results(YS[0]),
     P = results(YS[1]),
     L = CI("13"),
+    B = CI("22"),
     story = d3.select("#page").classed("storymode") && innerWidth > 900,
     x0 = story ? document.querySelector("aside").getBoundingClientRect().width : 0,
     key = document.getElementById("vkey").getBoundingClientRect(),
@@ -402,8 +411,15 @@ export function cityNotes(t) {
     .slice(0, NAMED);
   const out = [];
   for (const i of top) {
+    // named with Lula's share in both years, or his margin when the colour is the margin, so a flip reads as
+    // how close it was
     const name = M[MG.features[i].properties.codarea].n,
-      text = `${name} ${pctN(P[i].sh[L])} → ${pctN(R[i].sh[L])}`,
+      mg = (r) => r.sh[L] - (r.sh[B] || 0),
+      sg = (v) => (v >= 0 ? "+" : "−") + num(Math.abs(v), 0),
+      text =
+        S.VCOL === "margin"
+          ? `${name} ${sg(mg(P[i]))} → ${sg(mg(R[i]))}`
+          : `${name} ${pctN(P[i].sh[L])} → ${pctN(R[i].sh[L])}`,
       [x, y] = at(i),
       w = 7.4 * text.length;
     const box = ([dx, dy]) =>
@@ -530,23 +546,27 @@ export function vizHint(k = d3.zoomTransform(svg.node()).k) {
 const bar = (cols, ends) =>
   `<div class="kbar" style="background:linear-gradient(90deg,${cols.join(",")})"></div>` +
   `<div class="kax">${ends.map((e) => `<span>${e}</span>`).join("")}</div>`;
+// a classed scale: one block per class, labelled by lab(value, index)
+const steps = (cls, lab) =>
+  `<div class="ksteps">${cls.map(([c, v], i) => `<span><i style="background:${c}"></i>${lab(v, i)}</span>`).join("")}</div>`;
 const chip = (c, n, cls = "") => `<span><i class="${cls}" style="--c:${c}"></i>${n}</span>`;
 // nested circles on one baseline: the biggest round number that fits the key, then about a fifth and a twentieth of it
 const STEPS = [1e7, 5e6, 2e6, 1e6, 5e5, 2e5, 1e5, 5e4, 2e4, 1e4, 5e3, 2e3, 1e3, 500, 200, 100];
-function sizes(k) {
+// rf: the radius of n votes (the circles' at zoom k unless given)
+function sizes(k, rf = (n) => rad(n, k)) {
   const i = Math.max(
       0,
-      STEPS.findIndex((n) => rad(n, k) <= 22),
+      STEPS.findIndex((n) => rf(n) <= 22),
     ),
     ns = [STEPS[i], STEPS[i + 2], STEPS[i + 4]].filter(Boolean),
-    R = rad(ns[0], k),
+    R = rf(ns[0]),
     pad = 7,
     w = 2 * R + 52,
     h = 2 * R + pad + 1;
   // labels sit at each circle's top, pushed down where two would touch
   let last = -Infinity;
   const rows = ns.map((n) => {
-    const r = rad(n, k),
+    const r = rf(n),
       y = h - 1 - 2 * r,
       ty = (last = Math.max(y, last + 11));
     return { n, r, y, ty };
@@ -570,10 +590,11 @@ export function drawKey(t = d3.zoomTransform(svg.node())) {
   vizHint(t.k);
   const key = d3.select("#vkey"),
     b = blend(t.k),
-    on = b > 0 && S.VIZ !== "dots";
+    on = b > 0 && S.VIZ !== "dots" && S.VIZ !== "scatter"; // the scatter carries its own key
   key.property("hidden", !on);
+  d3.select("#page").classed("flat", flat());
   // the dots' own key steps back once the view has fully replaced them
-  d3.select(".mapbar .key").classed("nodots", on && b >= 1 && S.VIZ !== "outline");
+  d3.select(".mapbar .key").classed("nodots", flat() || (on && b >= 1 && S.VIZ !== "outline"));
   if (!on) return;
   const bg = css("--night") || "#0b0e14",
     v = S.VCOL,
@@ -594,11 +615,18 @@ export function drawKey(t = d3.zoomTransform(svg.node())) {
       HATCHES.map(([k, cat]) => chip(COLS[CI(cat)], name[k], "hatch")).join("") +
       `</div>` +
       (S.VIZ === "circles" ? "" : `<div class="kn">${tr("viz.keyGrain")}</div>`);
-  else if (v === "dabst")
+  else if (v === "dabst") {
+    // classes either side of grey: fell 3+, fell 1–3, within 1, rose 1–3, rose 3+
+    const cls = [-3, -1, 0, 1, 3].map((d) => [dabstCol(d), d]);
     h =
       `<div class="kt">${tr("viz.keyDabstRate")}</div>` +
-      bar([SHARE, MID, COLS[CI("A")]], [`−${DSAT}`, "0", tr("viz.gained", { n: DSAT })]);
-  else if (v === "abst") {
+      steps(cls, (d, i) =>
+        i === 2
+          ? `±${DCUTS[0]}`
+          : (d > 0 ? "+" : "−") + DCUTS[Math.abs(d) === 1 ? 0 : 1] + (Math.abs(d) === 3 ? "+" : ""),
+      ) +
+      `<div class="kax"><span>${tr("viz.abstDown")}</span><span>${tr("viz.abstUp")}</span></div>`;
+  } else if (v === "abst") {
     const cols = [0, 0.5, 1].map((u) => seq(COLS[CI("A")], u, bg));
     h = `<div class="kt">${tr("viz.keyAbst")}</div>` + bar(cols, [ABR[0] + "%", ABR[1] + "%"]);
   } else if (v.startsWith("share-")) {
@@ -611,13 +639,29 @@ export function drawKey(t = d3.zoomTransform(svg.node())) {
       ).join("") +
       `</div>`;
   } else {
-    const ramp = (c, rev) => (rev ? [MSAT, 20, 0] : [0, 20, MSAT]).map((m) => tint(c, m, bg));
+    // Lula's classes left, grey in the middle, the camp's right
+    const L = CI("13"),
+      B = CI("22"),
+      cls = [
+        ...[30, 15, 5].map((m) => [marginCol(L, m), m]),
+        [MID, 0],
+        ...[5, 15, 30].map((m) => [marginCol(B, m), m]),
+      ];
     h =
       `<div class="kt">${tr("viz.keyMargin")}</div>` +
-      bar([...ramp(lula, true), ...ramp(camp)], [`Lula +${MSAT}`, "0", `${name.b} +${MSAT}`]);
-    if (S.VIZ === "margins") h += `<div class="kchips">${chip(tint(lula, MSAT, bg), tr("viz.keyFlip"), "hatch")}</div>`;
+      steps(cls, (m) => (m ? `${m}${m === 30 ? "+" : ""}` : `<${MCUTS[0]}`)) +
+      `<div class="kax"><span>Lula</span><span>${name.b}</span></div>`;
+    if (S.VIZ === "margins") h += `<div class="kchips">${chip(marginCol(L, 30), tr("viz.keyFlip"), "hatch")}</div>`;
+    if (S.BIG && S.VIZ === "circles") h += `<div class="kn">${tr("viz.keyMarginNames")}</div>`;
   }
-  if (S.VIZ === "circles") {
+  // the multiples: the circles' two colours and their sizes at the cells' zoom
+  if (flat()) {
+    h =
+      `<div class="kt">${tr("viz.keyMultiples", { name: panelVar().n })}</div><div class="kchips">` +
+      chip(camp, tr("viz.movedAway")) +
+      chip(lula, tr("viz.movedTo")) +
+      `</div><div class="kcirc"><div class="krow">${sizes(cellK())}<div class="kn">${tr("viz.keyMovedSize")}</div></div></div>`;
+  } else if (S.VIZ === "circles") {
     const mv = moved();
     if (mv)
       h =

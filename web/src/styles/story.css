@@ -899,3 +899,16 @@
   color: var(--haze);
   margin-bottom: 8px;
 }
+/* the chart views (scatter, multiples) replace the map: its borders and names step aside */
+.flat #map g {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+/* beside a chart panel the key moves to the map's top-left corner, clear of the chart and above the country */
+.panelled .akey.vkey {
+  right: auto;
+  bottom: auto;
+  top: 56px;
+  left: calc(var(--story-w, 0px) + 20px);
+}

@@ -4,12 +4,13 @@
 // settings, and whether the studio is open. "embed" hides both side panels. The hash is rewritten as the view
 // changes.
 import * as d3 from "d3";
-import { CATS, M, VPD } from "../data.js";
+import { CATS, M, SG, VPD } from "../data.js";
 import { computeFilter } from "../filters/filter.js";
 import { VARS, isOn, resetVar } from "../filters/vars.js";
 import { setArrows } from "../map/arrows.js";
-import { MAXK, getView, layout, mapH, panLimits, proj, svg, zoom } from "../map/base.js";
+import { MAXK, getView, layout, mapH, panLimits, path, proj, svg, zoom } from "../map/base.js";
 import { placeSwipe, setMode } from "../map/compare.js";
+import { DEF_VX, mapFrame, panelled } from "../map/panels.js";
 import { repaint } from "../map/render.js";
 import { panelIfShown, setFocus } from "../panel/results.js";
 import { STEPS, drawArea, drawRange, setVcol, setViz } from "../panel/studio.js";
@@ -44,6 +45,10 @@ export function stateHash(embed) {
   if (!S.ADAPT) q.set("size", "zoom");
   if (S.VIZ !== "dots") q.set("viz", S.VIZ + (S.VIZALL ? "*" : ""));
   if (S.VCOL !== "change") q.set("vc", S.VCOL);
+  if (S.VX !== DEF_VX) q.set("vx", S.VX);
+  if (S.VCUTS.length) q.set("vcuts", S.VCUTS.join(","));
+  if (S.VY !== "dlula") q.set("vy", S.VY);
+  if (S.PANEL) q.set("panel", S.PANEL);
   if (Math.abs(S.VIZK - 3) > 0.01) q.set("vizk", +S.VIZK.toFixed(2));
   if (S.STEP !== 1) q.set("vpd", S.STEP * VPD);
   if (S.SIZE !== 1) q.set("scale", (+d3.select("#rad").property("value")).toFixed(2));
@@ -161,6 +166,14 @@ export function applyState(str, animate) {
     });
   }
   S.BIG = q.has("big");
+  S.VX = VARS.some((v) => v.k === q.get("vx")) ? q.get("vx") : DEF_VX;
+  S.VCUTS = (q.get("vcuts") || "")
+    .split(",")
+    .map(Number)
+    .filter((x) => isFinite(x) && x > 0);
+  S.VY = q.get("vy") === "dabst" ? "dabst" : "dlula";
+  S.PANEL = q.get("panel") === "scatter" ? "scatter" : null;
+  d3.select("#page").classed("panelled", panelled());
   setViz(q.get("viz"), false);
   setVcol(q.get("vc"), false);
   if (q.has("vizk") && +q.get("vizk") > 0)
@@ -225,10 +238,8 @@ export function applyState(str, animate) {
   panelIfShown();
   // refit only if the panels changed the map's size
   const r = document.getElementById("wrap").getBoundingClientRect();
-  if (r.width !== S.w || r.height !== S.h) {
-    layout();
-    panLimits(page.classed("storymode"));
-  }
+  if (r.width !== S.w || r.height !== S.h) layout();
+  panLimits(page.classed("storymode"));
   const at = q.get("at"),
     a3 = (at || "").split(",").map(Number);
   const off = storyOffset(),
@@ -242,7 +253,15 @@ export function applyState(str, animate) {
             .translate(-S.w / 2, -S.h / 2)
         : d3.zoomIdentity;
   let t = null;
-  if (at === "home") t = home;
+  if (at === "home" && panelled()) {
+    // beside a chart panel, the country fits the map's part of the frame
+    const f = mapFrame(),
+      [[x0, y0], [x1, y1]] = path.bounds(SG),
+      k = Math.min(1, 0.92 * Math.min((f.x1 - f.x0) / (x1 - x0), (f.y1 - f.y0) / (y1 - y0)));
+    t = d3.zoomIdentity
+      .translate((f.x0 + f.x1) / 2 - (k * (x0 + x1)) / 2, (f.y0 + f.y1) / 2 - (k * (y0 + y1)) / 2)
+      .scale(k);
+  } else if (at === "home") t = home;
   else if (a3.length === 3 && a3.every(isFinite)) {
     const p = proj([a3[0], a3[1]]);
     t = d3.zoomIdentity

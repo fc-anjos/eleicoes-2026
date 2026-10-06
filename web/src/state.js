@@ -41,6 +41,10 @@ export const S = {
   VIZK: 3, // the zoom where the zoomed-in view starts to fade in (fully in at 7/3 of it)
   VCOL: "change", // what the zoomed-in view's colour shows: moved, change, margin, abst or share-<ballot number> (map/marks.js)
   VIZ: "dots", // zoomed in: dots, outline (dots + winner), circles or margins (see map/marks.js)
+  VX: "pop_2022", // the chart views' variable and the values dividing its bands (map/panels.js; vx= and vcuts= in the view)
+  VCUTS: [],
+  VY: "dlula", // the scatter's y: the change in Lula's share or in the abstention rate (vy=)
+  PANEL: null, // "scatter": the scatter beside the map (panel=)
   sel: null, // the selected municipality (a feature of MG)
   NOTES: [], // map notes of the current story step
   restoring: true, // applying a view: don't write the hash back meanwhile

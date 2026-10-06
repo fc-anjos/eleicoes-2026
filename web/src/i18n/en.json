@@ -84,7 +84,15 @@
       },
       "small-towns": {
         "h": "The smaller the town, the bigger the shift",
-        "t": "<p>These are the smallest quarter of municipalities, each with fewer than about 5,200 residents. 2022 is on the left of the divider. The fall in Lula's share grows steadily as places get smaller.</p>",
+        "t": "<p>Each circle is a municipality, placed by its population and by how much Lula's share changed. The bigger the circle, the more votes it cast. The line runs through the average of each size band, weighted by votes: it falls steadily as places get smaller, from about one point lost in the biggest cities to seven in towns under 10,000 residents.</p>",
+        "chart": {
+          "title": "Lula's share by municipality size (residents)",
+          "labels": ["Under 10k", "10k–50k", "50k–200k", "200k–1M", "Over 1M"]
+        }
+      },
+      "small-towns-multiples": {
+        "h": "The same shift, one map per town size",
+        "t": "<p>The same municipalities, split into five maps by population. Each circle is the net votes that moved, blue away from Lula and red towards him. The small towns are many and spread across the interior, and almost every one is blue; among the big cities red and blue are mixed, and Lula's share there barely moved.</p>",
         "chart": {
           "title": "Lula's share by municipality size (residents)",
           "labels": ["Under 10k", "10k–50k", "50k–200k", "200k–1M", "Over 1M"]
@@ -92,7 +100,7 @@
       },
       "abstention": {
         "h": "Abstention barely changed",
-        "t": "<p>In 2026, 33.5 million people on the roll did not vote, more than voted for any candidate except the two leaders. Abstention has risen in every presidential first round since 2006, from 16.8 percent to 21.1 percent.</p><p>It rose by only 0.1 points from 2022, so it does not explain Lula's losses. He lost 3.4 million votes, and the Bolsonaro camp gained 5.0 million. In the quarter of municipalities with the lowest average income, where Lula is strongest, abstention fell 2.5 points. In the quarter with the highest average income, abstention rose 0.9 points.</p><p>Each circle is a municipality. Its size is the change in the number of people who did not vote. It is amber where more stayed home than in 2022 and green where fewer did.</p>",
+        "t": "<p>In 2026, 33.5 million people on the roll did not vote, more than voted for any candidate except the two leaders. Abstention has risen in every presidential first round since 2006, from 16.8 percent to 21.1 percent.</p><p>It rose by only 0.1 points from 2022, so it does not explain Lula's losses. He lost 3.4 million votes, and the Bolsonaro camp gained 5.0 million. In the quarter of municipalities with the lowest average income, where Lula is strongest, abstention fell 2.5 points. In the quarter with the highest average income, abstention rose 0.9 points.</p><p>The map shows the change in the abstention rate in each municipality: amber where more people stayed home than in 2022, green where fewer did, grey where it moved by less than a point. The two moves cancel out: abstention fell across the North and Northeast and rose in the South and South-east. Beside it, each municipality is placed by its average income and by that change: abstention fell in the poorest places and rose in the richest.</p>",
         "chart": {
           "title": "Abstention, presidential first round (% of the roll)",
           "note": "Source: TSE. Includes voters abroad."
@@ -478,6 +486,22 @@
     "abstUp": "more stayed home",
     "abstDown": "fewer stayed home",
     "keyDabstSize": "people",
-    "keyDabstRate": "Change in abstention, 2022 → 2026, in points"
+    "keyDabstRate": "Change in abstention, 2022 → 2026, in points",
+    "scatter": "Chart",
+    "scatterTitle": "A chart in place of the map: each municipality by a variable and the change in Lula's share",
+    "multiples": "Panels",
+    "multiplesTitle": "One small map per band of a variable, each with that band's circles",
+    "under": "Under {n}",
+    "over": "{n} and over",
+    "scatterX": "{name} (each circle is a municipality; its area is its valid votes)",
+    "scatterY": "Change in Lula's share, 2022 → 2026, in points",
+    "scatterTrend": "average of each band, weighted by votes",
+    "lulaShare": "Lula",
+    "nMuni": "{n} municipalities",
+    "keyMultiples": "Municipalities by {name}",
+    "keyMarginNames": "Names: Lula's margin in points, 2022 → 2026",
+    "scatterYAbst": "Change in the abstention rate, 2022 → 2026, in points",
+    "keyRoll": "people on the roll",
+    "scatterXShort": "{name} (circle area: voters)"
   }
 }
