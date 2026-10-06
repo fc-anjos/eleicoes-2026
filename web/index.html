@@ -9,11 +9,6 @@
 </style></head><body><div class="page" id="page">
  <div id="wrap"><canvas id="cv"></canvas><svg id="map" aria-label="Dot map of votes by municipality"></svg>
   <div id="swipe" hidden><span class="yl" id="swl"></span><span class="yl r" id="swr"></span><div class="grip" role="slider" tabindex="0" aria-label="Divider between years" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4 2 8l4 4M10 4l4 4-4 4"/></svg></div></div>
-  <div class="ctl"><button id="gear" aria-label="Display settings" aria-expanded="false" aria-controls="ctlp"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><div id="ctlp" hidden>
-   <div class="lbl"><span>Dot size</span><div id="mode" role="group" aria-label="Dot sizing"><button data-m="a" aria-pressed="true" title="Sized to the dots in view">Adaptive</button><button data-m="f" aria-pressed="false" title="Sized by zoom only">By zoom</button></div></div>
-   <label><span>Votes per dot</span><input id="vpd" type="range" min="0" max="5" step="1" value="0"><output id="vpdv">250</output></label>
-   <label><span>Scale</span><input id="rad" type="range" min="-1" max="1" step=".05" value="0"><output id="radv">1×</output></label>
-  </div></div>
   <div class="mapbar">
    <div class="key"><span class="k-dot"></span><b>1 dot = <span class="vpd">__VPD__</span> votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
    <div class="credit">Created by <b>Felipe dos Anjos</b><br><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> · <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br>Data: <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a></div></div></div>
@@ -23,12 +18,31 @@
   <h1>Brazil's presidential election, first round</h1>
   <p class="deck">1 dot = <b><span class="vpd">__VPD__</span> votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.</p>
   <div class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg><input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="qlist" aria-autocomplete="list" placeholder="Search a municipality" autocomplete="off"><ul id="qlist" role="listbox" hidden></ul></div>
-  <div id="cands"></div>
+<div id="cands"></div>
   <p class="studio-note">Toggle a row to hide it; click its swatch to change its colour. <button id="reset" class="link">Reset</button></p>
  </aside>
+ <section class="studio" id="studio" aria-label="Studio">
+  <div class="sh"><button id="studiox" aria-expanded="true" aria-controls="studiob" title="Hide the studio"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button><h2>Studio</h2></div>
+  <div id="studiob">
+   <h3>Display</h3>
+   <div class="disp">
+   <div class="lbl"><span>Dot size</span><div id="mode" role="group" aria-label="Dot sizing"><button data-m="a" aria-pressed="true" title="Sized to the dots in view">Adaptive</button><button data-m="f" aria-pressed="false" title="Sized by zoom only">By zoom</button></div></div>
+   <label><span>Votes per dot</span><input id="vpd" type="range" min="0" max="5" step="1" value="0"><output id="vpdv">250</output></label>
+   <label><span>Scale</span><input id="rad" type="range" min="-1" max="1" step=".05" value="0"><output id="radv">1×</output></label>
+   </div>
+   <h3>Abstention</h3>
+   <div class="sec"><span class="fn">Didn't vote</span><div id="asplit" class="seg" role="group" aria-label="Abstention"><button data-v="all" aria-pressed="true">Together</button><button data-v="age" aria-pressed="false">By age</button></div></div>
+   <label class="sec sw80"><span class="fn">Count people aged 80+</span><input type="checkbox" id="inc80" class="vis" checked></label>
+   <p class="note">Voting is optional at 70+ and 16–17. 80+ is shown apart: the 2026 roll lists 297,977 voters aged 100 or older, and 99% of that group didn't vote in 2022, so the band includes people no longer living. Leaving 80+ out takes them out of the dots and rates. Ages for 2026 are estimated.</p>
+   <h3>Filter places</h3>
+   <div id="filters"></div>
+   <div class="fstat"><span id="fcount"></span><button id="fclear" class="link" hidden>Clear filters</button></div>
+   <p class="note">Ranges move by number of municipalities. Totals add up the municipalities that pass; rates in small places swing widely, and a place's average doesn't describe each voter.</p>
+  </div>
+ </section>
 </div>
 <div id="tip"></div>
 <script>
-const MG=__MGEO__, SG=__SGEO__, M=__MUNS__, CATS=__CATS__, YEARS=__YEARS__;
+const MG=__MGEO__, SG=__SGEO__, M=__MUNS__, CATS=__CATS__, YEARS=__YEARS__, ORDER=__ORDER__, STUDIO=__STUDIO__;
 /*__JS__*/
 </script></body></html>

@@ -1,40 +1,87 @@
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 // colour categories are shared by both years (see categories() in build.py): candidates keyed by ballot number, so
-// a camp keeps its colour from one year to the other, then "Others", then abstentions (AB)
-const COLS=CATS.map(c=>css("--"+c.col)), AB=CATS.length-1, YS=Object.keys(YEARS).sort().reverse();
+// a camp keeps its colour from one year to the other, then "Others", then abstentions by age: AB for people who had
+// to vote (18–69), AO for those for whom voting is optional (16–17, 70–79), A8 for 80+
+const COLS=CATS.map(c=>css("--"+c.col)), K=CATS.length, OT=K-4, AB=K-3, AO=K-2, A8=K-1, YS=Object.keys(YEARS).sort().reverse();
 const pct=(v,t)=>(100*v/t).toFixed(1)+'%';
-const fmt=d3.format(",");
-let focus=-1, repaint=()=>{}, YEAR=YS[0];
+const fmt=d3.format(","), fmt0=d3.format(",.0f");
+let focus=-1, repaint=()=>{}, YEAR=YS[0], SPLITA=false, INC80=true;
 const nameOf=(y,k)=>YEARS[y].names[k]||k;
-const electorate=y=>d3.sum(YEARS[y].cands,c=>c.v)+YEARS[y].a+YEARS[y].bn;
 
-// Display state, per category: visible or hidden, and its colour (the studio controls in each panel row). Colours
-// start from the CSS tokens; changes and hidden rows are remembered in this browser.
-const HID=new Uint8Array(CATS.length);
+// Display state, per category: visible or hidden, and its colour (the controls in each panel row). Colours start
+// from the CSS tokens; changes and hidden rows are remembered in this browser. Unless abstention is split by age,
+// its two categories draw as one (DC maps each category to the one it draws as).
+const HID=new Uint8Array(K), DC=Uint8Array.from({length:K},(_,i)=>i);
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-{const c=store.get("cols"),hd=store.get("hid");if(c&&c.length===COLS.length)c.forEach((v,i)=>{if(/^#[0-9a-f]{6}$/i.test(v))COLS[i]=v;});
- if(hd&&hd.length===HID.length)HID.set(hd);}
-let PX=[];const packCols=()=>{PX=COLS.map(h=>{const c=d3.rgb(h);return (c.b<<16|c.g<<8|c.r)>>>0;});}; // little-endian RGB
+{const c=store.get("cols"),hd=store.get("hid");if(c&&c.length===K)c.forEach((v,i)=>{if(/^#[0-9a-f]{6}$/i.test(v))COLS[i]=v;});
+ if(hd&&hd.length===K)HID.set(hd);}
+let PX=[];const packCols=()=>{DC[AO]=SPLITA?AO:AB;DC[A8]=SPLITA?A8:AB;PX=COLS.map(h=>{const c=d3.rgb(h);return (c.b<<16|c.g<<8|c.r)>>>0;});}; // little-endian RGB
 packCols();
+const hidden=c=>HID[DC[c]];
+
+// Studio filters: municipalities outside every slider's range are dimmed on the map and left out of the totals.
+// PASS is per feature of MG (municipality shapes); the variables are those of STUDIO (build.py) plus two computed
+// here: the abstention rate in the year shown and its change since the other year.
+const PASS=new Uint8Array(MG.features.length).fill(1);let FILTERED=false;
+const codeOf=MG.features.map(f=>f.properties.codarea);
+// Without 80+ (the studio switch), their abstainers and their eligible voters (from TSE's voter profile, which can
+// differ from election-day counts by up to ~2%) leave the rates
+const tally=(y,m)=>{const d=m&&m.y[y];if(!d)return null;let ab=d.c[AB]+d.c[AO]+d.c[A8],all=d3.sum(d.c)+d.bn;const valid=all-ab-d.bn;
+ if(!INC80){ab-=d.c[A8];all-=Math.max(d.e80,d.c[A8]);}return {d,ab,all,valid};};
+const abRate=(y,m)=>{const t=tally(y,m);return t&&t.all?100*t.ab/t.all:null;};
+const VARS=[...STUDIO.map((v,j)=>({...v,get:m=>m.x?m.x[j]:null})),
+ {n:"Abstention rate",u:"pct",src:"TSE, year shown",get:m=>abRate(YEAR,m),dyn:true},
+ {n:"Change in abstention",u:"pp",src:"TSE, year shown vs the other",get:m=>{const a=abRate(YS[0],m),b=abRate(YS[1],m);return a==null||b==null?null:(YEAR===YS[0]?a-b:b-a);},dyn:true}];
+// sliders move by municipality count (0–100 = quantiles of the values): income and population are very skewed
+function quantiles(v){const s=MG.features.map(f=>v.get(M[f.properties.codarea]||{})).filter(x=>x!=null).sort((a,b)=>a-b);
+ return d3.range(101).map(i=>s[Math.round(i*(s.length-1)/100)]);}
+VARS.forEach(v=>{v.q=quantiles(v);v.lo=0;v.hi=100;});
+const showVal=(v,x)=>x==null?"–":v.u==="brl"?"R$ "+fmt0(x):v.u==="pct"?x.toFixed(x<10?1:0)+"%":v.u==="pp"?(x>0?"+":"")+x.toFixed(1)+" pp":d3.format(".2~s")(x).replace("k"," k").replace("M"," M");
+function refilter(){
+ const act=VARS.filter(v=>v.lo>0||v.hi<100);FILTERED=act.length>0;let n=0;
+ MG.features.forEach((f,fi)=>{const m=M[f.properties.codarea];let ok=!!m;
+  for(const v of act){if(!ok)break;const x=v.get(m);ok=x!=null&&x>=v.q[v.lo]&&x<=v.q[v.hi];}
+  PASS[fi]=ok?1:0;if(ok)n++;});
+ d3.select("#fcount").text(FILTERED?`${fmt(n)} of ${fmt(Object.keys(M).length)} municipalities`:"All municipalities");
+ d3.select("#fclear").property("hidden",!FILTERED);
+ panel();repaint();}
 
 // results panel: same dot language as the map, one dot per million. Abstention is ranked among the candidates by
-// head count (in both years it's third, behind only the two leaders); its share is of everyone on the roll, the
-// candidates' of valid votes, as TSE reports them. "Others" stays last.
+// head count; its share is of everyone on the roll, the candidates' of valid votes, as TSE reports them. "Others"
+// stays last. Unfiltered, the figures are the official national ones (including votes cast abroad); filtered, they
+// are the totals of the municipalities that pass. Each row also shows its change since the other year.
 const list=d3.select("#cands");
+function totals(y){const c=new Array(K).fill(0);let bn=0,e80=0;
+ MG.features.forEach((f,fi)=>{if(!PASS[fi])return;const d=(M[f.properties.codarea]||{y:{}}).y[y];if(!d)return;d.c.forEach((v,i)=>c[i]+=v);bn+=d.bn;e80+=Math.max(d.e80,d.c[A8]);});
+ return {c,bn,e80};}
+function figures(y){
+ const Y=YEARS[y],t=totals(y);
+ if(!FILTERED){t.c=t.c.slice();const dom=t.c[AB]+t.c[AO]+t.c[A8]||1,o=t.c[AO]/dom,e=t.c[A8]/dom;Y.cands.forEach(c=>t.c[c.i]=c.v);
+  t.c[AO]=Math.round(Y.a*o);t.c[A8]=Math.round(Y.a*e);t.c[AB]=Y.a-t.c[AO]-t.c[A8];t.bn=Y.bn;} // abroad: split like at home
+ let ab=t.c[AB]+t.c[AO]+t.c[A8];const valid=d3.sum(t.c)-ab;let all=valid+ab+t.bn;
+ if(!INC80){ab-=t.c[A8];all-=t.e80;}return {...t,ab,valid,all};}
 function panel(){
- const Y=YEARS[YEAR],valid=d3.sum(Y.cands,c=>c.v);
+ const Y=YEARS[YEAR],oy=YS.find(v=>v!==YEAR),F=figures(YEAR),G=figures(oy);
  d3.select("#date").text(Y.date);
  list.selectAll(".cand").remove();
- const rows=[{n:"Didn't vote",v:Y.a,i:AB,share:pct(Y.a,electorate(YEAR)),unit:"people on the roll didn't vote",abst:true},
-  ...Y.cands.map(c=>({...c,share:pct(c.v,valid),unit:"votes"}))].sort((a,b)=>(a.k==="")-(b.k==="")||b.v-a.v);
+ const has=(y,i)=>YEARS[y].cands.some(c=>c.i===i);
+ const ar=(v,i,n,unit,extra)=>({n,v,i,abst:true,share:v/F.all,prev:i===AB&&!SPLITA?G.ab/G.all:(SPLITA?G.c[i]/G.all:null),unit,extra});
+ const abRows=SPLITA?[ar(F.c[AB],AB,"Didn't vote, had to","people aged 18–69 on the roll didn't vote"),
+   ar(F.c[AO],AO,"Didn't vote, optional","people aged 70–79 or 16–17 didn't vote",YEAR==="2026"?"Age split estimated for 2026":""),
+   ...INC80?[ar(F.c[A8],A8,"Didn't vote, 80+","people aged 80+ didn't vote","Includes people likely no longer living who are still on the roll"+(YEAR==="2026"?"; estimated for 2026":""))]:[]]
+  :[ar(F.ab,AB,"Didn't vote",INC80?"people on the roll didn't vote":"people on the roll under 80 didn't vote")];
+ const rows=[...abRows,...Y.cands.map(c=>({...c,v:F.c[c.i],share:F.c[c.i]/F.valid,prev:has(oy,c.i)?G.c[c.i]/G.valid:null,unit:"votes"}))]
+  .sort((a,b)=>(a.k==="")-(b.k==="")||b.v-a.v);
  rows.forEach(c=>{const i=c.i;
   const r=list.append("div").datum(c).attr("class","cand").classed("ab",!!c.abst).classed("off",!!HID[i]).style("--c",COLS[i]);
   // visibility switch | the row itself (hover or click: show only this category) | colour
   r.append("input").attr("type","checkbox").attr("class","vis").property("checked",!HID[i]).attr("aria-label",`Show ${c.n}`)
    .on("change",e=>{HID[i]=e.target.checked?0:1;r.classed("off",!!HID[i]);store.set("hid",[...HID]);repaint();});
   const b=r.append("button").attr("class","body").attr("aria-pressed",String(focus===i));
-  b.append("div").attr("class","row").html(`<span class="nm">${c.n}</span><span class="pc">${c.share}</span>`);
-  b.append("div").attr("class","vt").text(`${fmt(c.v)} ${c.unit}`);
+  const d=c.prev==null?"":(c.share-c.prev)*100,ds=d===""?"":`<span class="dl">${d>=0?"+":"−"}${Math.abs(d).toFixed(1)} pp vs ${oy}</span>`;
+  b.append("div").attr("class","row").html(`<span class="nm">${c.n}</span><span class="pc">${(100*c.share).toFixed(1)}%</span>`);
+  b.append("div").attr("class","vt").html(`${fmt(c.v)} ${c.unit}${ds}`);
+  if(c.extra)b.append("div").attr("class","who").text(c.extra);
   if(c.who)b.append("div").attr("class","who").text(c.who.join(", "));
   const m=c.v/1e6, gr=b.append("div").attr("class","grains");
   for(let j=0;j<Math.ceil(m);j++)gr.append("i").classed("part",j>=Math.floor(m)&&m%1<.5);
@@ -45,21 +92,47 @@ function panel(){
   b.on("mouseenter",()=>set(true)).on("mouseleave",()=>set(false)).on("click",()=>set(focus!==i));
  });
 }
-d3.select("#reset").on("click",()=>{COLS.splice(0,COLS.length,...CATS.map(c=>css("--"+c.col)));HID.fill(0);packCols();
+// studio controls: abstention split by age, and a two-handled range per variable
+// the studio column collapses to a strip; the map refits to the space it frees
+d3.select("#studiox").on("click",e=>{const o=e.currentTarget.getAttribute("aria-expanded")!=="true";e.currentTarget.setAttribute("aria-expanded",o);
+ e.currentTarget.title=o?"Hide the studio":"Show the studio";d3.select("#page").classed("nostudio",!o);dispatchEvent(new Event("resize"));});
+d3.selectAll("#asplit button").on("click",e=>{SPLITA=e.currentTarget.dataset.v==="age";
+ d3.selectAll("#asplit button").attr("aria-pressed",function(){return String(this===e.currentTarget);});
+ if(!SPLITA&&(focus===AO||focus===A8))focus=AB;packCols();panel();repaint();});
+d3.select("#inc80").on("change",e=>{INC80=e.target.checked;if(!INC80&&focus===A8)focus=-1;
+ VARS.filter(v=>v.dyn).forEach(v=>{v.q=quantiles(v);drawRange(v);});refilter();});
+let fRaf=0;const refilterSoon=()=>{if(!fRaf)fRaf=requestAnimationFrame(()=>{fRaf=0;refilter();});};
+const fl=d3.select("#filters").selectAll(".f").data(VARS).join("div").attr("class","f");
+fl.append("div").attr("class","fh").html(v=>`<span class="fn">${v.n}</span><span class="fv"></span>`);
+const rg=fl.append("div").attr("class","rng");rg.append("div").attr("class","track").append("div").attr("class","fill");
+["lo","hi"].forEach(end=>rg.append("input").attr("type","range").attr("min",0).attr("max",100).attr("step",1).attr("class",end)
+ .attr("aria-label",v=>`${v.n}, ${end==="lo"?"minimum":"maximum"}`).property("value",v=>v[end])
+ .on("input",function(e,v){let x=+this.value;if(end==="lo")x=Math.min(x,v.hi);else x=Math.max(x,v.lo);this.value=x;v[end]=x;drawRange(v);refilterSoon();}));
+fl.append("div").attr("class","fs").text(v=>v.src);
+function drawRange(v){const f=fl.filter(d=>d===v);
+ f.select(".fv").text(`${showVal(v,v.q[v.lo])} – ${showVal(v,v.q[v.hi])}`); // the full span when unfiltered
+ f.select(".fill").style("left",v.lo+"%").style("right",(100-v.hi)+"%");f.select("input.lo").property("value",v.lo);f.select("input.hi").property("value",v.hi);
+ f.classed("on",v.lo>0||v.hi<100);}
+VARS.forEach(drawRange);
+d3.select("#fclear").on("click",()=>{VARS.forEach(v=>{v.lo=0;v.hi=100;drawRange(v);});refilter();});
+d3.select("#fcount").text("All municipalities");
+d3.select("#reset").on("click",()=>{COLS.splice(0,K,...CATS.map(c=>css("--"+c.col)));HID.fill(0);packCols();
  store.set("cols",null);store.set("hid",null);panel();repaint();});
 
 const proj=d3.geoMercator(), path=d3.geoPath(proj);
 const svg=d3.select("#map"), tip=d3.select("#tip"), g=svg.append("g");
 const mu=g.append("g").selectAll("path").data(MG.features).join("path").attr("class","mu")
- .on("mousemove",(e,f)=>{const m=M[f.properties.codarea];if(!m||!m.y[YEAR])return;
+ .on("mousemove",(e,f)=>{const m=M[f.properties.codarea],a=tally(YEAR,m);if(!a)return;
   // this year's top candidates, then the same camps in the other year, and abstention in both
-  const y=m.y[YEAR],oy=YS.find(v=>v!==YEAR),o=m.y[oy],ov=o?Object.fromEntries(o.v):{};
-  const ab=d=>d.a/(d.t+d.a+d.bn);
-  tip.style("opacity",1).style("left",Math.min(e.clientX+16,innerWidth-260)+"px").style("top",Math.min(e.clientY+16,innerHeight-220)+"px")
+  const oy=YS.find(v=>v!==YEAR),o=tally(oy,m),has=(y,i)=>YEARS[y].cands.some(c=>c.i===i);
+  const top=YEARS[YEAR].cands.filter(c=>c.k).map(c=>c.i).sort((p,q)=>a.d.c[q]-a.d.c[p]).slice(0,4);
+  tip.style("opacity",1).style("left",Math.min(e.clientX+16,innerWidth-260)+"px").style("top",Math.min(e.clientY+16,innerHeight-240)+"px")
   .html(`<b>${m.n}, ${m.uf}</b><div class="l h"><span></span><span>${YEAR}</span><span>${oy}</span></div>`
-   +y.v.map(([k,v])=>`<div class="l"><span>${nameOf(YEAR,k)}</span><span>${pct(v,y.t)}</span><span>${o&&ov[k]!=null?pct(ov[k],o.t):"–"}</span></div>`).join("")
-   +`<div class="l a"><span>Didn't vote</span><span>${pct(y.a,y.t+y.a+y.bn)}</span><span>${o?pct(o.a,o.t+o.a+o.bn):"–"}</span></div>`
-   +`<div class="t">${fmt(y.t)} valid votes in ${YEAR}</div>`);})
+   +top.map(i=>`<div class="l"><span>${YEARS[YEAR].cands.find(c=>c.i===i).n}</span><span>${pct(a.d.c[i],a.valid)}</span><span>${o&&has(oy,i)?pct(o.d.c[i],o.valid):"–"}</span></div>`).join("")
+   +`<div class="l a"><span>Didn't vote</span><span>${pct(a.ab,a.all)}</span><span>${o?pct(o.ab,o.all):"–"}</span></div>`
+   +`<div class="l"><span class="sub">of whom optional</span><span>${pct(a.d.c[AO],a.ab)}</span><span>${o?pct(o.d.c[AO],o.ab):"–"}</span></div>`
+   +`<div class="l"><span class="sub">of whom 80+</span><span>${pct(a.d.c[A8],a.ab)}</span><span>${o?pct(o.d.c[A8],o.ab):"–"}</span></div>`
+   +`<div class="t">${fmt(a.valid)} valid votes in ${YEAR}${PASS[MG.features.indexOf(f)]?"":" · outside the filters"}</div>`);})
  .on("mouseenter",(e,f)=>hl.datum(f).attr("d",path).style("display",null))
  .on("mouseleave",()=>{tip.style("opacity",0);hl.style("display","none");})
  .on("click",(e,f)=>{e.stopPropagation();select(sel===f?null:f);})
@@ -85,7 +158,9 @@ for(const y of YS){const D=YEARS[y].dots,n=D.n,U=new Float32Array(2*n),C=new Uin
  const bin=atob(D.b),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
  const X=new Uint16Array(bytes.buffer,0,n),Y=new Uint16Array(bytes.buffer,2*n,n),rad=Math.PI/180000;C.set(bytes.subarray(4*n,5*n));
  for(let i=0;i<n;i++){U[2*i]=(X[i]+D.x0)*rad;U[2*i+1]=-Math.log(Math.tan(Math.PI/4+(Y[i]+D.y0)*rad/2));}
- DOT[y]={n,U,C,P:new Float32Array(2*n)};delete D.b;}
+ // dots come grouped by municipality, in ORDER (feature indices); S holds each group's first dot
+ const cnt=YEARS[y].cnt,S=new Uint32Array(cnt.length+1);for(let r=0;r<cnt.length;r++)S[r+1]=S[r]+cnt[r];
+ DOT[y]={n,U,C,S,P:new Float32Array(2*n)};delete D.b;}
 function useYear(y){YEAR=y;}
 function project(){const k=proj.scale(),[tx,ty]=proj.translate();
  for(const y of YS){const {n,U,P}=DOT[y];for(let i=0;i<n;i++){P[2*i]=U[2*i]*k+tx;P[2*i+1]=U[2*i+1]*k+ty;}}}
@@ -118,12 +193,15 @@ const ALO=.4, CELL=16, COVER=.6; // opacity of the sparsest pixels; density fit
 // The other strategy (the original): radius from zoom alone, R0·k^0.5 (CartoDB's women dot map grows ~k^0.83),
 // so dots per screen area fall by k² but each grows by k^1.5 and coverage thins slowly as you zoom in.
 const R0=.32, DENSE_W=.35, ADAPT_W=.9, AMIN=.3, AMAX=8;
+// dots are drawn municipality by municipality (so filtered-out ones can be skipped or dimmed); every STEP-th dot
+// overall, as before: first(s) is the first such index at or after s
+const first=s=>Math.ceil(s/STEP)*STEP;
 function radius(t){ // in css px
  const k=t.k,rz=R0*Math.sqrt(k);
  if(!ADAPT)return rz*SIZE;
  const gw=Math.ceil(w/CELL);cnt.fill(0);
- for(const {n,P,C,x0,x1} of layers())
-  for(let i=0;i<n;i+=STEP){if(HID[C[i]])continue;const x=P[2*i]*k+t.x,y=P[2*i+1]*k+t.y;if(x>=x0&&x<x1&&y>=0&&y<h)cnt[((y/CELL)|0)*gw+((x/CELL)|0)]++;}
+ for(const {P,C,S,x0,x1} of layers())for(let r=0;r<ORDER.length;r++){if(!PASS[ORDER[r]])continue;
+  for(let i=first(S[r]),e=S[r+1];i<e;i+=STEP){if(hidden(C[i])||(!INC80&&C[i]===A8))continue;const x=P[2*i]*k+t.x,y=P[2*i+1]*k+t.y;if(x>=x0&&x<x1&&y>=0&&y<h)cnt[((y/CELL)|0)*gw+((x/CELL)|0)]++;}}
  // Two views of the density: as seen by the average dot (Σc²/Σc over cells, dominated by crowded town cells) and
  // of a typical occupied cell (geometric mean of counts, dominated by sparse rural cells). Sizing by the first
  // leaves the countryside as faint specks; by the second, cities and zoomed-out views clutter. The radius uses
@@ -161,7 +239,8 @@ function paint(t){
  const Wq=W,Hq=H,N=W*H,out=px;
  const sx=t.k*dpr,ox=t.x*dpr,oy=t.y*dpr,rd=rCur*dpr,f=focus;
  if(!TI||TI.buffer!==T.buffer)TI=new Int32Array(T.buffer);
- T.fill(0,0,N);if(f>=0)O.fill(0,0,N);
+ const trace=f>=0||FILTERED,x80=INC80?-1:A8; // x80: 80+ abstainers, when left out
+ T.fill(0,0,N);if(trace)O.fill(0,0,N);
  // T is total coverage per pixel (with a candidate in focus, only theirs; O holds everyone else's, drawn as
  // a faint grey trace). A pixel's colour is the last dot drawn on it, not the average: dots are shuffled, so
  // that is a random pick weighted by each candidate's share, and dense mixed places read as blue-and-orange
@@ -171,19 +250,21 @@ function paint(t){
  // per covered pixel; fringe pixels add partial coverage but only take the colour when mostly inside.
  // Each layer (one year, or one per side when comparing) draws only within its own columns [xa, xb), into the
  // same buffers, so both sides share one opacity scale and stay comparable.
- for(const {n,P,C,x0,x1} of layers()){const xa=Math.round(x0*dpr),xb=Math.round(x1*dpr);
+ // Municipalities outside the studio filters go to the grey trace (O), like the other candidates under focus.
+ for(const {P,C,S,x0,x1} of layers()){const xa=Math.round(x0*dpr),xb=Math.round(x1*dpr);
+ for(let r=0;r<ORDER.length;r++){const out_=!PASS[ORDER[r]],i0=first(S[r]),i1=S[r+1];
  if(rd<.75){const area=Math.PI*rd*rd;
-  for(let i=0;i<n;i+=STEP){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
-   if(x<xa||x>=xb||y<0||y>=Hq)continue;const j=y*Wq+x,c=C[i];if(HID[c])continue;
-   if(f<0||c===f){T[j]+=area;TOP[j]=c;}else O[j]+=area;}
+  for(let i=i0;i<i1;i+=STEP){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
+   if(x<xa||x>=xb||y<0||y>=Hq)continue;const j=y*Wq+x,c0=C[i],c=DC[c0];if(HID[c]||c0===x80)continue;
+   if(!out_&&(f<0||c===f)){T[j]+=area;TOP[j]=c;}else O[j]+=area;}
  }else{const {Rr,start,off,wt}=stamps(rd);
-  for(let i=0;i<n;i+=STEP){const fx=P[2*i]*sx+ox-.5,fy=P[2*i+1]*sx+oy-.5,X=Math.floor(fx),Y=Math.floor(fy);
-   if(X<xa-Rr||X>=xb+Rr||Y<-Rr||Y>=Hq+Rr)continue;const c=C[i];if(HID[c])continue;const mine=f<0||c===f,p=((fy-Y)*PH|0)*PH+((fx-X)*PH|0);
+  for(let i=i0;i<i1;i+=STEP){const fx=P[2*i]*sx+ox-.5,fy=P[2*i+1]*sx+oy-.5,X=Math.floor(fx),Y=Math.floor(fy);
+   if(X<xa-Rr||X>=xb+Rr||Y<-Rr||Y>=Hq+Rr)continue;const c0=C[i],c=DC[c0];if(HID[c]||c0===x80)continue;const mine=!out_&&(f<0||c===f),p=((fy-Y)*PH|0)*PH+((fx-X)*PH|0);
    const inside=X>=xa+Rr&&X<xb-Rr&&Y>=Rr&&Y<Hq-Rr;
    for(let q2=start[p],e=start[p+1];q2<e;q2++){const x=X+off[2*q2],y=Y+off[2*q2+1];
     if(!inside&&(x<xa||x>=xb||y<0||y>=Hq))continue;const j=y*Wq+x,a=wt[q2];
     if(mine){T[j]+=a;if(a>=.5||T[j]===a)TOP[j]=c;}else O[j]+=a;}}
- }}
+ }}}
  // histogram-equalised opacity (as in Datashader's eq_hist): pixels are ranked by coverage within the
  // current view, so a pixel with 50 overlapping dots reads denser than one with 5 instead of both saturating.
  // A sample of pixels is counted into 1024 log-coverage bins, and the running count gives each bin its rank.
@@ -194,7 +275,7 @@ function paint(t){
  for(let b=0,below=0;b<1024;b++){LUT[b]=255*(ALO+(1-ALO)*below/Math.max(1,m));below+=hist[b];}
  const grey=(22<<24|150<<16|150<<8|150)>>>0;
  for(let j=0;j<N;j++){const v=TI[j];
-  if(!v){out[j]=f>=0&&O[j]?grey:0;continue;}
+  if(!v){out[j]=trace&&O[j]?grey:0;continue;}
   let b=((v-ilo)*sc)|0;b=b<0?0:b>1023?1023:b;
   out[j]=(LUT[b]<<24|PX[TOP[j]])>>>0;}
  cx.putImageData(img,0,0);
@@ -219,7 +300,7 @@ useYear(YEAR);layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));panel();
 // it falls in view and doesn't collide with one already placed, so big cities win and more names appear as you
 // zoom in. Names sit at the municipality's centroid.
 const LABELS_K=2.5,labG=svg.append("g").attr("class","place");
-const tot=m=>(m.y[YS[0]]||Object.values(m.y)[0]).t;
+const tot=m=>{const d=m.y[YS[0]]||Object.values(m.y)[0];return d3.sum(d.c)-d.c[AB]-d.c[AO]-d.c[A8];};
 const LAB=MG.features.filter(f=>M[f.properties.codarea]).map(f=>({f,n:M[f.properties.codarea].n,t:tot(M[f.properties.codarea]),c:[0,0]})).sort((a,b)=>b.t-a.t);
 let labGen=-1;
 function placeLabels(t){
@@ -250,7 +331,8 @@ function setMode(y){const cmp=y==="cmp";COMPARE=cmp;if(!cmp)useYear(y);
  d3.selectAll("#years button").attr("aria-pressed",v=>String(cmp?v==="cmp":v===YEAR));
  swipe.property("hidden",!cmp);if(cmp)placeSwipe();
  if(focus>=0&&!YEARS[YEAR].cands.some(c=>c.i===focus)){focus=-1;d3.select("#page").classed("focus",false);}
- panel();repaint();}
+ VARS.filter(v=>v.dyn).forEach(v=>{v.q=quantiles(v);drawRange(v);});
+ if(VARS.some(v=>v.dyn&&(v.lo>0||v.hi<100)))refilter();else panel();repaint();}
 d3.select("#years").selectAll("button").data([...YS,"cmp"]).join("button").text(y=>y==="cmp"?"Compare":y)
  .attr("aria-pressed",y=>String(y===YEAR)).on("click",(e,y)=>setMode(y));
 d3.select("#swl").text(YS[1]);d3.select("#swr").text(YS[0]);
@@ -264,8 +346,7 @@ swipe.select(".grip").on("pointerdown",e=>{e.stopPropagation();e.preventDefault(
  .on("keydown",e=>{const d={ArrowLeft:-.02,ArrowRight:.02}[e.key];if(d){e.preventDefault();moveSplit(SPLIT+d);}});
 
 // controls. Dots are shuffled, so keeping every STEP-th one is a random sample at STEP × __VPD__ votes per dot.
-// display settings: hidden behind the gear until asked for
-d3.select("#gear").on("click",e=>{const b=e.currentTarget,o=b.getAttribute("aria-expanded")!=="true";b.setAttribute("aria-expanded",o);d3.select("#ctlp").property("hidden",!o);});
+
 d3.selectAll("#mode button").on("click",e=>{ADAPT=e.currentTarget.dataset.m==="a";
  d3.selectAll("#mode button").attr("aria-pressed",function(){return String(this===e.currentTarget);});repaint();});
 const STEPS=[1,2,4,10,20,40];let vpdTimer;

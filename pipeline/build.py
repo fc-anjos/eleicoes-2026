@@ -3,7 +3,7 @@
 Each dot is VPD votes for one candidate, placed in the Voronoi cell of the polling place where the votes were
 cast (see geometry.cells), clipped to the municipality. Run from the repo root: python3 -m pipeline.build
 """
-import base64, json, os, random
+import base64, csv, json, os, random
 import numpy as np
 from .geometry import round_coords, rewind, polygons, edges, bbox, inside, uniform, dist_km, area_km2, cells
 
@@ -17,7 +17,20 @@ DATE = {2026: "4 October 2026", 2022: "2 October 2022"}
 # 2026, 13 (PT) is Lula in both, so each camp keeps its colour across years. Colours are tokens in web/style.css.
 LABEL = {"22": {2026: "Flávio Bolsonaro", 2022: "Jair Bolsonaro"}, "13": "Lula", "70": "Augusto Cury", "14": "Renan Santos",
          "55": "Ronaldo Caiado", "15": "Simone Tebet", "12": "Ciro Gomes"}
-COLOR = {"22": "c0", "13": "c1", "70": "c2", "14": "c3", "55": "c4", "15": "c6", "12": "c7", "": "c5", "A": "ca"}
+COLOR = {"22": "c0", "13": "c1", "70": "c2", "14": "c3", "55": "c4", "15": "c6", "12": "c7", "": "c5", "A": "ca", "AO": "cb", "A8": "cc"}
+# Abstention is split by age: "A" for people who had to vote (18–69), "AO" for those for whom voting is optional
+# (16–17 and 70–79) and "A8" for 80+, a band of its own because it partly counts people no longer living who are
+# still on the roll. Shares per municipality come from data/studio.csv (from the elections-abstentions project):
+# observed in 2022, modelled in 2026, where the model's bands cover ages 18+ only, so the small remainder (mostly
+# 16–17) counts as optional. Defaults: the national shares.
+SHARE_DEFAULT = {"AO": .19, "A8": .13}
+# Studio filters: municipal variables from data/studio.csv, shown as range sliders. [column, label, unit, source]
+STUDIO = [("renda_dom_pc_media_2022", "Household income per person", "brl", "Censo 2022, monthly average"),
+          ("censo_sup_comp_25p_2022", "Adults with a degree", "pct", "Censo 2022, ages 25+"),
+          ("censo_medio_comp_mais_25p_2022", "Adults who finished secondary school", "pct", "Censo 2022, ages 25+"),
+          ("pct_urbana_2022", "Urban population", "pct", "Censo 2022"),
+          ("pop_2022", "Population", "int", "Censo 2022"),
+          ("eleit_sup_comp_2026", "Voters with a degree", "pct", "TSE 2026, self-reported at registration")]
 OUT = "brazil_2026_president_map.html"
 
 random.seed(2026)
@@ -51,7 +64,7 @@ def label(year, k, names):
 
 def categories(places):
     """Colour categories shared by both years: candidates above MIN_SHARE in either, then "Others", then abstentions
-    ("A": people on the roll who didn't vote). Returns the keys in order and, per year, key -> index."""
+    ("A", "AO", "A8": people on the roll who didn't vote, by age band; see COLOR). Returns the keys in order and, per year, key -> index."""
     keys, mains = [], {}
     for y in YEARS:
         nat = places[y]["nat"]; valid = sum(v for k, v in nat.items() if k not in ("A", "BN"))
@@ -60,11 +73,11 @@ def categories(places):
                 assert k in COLOR, f"no colour for candidate {k} ({y}): add it to COLOR and web/style.css"
                 mains.setdefault(y, []).append(k)
                 if k not in keys: keys.append(k)
-    keys += ["", "A"]
+    keys += ["", "A", "AO", "A8"]
     cat = {k: i for i, k in enumerate(keys)}
     # per year, only that year's own main candidates: a number reused by another party's candidate (14 was PTB in
     # 2022, Missão in 2026) falls into "Others" rather than borrowing a colour
-    return keys, {y: {k: cat[k] for k in mains[y] + ["", "A"]} for y in YEARS}
+    return keys, {y: {k: cat[k] for k in mains[y] + ["", "A", "AO", "A8"]} for y in YEARS}
 
 
 def year_summary(y, pl, keys, cat):
@@ -78,25 +91,64 @@ def year_summary(y, pl, keys, cat):
     return {"date": DATE[y], "cands": cands, "a": nat["A"], "bn": nat["BN"], "names": {k: label(y, k, names) for k, _ in ranked}}
 
 
-def municipality_summaries(places):
-    """Name, state and, per year, valid votes, abstentions, blank/null and top four candidates: tooltip and search."""
+def load_studio():
+    """data/studio.csv by IBGE code: the optional share of abstainers per year, and the STUDIO variables."""
+    num = lambda v: float(v) if v not in ("", None) else None
+    out = {}
+    for r in csv.DictReader(open("data/studio.csv")):
+        a26, a22 = num(r["abst_2026"]), num(r["abst_2022"])
+        req26 = (num(r["abst26_18_34_est"]) or 0) + (num(r["abst26_35_69_est"]) or 0)
+        e26, e22 = num(r["abst26_80p_est"]), num(r["abst22_80p"])
+        out[r["cd_ibge"]] = {
+            "opt": {2026: {"A8": e26 / a26, "AO": max(0, 1 - (req26 + e26) / a26)} if a26 and e26 is not None else None,
+                    2022: {"A8": e22 / a22, "AO": (num(r["abst22_optional"]) - e22) / a22}
+                    if a22 and r["abst22_optional"] and e22 is not None else None},
+            "x": [num(r[c]) for c, *_ in STUDIO],
+            # eligible voters aged 80+ (TSE voter profile at the close of the rolls), to take them out of rates
+            "e80": {2026: num(r["aptos_80p_2026"]), 2022: num(r["aptos_80p_2022"])}}
+    return out
+
+
+def split_abstention(votes, p):
+    """Split a place's abstainers ("A") by age band, multinomially with shares p = {"AO": .., "A8": ..}."""
+    a = votes.pop("A", 0)
+    if a:
+        o, e, r = rng.multinomial(a, [p["AO"], p["A8"], max(0, 1 - p["AO"] - p["A8"])])
+        votes["AO"] = votes.get("AO", 0) + int(o); votes["A8"] = votes.get("A8", 0) + int(e); votes["A"] = int(r)
+    return votes
+
+
+def municipality_summaries(places, cats_y, studio):
+    """Name, state and, per year: blank/null votes and counts by colour category (candidates, Others, abstention
+    split by age), for the tooltip, search and the studio's live totals; plus the studio variables."""
     cfg = json.load(open("data/mun-config.json"))
     where = {m["cdi"]: (uf["cd"].upper(), m["nm"]) for uf in cfg["abr"] for m in uf["mu"] if m["cdi"]}
+    ncat = max(max(c.values()) for c in cats_y.values()) + 1
     muns = {}
     for y in YEARS:
+        cat = cats_y[y]
         for code, m in places[y]["muns"].items():
-            tot = {}
+            c = [0] * ncat
             for votes in [p[2] for p in m["p"]] + [m["u"]]:
-                for k, v in votes.items(): tot[k] = tot.get(k, 0) + v
-            a = tot.pop("A", 0)
+                for k, v in votes.items(): c[cat.get(k, cat[""])] += v
+            p = studio.get(code, {}).get("opt", {}).get(y) or SHARE_DEFAULT  # as in the dots, but the expected split
+            a = c[cat["A"]]; c[cat["AO"]] = round(a * p["AO"]); c[cat["A8"]] = round(a * p["A8"]); c[cat["A"]] = a - c[cat["AO"]] - c[cat["A8"]]
             uf, nm = where[code]
-            d = muns.setdefault(code, {"n": pt_title(nm), "uf": uf, "y": {}})
-            d["y"][y] = {"t": sum(tot.values()), "a": a, "bn": m["bn"], "v": sorted(tot.items(), key=lambda x: -x[1])[:4]}
+            d = muns.setdefault(code, {"n": pt_title(nm), "uf": uf, "y": {}, "x": studio.get(code, {}).get("x")})
+            d["y"][y] = {"c": c, "bn": m["bn"], "e80": int(studio.get(code, {}).get("e80", {}).get(y) or 0)}
     return muns
 
 
-def make_dots(mgeo, places, cat, others):
-    """Flat [lon*1000, lat*1000, category, ...] list (abstentions are dots too, at their polling place), shuffled so no colour systematically paints over another.
+def make_dots(mgeo, places, cat, others, opt, order, n_ref):
+    """Flat [lon*1000, lat*1000, category, ...] list (abstentions are dots too, at their polling place), grouped by
+    municipality so the page can filter whole municipalities, and the dot count of each, in `order` (indices into
+    mgeo's features). Municipalities come in a fixed random order and dots are shuffled within each, so no colour
+    systematically paints over another. opt(code) gives the age-band shares of the municipality's abstainers.
+
+    Placement is stable across years (see geometry.cells): each municipality's lattice is seeded by its code and
+    sized for n_ref[code] places, and each polling place lays its dots in a fixed order seeded by its location,
+    with categories filling them in a fixed order. Where a place exists in both years, its dots sit in the same
+    spots and only their colours change.
 
     Places slightly outside our simplified outline (rounded to ~100 m, coarse on coasts and rivers) still count,
     with a tolerance that grows with the municipality's size; farther out means bad coordinates, so the 2024
@@ -108,13 +160,15 @@ def make_dots(mgeo, places, cat, others):
         for k, v in votes.items(): cats[cat.get(k, others)] += v
         return [c for c, v in enumerate(cats) for _ in range(int(v // VPD) + (random.random() < v % VPD / VPD))]
 
-    dots, spacing = [], []
+    dots, counts, spacing = [], [], []
     stats = {"place": 0, "spread": 0, "reassigned_votes": 0, "dropped_far_places": 0, "used_2024": 0, "empty_cells": 0}
-    for f in mgeo["features"]:
-        code = f["properties"]["codarea"]
-        if code not in places: continue
+    for fi in order:
+        f = mgeo["features"][fi]; code = f["properties"]["codarea"]
+        if code not in places: counts.append(0); continue
         E = edges(polygons(f["geometry"])); box = bbox(E)
-        pl = places[code]["p"]; spread = dict(places[code]["u"])
+        p_opt = opt(code)
+        pl = [[*p[:2], split_abstention(dict(p[2]), p_opt), p[3]] for p in places[code]["p"]]
+        spread = split_abstention(dict(places[code]["u"]), p_opt)
         P = np.array([p[:2] for p in pl], float).reshape(-1, 2)
         tol = TOL_KM(area_km2(E))
         ok = dist_km(P, E) <= tol if len(P) else np.zeros(0, bool)
@@ -136,17 +190,19 @@ def make_dots(mgeo, places, cat, others):
         for i, p in enumerate(keep):
             c = ndots(p); owner += [i] * len(c); cs += c
         if owner:
-            pts, sp, empty = cells(P, E, box, np.array(owner), PER_PLACE, rng)
+            mrng = np.random.default_rng(int(code))
+            prng = lambda i: np.random.default_rng([int(code), int(round(P[i][0] * 1e4)) & 0xFFFFFFFF, int(round(P[i][1] * 1e4)) & 0xFFFFFFFF])
+            pts, sp, empty = cells(P, E, box, np.array(owner), PER_PLACE, mrng, n_ref.get(code), prng)
             spacing.append(sp); stats["empty_cells"] += empty
         else: pts = np.zeros((0, 2))
         us = ndots(spread)  # no usable polling place at all: spread over the municipality
-        upts = uniform(E, box, len(us), rng) if us else np.zeros((0, 2))
+        upts = uniform(E, box, len(us), np.random.default_rng(int(code) + 1)) if us else np.zeros((0, 2))
         stats["place"] += len(owner); stats["spread"] += len(us)
-        for (x, y), c in zip(np.vstack([pts, upts]), cs + us):
-            dots += [round(x * 1000), round(y * 1000), c]
+        mine = [[round(x * 1000), round(y * 1000), c] for (x, y), c in zip(np.vstack([pts, upts]), cs + us)]
+        random.shuffle(mine); counts.append(len(mine))
+        for d in mine: dots += d
     print(stats, "lattice spacing km: median %.3f, p5 %.3f, p95 %.3f" % tuple(np.percentile(spacing, [50, 5, 95])))
-    idx = list(range(len(dots) // 3)); random.shuffle(idx)
-    return [v for i in idx for v in dots[3 * i:3 * i + 3]]
+    return dots, counts
 
 
 def pack(dots):
@@ -160,6 +216,16 @@ def pack(dots):
     return {"n": len(a), "x0": x0, "y0": y0, "b": base64.b64encode(raw).decode()}
 
 
+def summary_stats(muns):
+    """Per studio variable: label, unit, source, and the values' quantiles (0–100), so the sliders move by
+    municipality count rather than raw value: income and population are very skewed."""
+    out = []
+    for j, (col, lab, unit, src) in enumerate(STUDIO):
+        v = sorted(m["x"][j] for m in muns.values() if m["x"] and m["x"][j] is not None)
+        out.append({"k": col, "n": lab, "u": unit, "src": src, "q": [v[min(len(v) - 1, round(i * (len(v) - 1) / 100))] for i in range(101)]})
+    return out
+
+
 def render(data):
     """Inline web/style.css, web/map.js and the data into web/index.html."""
     html = open("web/index.html").read()
@@ -171,19 +237,24 @@ def render(data):
 
 def main():
     places = {y: json.load(open(f"data/places_{y}.json")) for y in YEARS}
+    studio = load_studio()
     mgeo, sgeo = load_geometry()
     keys, cats_y = categories(places)
+    order = list(range(len(mgeo["features"]))); random.shuffle(order)
+    n_ref = {c: max(len(places[y]["muns"].get(c, {}).get("p", [])) for y in YEARS) for c in places[YEARS[0]]["muns"]}
     years = {}
     for y in YEARS:
         cat = cats_y[y]
-        dots = make_dots(mgeo, places[y]["muns"], cat, cat[""])
+        opt = lambda code: (studio.get(code, {}).get("opt", {}).get(y) or SHARE_DEFAULT)
+        dots, counts = make_dots(mgeo, places[y]["muns"], cat, cat[""], opt, order, n_ref)
         print(y, len(dots) // 3, "dots")
-        years[y] = {**year_summary(y, places[y], keys, cat), "dots": pack(dots)}
-    muns = municipality_summaries(places)
+        years[y] = {**year_summary(y, places[y], keys, cat), "dots": pack(dots), "cnt": counts}
+    muns = municipality_summaries(places, cats_y, studio)
     cats = [{"k": k, "col": COLOR[k]} for k in keys]
     open(OUT, "w").write(render({"__MGEO__": mgeo, "__SGEO__": sgeo, "__MUNS__": muns, "__CATS__": cats,
-                                 "__YEARS__": years, "__VPD__": VPD}))
-    print("ok", len(muns), "municipalities;", sum(1 for f in mgeo["features"] if f["properties"]["codarea"] not in muns), "unmatched shapes")
+                                 "__YEARS__": years, "__ORDER__": order, "__STUDIO__": summary_stats(muns), "__VPD__": VPD}))
+    print("ok", len(muns), "municipalities;", sum(1 for f in mgeo["features"] if f["properties"]["codarea"] not in muns), "unmatched shapes;",
+          sum(1 for c in muns if c not in studio), "without studio data")
 
 
 if __name__ == "__main__":
