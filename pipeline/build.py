@@ -30,7 +30,11 @@ STUDIO = [("renda_dom_pc_media_2022", "Household income per person", "brl", "Cen
           ("censo_medio_comp_mais_25p_2022", "Adults who finished secondary school", "pct", "Censo 2022, ages 25+"),
           ("pct_urbana_2022", "Urban population", "pct", "Censo 2022"),
           ("pop_2022", "Population", "int", "Censo 2022"),
-          ("eleit_sup_comp_2026", "Voters with a degree", "pct", "TSE 2026, self-reported at registration")]
+          ("eleit_sup_comp_2026", "Voters with a degree", "pct", "TSE 2026, self-reported at registration"),
+          # religion describes the places, not their voters: see the note under the filters
+          ("pct_evangelica_2022", "Evangelical", "pct", "Censo 2022, residents aged 10+"),
+          ("pct_catolica_2022", "Catholic", "pct", "Censo 2022, residents aged 10+"),
+          ("pct_sem_religiao_2022", "No religion", "pct", "Censo 2022, residents aged 10+")]
 OUT = "brazil_2026_president_map.html"
 
 random.seed(2026)

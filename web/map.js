@@ -185,20 +185,22 @@ function layout(){
 // Every dot exists at every zoom (as in Cable's Racial Dot Map).
 // Zoomed out, many dots share a pixel: its opacity shows their coverage, its colour one of them (see add()).
 // Zoomed in, the dots grow past a pixel and are drawn as discs.
-// Dot radius: by default R0·√k (the zoom rule), corrected by the density of the dots in view (as in Datashader's
-// dynspread): dense close-ups get somewhat smaller dots, so blocks show instead of a solid sheet; sparse ones get
-// larger dots, so a few hundred votes stay visible. See radius().
+// Two sizing strategies (Studio → Display → Dot size):
+// - By zoom: dots are fixed objects on the map and just magnify with it, radius R0·k (up to RMAX px), so zooming
+//   in on a city turns it into a solid sheet. Nothing adapts.
+// - Adaptive: the radius is fitted to the dots in view (as in Datashader's dynspread) on every frame, so it changes
+//   as you pan and zoom: dense close-ups get fine dots, so blocks and streets show; sparse ones get large dots, so
+//   a few hundred votes stay visible. See radius().
 let SIZE=1, STEP=1, ADAPT=true; // radius multiplier (dot-size control); draw every STEP-th dot (votes-per-dot control)
 const ALO=.4, CELL=16, COVER=.6; // opacity of the sparsest pixels; density fit
-// The other strategy (the original): radius from zoom alone, R0·k^0.5 (CartoDB's women dot map grows ~k^0.83),
-// so dots per screen area fall by k² but each grows by k^1.5 and coverage thins slowly as you zoom in.
-const R0=.32, DENSE_W=.35, ADAPT_W=.9, AMIN=.3, AMAX=8;
+// Adaptive is bounded to ×AMIN–×AMAX of R0·√k (the old zoom rule, CartoDB-like), a soft guard against extremes.
+const R0=.32, RMAX=16, DENSE_W=.75, ADAPT_W=1, AMIN=.15, AMAX=10;
 // dots are drawn municipality by municipality (so filtered-out ones can be skipped or dimmed); every STEP-th dot
 // overall, as before: first(s) is the first such index at or after s
 const first=s=>Math.ceil(s/STEP)*STEP;
 function radius(t){ // in css px
  const k=t.k,rz=R0*Math.sqrt(k);
- if(!ADAPT)return rz*SIZE;
+ if(!ADAPT)return Math.min(RMAX,R0*k)*SIZE;
  const gw=Math.ceil(w/CELL);cnt.fill(0);
  for(const {P,C,S,x0,x1} of layers())for(let r=0;r<ORDER.length;r++){if(!PASS[ORDER[r]])continue;
   for(let i=first(S[r]),e=S[r+1];i<e;i+=STEP){if(hidden(C[i])||(!INC80&&C[i]===A8))continue;const x=P[2*i]*k+t.x,y=P[2*i+1]*k+t.y;if(x>=x0&&x<x1&&y>=0&&y<h)cnt[((y/CELL)|0)*gw+((x/CELL)|0)]++;}}
@@ -221,7 +223,10 @@ function radius(t){ // in css px
 const PH=8;let stamp={rd:-1};
 function stamps(rd){
  if(stamp.rd===rd)return stamp;
- const e=rd+.5,Rr=Math.ceil(e)+1,off=[],wt=[],start=new Int32Array(PH*PH+1);
+ // e: the radius at which coverage reaches 0. Full-size discs get half a pixel of anti-aliased edge (rd+.5); just
+ // above the single-pixel threshold the edge grows in from almost nothing, so the footprint there (πe² ≈ 1 px)
+ // matches a single-pixel dot and the size grows continuously through the switch
+ const e=rd+.064+.436*Math.min(1,Math.max(0,rd-.5)),Rr=Math.ceil(e)+1,off=[],wt=[],start=new Int32Array(PH*PH+1);
  for(let p=0;p<PH*PH;p++){const cx=(p%PH+.5)/PH,cy=(((p/PH)|0)+.5)/PH; /* dot centre within its pixel */start[p]=off.length/2;
   for(let dy=-Rr;dy<=Rr;dy++)for(let dx=-Rr;dx<=Rr;dx++){const a=e-Math.hypot(dx-cx,dy-cy);if(a>0){off.push(dx,dy);wt.push(a<1?a:1);}}}
  start[PH*PH]=off.length/2;
@@ -253,7 +258,7 @@ function paint(t){
  // Municipalities outside the studio filters go to the grey trace (O), like the other candidates under focus.
  for(const {P,C,S,x0,x1} of layers()){const xa=Math.round(x0*dpr),xb=Math.round(x1*dpr);
  for(let r=0;r<ORDER.length;r++){const out_=!PASS[ORDER[r]],i0=first(S[r]),i1=S[r+1];
- if(rd<.75){const area=Math.PI*rd*rd;
+ if(rd<.5){const area=Math.PI*rd*rd; // below .5 px a disc covers about one pixel anyway: switching here keeps growth continuous
   for(let i=i0;i<i1;i+=STEP){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
    if(x<xa||x>=xb||y<0||y>=Hq)continue;const j=y*Wq+x,c0=C[i],c=DC[c0];if(HID[c]||c0===x80)continue;
    if(!out_&&(f<0||c===f)){T[j]+=area;TOP[j]=c;}else O[j]+=area;}

@@ -12,7 +12,7 @@ html,body{height:100%;overflow:hidden}
 #wrap{position:relative;overflow:hidden;grid-column:2;grid-row:1;background:var(--night)}
 #cv,#map{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* place names: a halo in the background colour separates them from the dots beneath */
-.place text{font:500 11px var(--body);fill:var(--haze);text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:var(--night);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.place text{font:500 11px var(--body);fill:var(--haze);text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:var(--night);stroke-opacity:.7;stroke-width:2px;stroke-linejoin:round;pointer-events:none}
 .place text.big{font-weight:600;fill:var(--ink)}
 #map{cursor:grab}#map:active{cursor:grabbing}
 /* municipality borders fade in with zoom (--mu-o, set from JS); hovered and selected ones are drawn on top */
