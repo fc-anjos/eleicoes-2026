@@ -20,7 +20,7 @@ onLang(() => {
   FCACHE.clear();
   refilter();
 });
-const fsig = () =>
+export const fsig = () =>
   VARS.filter(isOn)
     .map((v) => `${v.k}:${lo_(v)}:${hi_(v)}${v.dyn ? ":" + S.YEAR : ""}`)
     .join("|") +

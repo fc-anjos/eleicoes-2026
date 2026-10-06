@@ -228,7 +228,7 @@
   {
     "id": "sp-vs-brazil",
     "block": "income",
-    "view": "y=cmp&split=0.5&at=home&f=setor_renda_resp_media@1818~3030",
+    "view": "y=2026&at=home&f=setor_renda_resp_media@1818~3030&viz=circles*&vc=moved",
     "chart": {
       "by": "bands",
       "var": "setor_renda_resp_media",
@@ -262,12 +262,15 @@
         [2022, 20.95],
         [2026, 21.08]
       ]
+    },
+    "chart2": {
+      "by": "stack",
+      "parts": [
+        [70, "ca"],
+        [17, "cb"],
+        [13, "cc"]
+      ]
     }
-  },
-  {
-    "id": "who-didnt-vote",
-    "block": "abstention",
-    "view": "y=2026&at=home&ages=1"
   },
   {
     "id": "excess-abstention",

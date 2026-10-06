@@ -100,10 +100,15 @@
       },
       "abstention": {
         "h": "Abstention barely changed",
-        "t": "<p>In 2026, 33.5 million people on the roll did not vote, more than voted for any candidate except the two leaders. Abstention has risen in every presidential first round since 2006, from 16.8 percent to 21.1 percent.</p><p>It rose by only 0.1 points from 2022, so it does not explain Lula's losses. He lost 3.4 million votes, and the Bolsonaro camp gained 5.0 million. In the quarter of municipalities with the lowest average income, where Lula is strongest, abstention fell 2.5 points. In the quarter with the highest average income, abstention rose 0.9 points.</p><p>The map shows the change in the abstention rate in each municipality: amber where more people stayed home than in 2022, green where fewer did, grey where it moved by less than a point. The two moves cancel out: abstention fell across the North and Northeast and rose in the South and South-east. Beside it, each municipality is placed by its average income and by that change: abstention fell in the poorest places and rose in the richest.</p>",
+        "t": "<p>In 2026, 33.5 million people on the roll did not vote, more than voted for any candidate except the two leaders. Abstention has risen in every presidential first round since 2006, from 16.8 percent to 21.1 percent.</p><p>Not all of them were required to vote: about 70 percent of non-voters were aged 18 to 69, for whom voting is compulsory; 17 percent were 16–17 or 70–79, for whom it is optional; 13 percent were 80 or older.</p><p>It rose by only 0.1 points from 2022, so it does not explain Lula's losses. He lost 3.4 million votes, and the Bolsonaro camp gained 5.0 million. In the quarter of municipalities with the lowest average income, where Lula is strongest, abstention fell 2.5 points. In the quarter with the highest average income, abstention rose 0.9 points.</p><p>The map shows the change in the abstention rate in each municipality: amber where more people stayed home than in 2022, green where fewer did, grey where it moved by less than a point. The two moves cancel out: abstention fell across the North and Northeast and rose in the South and South-east. Beside it, each municipality is placed by its average income and by that change: abstention fell in the poorest places and rose in the richest.</p>",
         "chart": {
           "title": "Abstention, presidential first round (% of the roll)",
           "note": "Source: TSE. Includes voters abroad."
+        },
+        "chart2": {
+          "title": "Who didn't vote in 2026, by age",
+          "labels": ["18–69 (must vote)", "16–17, 70–79", "80+"],
+          "note": "The 2026 age split is estimated."
         }
       },
       "northeast": {
@@ -170,10 +175,6 @@
           "labels": ["Least (under 58%)", "58–70%", "70–80%", "Most (over 80%)"]
         }
       },
-      "who-didnt-vote": {
-        "h": "Who didn't vote",
-        "t": "<p>About one in five people on the roll did not vote. Not all of them were required to vote.</p><p><b class=\"sa\">18–69</b>, who must vote: 14.7 percent of the roll, and 70 percent of those who did not vote.<br><b class=\"sa2\">16–17 and 70–79</b>, for whom voting is optional: 3.5 percent of the roll, 17 percent of non-voters.<br><b class=\"sa3\">80 and older</b>: 2.8 percent of the roll, 13 percent of non-voters.</p><p class=\"n\">The 2026 age split is estimated.</p>"
-      },
       "excess-abstention": {
         "h": "More abstention than expected",
         "t": "<p>The 2026 roll lists 297,977 voters aged 100 or older. In 2022, 99 percent of that age group did not vote. Some of the abstainers over 80 have probably died and remain on the roll. Without them, abstention was 18.9 percent, 0.1 points higher than in 2022.</p><p>Abstention rates are not the same across groups of voters. In 2022 they varied with age, with schooling and from state to state. We used those 2022 rates to set a baseline for each polling place: the abstention its 2026 roll would have if each age and schooling group had its state's 2022 abstention rate. The baselines were then scaled so each state's total matched its actual abstention.</p><p>The map shows, in amber, the tenth of polling places where abstention was furthest above that estimate, by 4.5 points or more. About 11 million people are registered there. Their baseline is about 21 percent. Actual abstention was 27.5 percent. These places are spread out, led by São Paulo, Minas Gerais, Bahia and Rio Grande do Sul.</p><p class=\"n\">The model does not account for distance to the polling place, transport, weather or local politics. It points to places worth a closer look, and does not explain why people did not vote.</p>"
@@ -200,7 +201,7 @@
       },
       "sp-vs-brazil": {
         "h": "Outside São Paulo, the drop was deepest in the middle",
-        "t": "<p>The chart compares the city with the rest of the country around polling places of the same income. Outside São Paulo, Lula's share fell 3.4 points in the lowest-income areas, below one minimum wage, and about 4.7 points between 1.5 and 2.5 minimum wages. He gained only above six minimum wages.</p><p>In São Paulo the line sits higher. Above two minimum wages, Lula did better in the city than elsewhere at the same income, by 1.3 to 2.5 points. His losses in the city were concentrated in its lowest-income areas, where he fell 5.6 points.</p><p>Most votes are cast where he lost the most. Outside São Paulo, about seven in ten valid votes come from polling places in areas below 2.5 minimum wages.</p><p>The map shows only polling places in areas of 1.5 to 2.5 minimum wages.</p>",
+        "t": "<p>The chart compares the city with the rest of the country around polling places of the same income. Outside São Paulo, Lula's share fell 3.4 points in the lowest-income areas, below one minimum wage, and about 4.7 points between 1.5 and 2.5 minimum wages. He gained only above six minimum wages.</p><p>In São Paulo the line sits higher. Above two minimum wages, Lula did better in the city than elsewhere at the same income, by 1.3 to 2.5 points. His losses in the city were concentrated in its lowest-income areas, where he fell 5.6 points.</p><p>Most votes are cast where he lost the most. Outside São Paulo, about seven in ten valid votes come from polling places in areas below 2.5 minimum wages.</p><p>The map shows the municipalities whose polling places sit in areas of 1.5 to 2.5 minimum wages, as net votes moved: blue away from Lula, red towards him.</p>",
         "chart": {
           "title": "Change in Lula's share, by income nearby (points)",
           "axis": "Average income of household heads nearby, minimum wages",

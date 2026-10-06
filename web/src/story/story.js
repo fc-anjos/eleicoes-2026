@@ -247,6 +247,7 @@ function fillSteps() {
     )
     .each(function (d) {
       if (d.chart) chart(this, { ...d.chart, ...copyOf(d).chart });
+      if (d.chart2) chart(this, { ...d.chart2, ...copyOf(d).chart2 });
       if (d.find) findStep(this);
     });
   steps

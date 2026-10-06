@@ -18,7 +18,7 @@
 // trailing * (viz=margins*) shows it at every zoom, for steps framed on the whole country.
 import * as d3 from "d3";
 import { M, MG, ORDER, YEARS } from "../data.js";
-import { PASS } from "../filters/filter.js";
+import { PASS, fsig } from "../filters/filter.js";
 import { hum, num, pctN } from "../format.js";
 import { t as tr } from "../i18n/index.js";
 import { A8, AB, AO, CI, COLS, K, S, YS, css } from "../state.js";
@@ -354,6 +354,67 @@ function places(y) {
   return (PL[y] = out);
 }
 
+export // Under a polling-place filter (an income band, say) a municipality's circle counts only its places that pass, in
+// both years, so the circle shows the votes the step is about and not the whole town's. Municipalities where no
+// place passes stay as ghosts of their full results.
+const ROWOF = new Int32Array(MG.features.length).fill(-1);
+ORDER.forEach((fi, r) => (ROWOF[fi] = r));
+const PR = {};
+let prKey = "";
+function placeResults(y) {
+  const key = [fsig(), S.layoutGen, S.INC80].join("|");
+  if (prKey !== key) for (const k in PR) delete PR[k];
+  prKey = key;
+  if (PR[y]) return PR[y];
+  const L = CI("13"),
+    Bc = CI("22");
+  // per year and municipality: the passing places' Lula votes, camp votes, valid votes and abstentions
+  const sums = YS.map((yy) => {
+    const D = DOT[yy],
+      out = new Float64Array(4 * ORDER.length);
+    for (let r = 0; r < ORDER.length; r++)
+      for (let g = D.GM[r]; g < D.GM[r + 1]; g++) {
+        if (!D.GP[g]) continue;
+        const o = g * K;
+        let valid = 0;
+        for (let i = 0; i < K; i++) if (i !== AB && i !== AO && i !== A8) valid += D.GV[o + i];
+        out[4 * r] += D.GV[o + L];
+        out[4 * r + 1] += D.GV[o + Bc];
+        out[4 * r + 2] += valid;
+        out[4 * r + 3] += D.GV[o + AB] + D.GV[o + AO] + (S.INC80 ? D.GV[o + A8] : 0);
+      }
+    return out;
+  });
+  const yi = YS.indexOf(y),
+    a = sums[yi],
+    b = sums[1 - yi],
+    sign = yi === 0 ? 1 : -1; // changes are always 2026 minus 2022
+  return (PR[y] = results(y).map((r, fi) => {
+    const row = ROWOF[fi];
+    if (!r || row < 0) return null;
+    const o = 4 * row,
+      va = a[o + 2],
+      vb = b[o + 2];
+    if (!va || !vb) return null;
+    const shL = (100 * a[o]) / va,
+      shB = (100 * a[o + 1]) / va,
+      abA = (100 * a[o + 3]) / (va + a[o + 3]),
+      abB = (100 * b[o + 3]) / (vb + b[o + 3]);
+    return {
+      ...r,
+      valid: va,
+      lead: a[o] >= a[o + 1] ? L : Bc,
+      margin: Math.abs(shL - shB),
+      sh: { ...r.sh, [L]: shL, [Bc]: shB },
+      small: 100 - shL - shB,
+      ab: abA,
+      dl: sign * (shL - (100 * b[o]) / vb),
+      roll: va + a[o + 3],
+      da: sign * (abA - abB),
+    };
+  }));
+}
+
 export const RMIN = 1.3,
   GHOST = 0.06;
 export function disc(cx, x, y, r, fills) {
@@ -503,13 +564,17 @@ export function drawMarks(cx, t, W, H, dpr) {
       // one item per municipality, or per polling place inside a single municipality
       const mv = moved(),
         GP = DOT[y].GP,
+        PRR = S.PLACEF && !byPlace() ? placeResults(y) : null,
         items = (
           byPlace()
             ? places(y).map((r) => ({ r, x: r.x, y: r.y, pass: GP[r.g], i: -1 }))
             : d3
                 .range(R.length)
                 .filter((i) => R[i] && vis(i) && isFinite(cen[i][0]) && isBig(i, t.k))
-                .map((i) => ({ r: R[i], x: cen[i][0], y: cen[i][1], pass: PASS[i], i }))
+                .map((i) => {
+                  const lit = PASS[i] && (!PRR || !!PRR[i]);
+                  return { r: lit && PRR ? PRR[i] : R[i], x: cen[i][0], y: cen[i][1], pass: lit, i };
+                })
         )
           .filter((d) => ms.col(d.r) && sizeOf(d.r) > 0)
           .sort((u, v) => u.pass - v.pass || sizeOf(v.r) - sizeOf(u.r));

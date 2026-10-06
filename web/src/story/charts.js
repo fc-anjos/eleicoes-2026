@@ -160,6 +160,7 @@ export function changeArrows(r, x, col) {
 
 export function chart(el, spec) {
   if (spec.by === "series") return seriesChart(el, spec);
+  if (spec.by === "stack") return stackChart(el, spec);
   if (spec.by === "deciles") return decileChart(el, spec);
   if (spec.by === "bands") return bandChart(el, spec);
   const rows = spec.by === "places" ? placeRows(spec) : groupShares(spec),
@@ -248,6 +249,46 @@ function seriesChart(el, spec) {
     .attr("x", x.bandwidth() / 2)
     .attr("y", H - 4)
     .text((p) => p[0]);
+  if (spec.note) d3.select(el).append("p").attr("class", "ck").text(spec.note);
+}
+
+// spec.by "stack": one bar split into parts (shares in spec.parts, each with its colour variable), each labelled
+// below with its name and share: who the non-voters were
+function stackChart(el, spec) {
+  const W = chartW(el),
+    H = 92,
+    top = 26,
+    bh = 18,
+    tot = d3.sum(spec.parts, (p) => p[0]),
+    x = d3.scaleLinear().domain([0, tot]).range([0, W]);
+  let x0 = 0;
+  const parts = spec.parts.map(([v, col], i) => {
+    const d = { v, col, x0, x1: x0 + v, label: spec.labels[i] };
+    x0 += v;
+    return d;
+  });
+  const g = chartSvg(el, W, H, spec.title).append("g").selectAll("g").data(parts).join("g");
+  g.append("rect")
+    .attr("x", (d) => x(d.x0) + (d.x0 ? 1 : 0))
+    .attr("y", top)
+    .attr("width", (d) => Math.max(0, x(d.x1) - x(d.x0) - (d.x0 ? 1 : 0)))
+    .attr("height", bh)
+    .attr("rx", 2)
+    .attr("fill", (d) => css("--" + d.col));
+  g.append("text")
+    .attr("class", "rv")
+    .attr("x", (d) => x((d.x0 + d.x1) / 2))
+    .attr("y", top + bh / 2 + 4)
+    .attr("text-anchor", "middle")
+    .style("fill", css("--night"))
+    .text((d) => pctN(d.v, 0));
+  // names under the bar: the first flush left, the last flush right, the rest centred on their part
+  g.append("text")
+    .attr("class", "tk")
+    .attr("x", (d, i) => (i === 0 ? 0 : i === parts.length - 1 ? W : x((d.x0 + d.x1) / 2)))
+    .attr("y", top + bh + 16)
+    .attr("text-anchor", (d, i) => (i === 0 ? "start" : i === parts.length - 1 ? "end" : "middle"))
+    .text((d) => d.label);
   if (spec.note) d3.select(el).append("p").attr("class", "ck").text(spec.note);
 }
 
