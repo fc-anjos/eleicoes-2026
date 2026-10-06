@@ -127,11 +127,14 @@ export function setFiltersFrom(q) {
 // on phones the cards scroll up from the bottom: views centre in the band above them (a negative y offset) and the
 // whole country is drawn smaller to fit there
 const phoneStory = () => d3.select("#page").classed("storymode") && innerWidth <= 900;
-// phones: the band between the totals (TOP px) and the step panel (its height a share of the screen's, which the
+// phones: the band between the totals and the step panel (its height a share of the screen's, which the
 // reader can drag), with the dots above the panel
-const TOP = 104;
+export const phoneTop = () => {
+  const e = document.querySelector(".stot");
+  return e ? e.getBoundingClientRect().bottom + 4 : 80;
+};
 export const PANEL = { f: 0.44 };
-const band = () => [TOP, S.h * (1 - PANEL.f) - 40];
+const band = () => [phoneTop(), S.h * (1 - PANEL.f) - 50]; // 50: the key's strip above the card
 export const storyOffsetY = () => (phoneStory() ? (band()[0] + band()[1]) / 2 - S.h / 2 : 0);
 // the country fills the screen's width unless the band is too short for it
 const phoneK = () => Math.min(1, (0.96 * (band()[1] - band()[0])) / mapH());

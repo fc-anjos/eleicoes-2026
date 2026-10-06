@@ -25,7 +25,7 @@ import { A8, AB, AO, CI, COLS, K, S, YS, css } from "../state.js";
 import { CAPITALS, abRate, lulaShift, tally } from "../stats.js";
 import { DOT, layers } from "../dots.js";
 import { path, svg } from "./base.js";
-import { cellK, flat, panelVar } from "./panels.js";
+import { cellK, flat, panelVar, phoneBand } from "./panels.js";
 
 // scatter and multiples leave the map for a chart (see panels.js); hex pools polling places into hexagons
 export const VIZS = ["dots", "outline", "circles", "margins", "hex", "scatter", "multiples"];
@@ -458,6 +458,10 @@ export function cityNotes(t) {
     B = CI("22"),
     story = d3.select("#page").classed("storymode") && innerWidth > 900,
     x0 = story ? document.querySelector("aside").getBoundingClientRect().width : 0,
+    // phones: only the band between the totals and the card, and fewer names (the labels are long)
+    band = phoneBand(),
+    [y0, y1] = band || [0, S.h],
+    n = band ? NAMED / 2 : NAMED,
     key = document.getElementById("vkey").getBoundingClientRect(),
     wrap = document.getElementById("wrap").getBoundingClientRect(),
     // taken: the key, then each label as it is placed
@@ -469,10 +473,10 @@ export function cityNotes(t) {
     .filter((i) => {
       if (!R[i] || !P[i] || !PASS[i] || !isBig(i, t.k)) return false;
       const [x, y] = at(i);
-      return x > x0 + 20 && x < S.w - 20 && y > 20 && y < S.h - 20;
+      return x > x0 + 20 && x < S.w - 20 && y > y0 + 20 && y < y1 - 20;
     })
     .sort((i, j) => CAP[j] - CAP[i] || R[j].valid - R[i].valid)
-    .slice(0, NAMED);
+    .slice(0, n);
   const out = [];
   for (const i of top) {
     // named with Lula's share in both years, or his margin when the colour is the margin, so a flip reads as
@@ -490,7 +494,7 @@ export function cityNotes(t) {
       dx < 0 ? [x + dx - w, y + dy - 9, x + dx, y + dy + 9] : [x + dx, y + dy - 9, x + dx + w, y + dy + 9];
     const fits = (s) => {
       const b = box(s);
-      return b[0] > x0 && b[2] < S.w && b[1] > 0 && b[3] < S.h && !hits(b);
+      return b[0] > x0 && b[2] < S.w && b[1] > y0 && b[3] < y1 && !hits(b);
     };
     const s = [kept.get(name), ...SPOTS].filter(Boolean).find(fits);
     if (!s) continue;

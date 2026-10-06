@@ -14,7 +14,7 @@ import { VARS } from "../filters/vars.js";
 import { hum, num, pctN, showVal, signed } from "../format.js";
 import { t as tr } from "../i18n/index.js";
 import { CI, COLS, S, YS, css } from "../state.js";
-import { PANEL } from "../view/hash.js";
+import { PANEL, phoneTop } from "../view/hash.js";
 import { path, showTip, svg, tip } from "./base.js";
 import { GHOST, RMIN, SHARE, disc, fitScale, geo, measure, moved, rad, results } from "./marks.js";
 
@@ -24,6 +24,8 @@ export const flat = () => FLAT.includes(S.VIZ);
 // its y shows: the change in Lula's share (dlula) or in the abstention rate (dabst)
 const PANELW = 0.44;
 export const panelled = () => !!S.PANEL && !flat() && !phoneStory();
+// phones: the map's visible band, between the totals and the key strip above the card
+export const phoneBand = () => (phoneStory() ? [phoneTop() + 8, S.h * (1 - PANEL.f) - 52] : null);
 const phoneStory = () => d3.select("#page").classed("storymode") && innerWidth <= 900;
 // the y measure: its value, the weight of a place (the circles' area and the trend's weights), its colours by sign
 // and its title
@@ -85,7 +87,7 @@ export function frame() {
     x0 = story && !phone ? document.querySelector("aside").getBoundingClientRect().width : 0;
   // the top clears the Share button, the bottom the credits
   return phone
-    ? { x0: 8, x1: S.w - 8, y0: 120, y1: S.h * (1 - PANEL.f) - 48 }
+    ? { x0: 8, x1: S.w - 8, y0: phoneTop() + 12, y1: S.h * (1 - PANEL.f) - (flat() ? 14 : 54) }
     : { x0, x1: S.w - 20, y0: 56, y1: S.h - 70 };
 }
 // with a side panel, the map's part of the frame and the panel's
@@ -129,9 +131,12 @@ function label(cx, text, x, y, dpr, bg, align = "left", col = css("--ink")) {
 // the plot: margins for the axes, the scales, and the circles' size scale (their areas together cover SCOVER of
 // the plot, min RMIN)
 const SCOVER = 0.16,
-  PAD = { l: 64, r: 28, t: 64, b: 56 };
+  // a narrow panel (a phone) sets the trend's name on its own line above the plot and keeps room for the last
+  // band's label at the right
+  pad = (f) => (f.x1 - f.x0 < 500 ? { l: 56, r: 44, t: 82, b: 56 } : { l: 64, r: 28, t: 64, b: 56 });
 function plot(y, f) {
-  const v = vx(),
+  const PAD = pad(f),
+    v = vx(),
     { get, w } = vy(),
     its = items(y),
     xs = its.map((d) => d.x),
@@ -230,13 +235,14 @@ function drawScatter(cx, y, dpr, f = frame()) {
   cx.fillStyle = ink;
   cx.textAlign = "left";
   cx.fillText(tr(narrow ? "viz.scatterXShort" : "viz.scatterX", { name: p.v.n }), px0 * dpr, (py0 + 32) * dpr);
-  cx.fillText(tr(title), (px0 - 50) * dpr, (py1 - 30) * dpr);
+  const cy = narrow ? py1 - 32 : py1 - 13; // the chips' row
+  cx.fillText(tr(title), (px0 - 50) * dpr, (cy - 17) * dpr);
   cx.font = font(11, dpr);
   let lx = px0 - 50;
   for (const [cat, key] of chips()) {
-    disc(cx, (lx + 4) * dpr, (py1 - 13) * dpr, 4 * dpr, [cat.startsWith("#") ? cat : COLS[CI(cat)]]);
+    disc(cx, (lx + 4) * dpr, cy * dpr, 4 * dpr, [cat.startsWith("#") ? cat : COLS[CI(cat)]]);
     cx.fillStyle = haze;
-    cx.fillText(tr(key), (lx + 12) * dpr, (py1 - 13) * dpr);
+    cx.fillText(tr(key), (lx + 12) * dpr, cy * dpr);
     lx += 12 + cx.measureText(tr(key)).width / dpr + 16;
   }
   // circles, those outside the filters faint and first, then the lit ones biggest first
@@ -272,7 +278,7 @@ function drawScatter(cx, y, dpr, f = frame()) {
   cx.globalAlpha = 1;
   cx.fillStyle = haze;
   cx.textAlign = "right";
-  const ty = narrow ? py1 + 6 : py1 - 13,
+  const ty = narrow ? py1 - 14 : py1 - 13,
     tw = cx.measureText(tr("viz.scatterTrend")).width / dpr;
   cx.fillText(tr("viz.scatterTrend"), px1 * dpr, ty * dpr);
   cx.strokeStyle = ink;

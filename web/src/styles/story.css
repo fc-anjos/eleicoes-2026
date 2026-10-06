@@ -557,17 +557,33 @@
    totals shrink to one line, views are framed in the band above the cards, and the cards come with long gaps
    between them so the map is seen on its own. */
 @media (max-width: 900px) {
+  /* a slim header: every pixel it doesn't take goes to the map */
   .storymode aside {
-    padding: 8px 10px 0;
+    padding: 4px 10px 0;
   }
   .storymode .tabs {
-    top: 8px;
-    margin-top: 8px !important;
-    padding: 6px 12px 0;
+    top: 4px;
+    margin-top: 4px !important;
+    padding: 2px 12px 0;
+  }
+  .storymode .tabs button {
+    padding: 6px 2px;
+    font-size: 12px;
+  }
+  .storymode .share {
+    top: 10px;
+    right: 20px;
+    z-index: 8;
+    padding: 6px 7px;
+    background: none;
+    backdrop-filter: none;
+  }
+  .storymode .share span {
+    display: none;
   }
   .storymode .stot {
-    top: 46px;
-    padding: 6px 12px 8px;
+    top: 36px;
+    padding: 4px 12px 6px;
     margin-bottom: 62vh;
     display: flex;
     flex-wrap: wrap;
@@ -685,7 +701,7 @@
     opacity: 1;
     border-radius: 14px 14px 0 0;
     border-bottom: 0;
-    padding: 24px 18px calc(18px + env(safe-area-inset-bottom));
+    padding: 42px 18px calc(18px + env(safe-area-inset-bottom));
     background: var(--dusk);
   }
   .storymode .prog {
@@ -697,8 +713,10 @@
     left: 56px;
     right: 56px;
     top: auto;
-    bottom: calc(var(--card-h) + 10px);
+    /* on the card's top edge, under its grip, so the map keeps the room above the card */
+    bottom: calc(var(--card-h) - 30px);
     transform: none;
+    z-index: 6;
   }
   .storymode .prog button {
     width: 7px;
@@ -708,10 +726,10 @@
     display: grid;
     place-items: center;
     position: fixed;
-    bottom: calc(var(--card-h) + 4px);
+    bottom: calc(var(--card-h) - 36px);
     z-index: 6;
     width: 36px;
-    height: 28px;
+    height: 26px;
     padding: 0;
     border-radius: 8px;
     border: 1px solid var(--rule);
@@ -730,7 +748,7 @@
   }
 }
 :root {
-  --panel-h: 50dvh; /* the most a step may take; a shorter one sets --card-h to its own height */
+  --panel-h: 32dvh; /* the most a step may take; a shorter one sets --card-h to its own height */
   --card-h: var(--panel-h);
 }
 /* desktop: a step's title beside its dot, on hover */
@@ -760,16 +778,52 @@
 }
 @media (max-width: 900px) {
   /* the panel's top edge: drag it up or down to give the text or the map more room */
+  /* the key: one strip across the bottom of the map's band, just above the card (the map's band stops short of
+     it); the circle sizes and notes are left out for room */
+  .storymode .akey.vkey {
+    left: 8px;
+    right: 8px;
+    bottom: calc(var(--card-h) + 6px);
+    width: auto;
+    padding: 6px 10px;
+    font-size: 10.5px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px 12px;
+  }
+  .storymode .vkey .kt {
+    font-size: 10.5px;
+    margin: 0;
+    flex: 1 1 100%;
+  }
+  .storymode .vkey .ksteps,
+  .storymode .vkey .kbar {
+    flex: 1 1 140px;
+  }
+  .storymode .vkey .kax {
+    flex: 1 1 100%;
+  }
+  .storymode .vkey .kchips {
+    margin: 0;
+  }
+  .storymode .vkey .kcirc,
+  .storymode .vkey .kn {
+    display: none;
+  }
   .storymode #pgrip {
     display: block;
     position: fixed;
     left: 0;
     right: 0;
-    bottom: calc(var(--card-h) - 22px);
-    height: 22px;
-    z-index: 7;
+    bottom: calc(var(--card-h) - 42px);
+    height: 42px;
+    z-index: 5;
     touch-action: none;
     cursor: ns-resize;
+    /* the card's header band: opaque, so the text scrolls under the dots and arrows */
+    background: var(--dusk);
+    border-radius: 14px 14px 0 0;
   }
   .storymode #pgrip::after {
     content: "";
