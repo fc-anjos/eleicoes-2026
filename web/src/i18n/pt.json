@@ -398,5 +398,15 @@
       "n": "Votos nos candidatos menores",
       "src": "TSE 2026, soma dos votos válidos no local de votação de todos os candidatos exceto Lula e Flávio Bolsonaro"
     }
+  },
+  "loader": {
+    "lines": [
+      "Baixando os votos de 5.570 municípios",
+      "Mais de 1,2 milhão de pontos, um a cada 250 votos",
+      "Posicionando cada ponto perto de um dos 94 mil locais de votação",
+      "Comparando 2022 e 2026, local por local"
+    ],
+    "drawing": "Desenhando o mapa",
+    "mb": "{got} de {total} MB"
   }
 }

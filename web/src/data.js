@@ -8,8 +8,35 @@
 //   STUDIO     municipal filter variables; PLACES: neighbourhood variables per polling place
 //   VPD        votes per dot
 import STORY from "./story/story.json";
+import * as loader from "./view/loader.js";
 
-const res = await fetch(`${import.meta.env.BASE_URL}data/map.json`);
-if (!res.ok) throw new Error(`Could not load the map data (${res.status}): run \`make data\``);
-export const { MG, SG, M, CATS, YEARS, ORDER, STUDIO, PLACES, VPD } = await res.json();
+// read as a stream, so the loader can show how much has arrived
+async function load(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Could not load the map data (${res.status}): run \`make data\``);
+  const total = __MAP_BYTES__ || +res.headers.get("content-length") || 0,
+    reader = res.body.getReader(),
+    parts = [];
+  let got = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    parts.push(value);
+    got += value.length;
+    loader.progress(got, total);
+  }
+  loader.drawing();
+  const all = new Uint8Array(got);
+  let o = 0;
+  for (const p of parts) {
+    all.set(p, o);
+    o += p.length;
+  }
+  return JSON.parse(new TextDecoder().decode(all));
+}
+
+loader.start();
+export const { MG, SG, M, CATS, YEARS, ORDER, STUDIO, PLACES, VPD } = await load(
+  `${import.meta.env.BASE_URL}data/map.json`,
+);
 export { STORY };

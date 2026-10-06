@@ -12,6 +12,18 @@
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
+    <div class="loader" id="loader" role="status" aria-live="polite">
+      <div class="ld-card" aria-hidden="true">
+        <i class="sk sk-tabs"></i><i class="sk sk-h"></i><i class="sk"></i><i class="sk"></i><i class="sk sk-s"></i>
+        <i class="sk sk-gap"></i><i class="sk"></i><i class="sk"></i><i class="sk sk-s"></i>
+      </div>
+      <div class="ld-map">
+        <img src="./favicon.svg" alt="" class="ld-mark" />
+        <p class="ld-msg" id="ldmsg"></p>
+        <div class="ld-bar"><i id="ldbar"></i></div>
+        <p class="ld-n" id="ldn"></p>
+      </div>
+    </div>
     <div class="page" id="page">
       <div id="wrap">
         <canvas id="cv"></canvas><canvas id="cvg" aria-hidden="true"></canvas

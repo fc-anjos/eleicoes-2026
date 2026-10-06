@@ -14,6 +14,7 @@ import { initSearch } from "./search.js";
 import { initStory } from "./story/story.js";
 import { initHash } from "./view/hash.js";
 import { initHints } from "./view/hints.js";
+import { done as loaded } from "./view/loader.js";
 import { initShare } from "./view/share.js";
 
 applyDom(); // the page's copy first: the modules below fill in parts of it
@@ -30,3 +31,4 @@ initArrows();
 initShare();
 initStory();
 initHash(); // after the tabs, so a shared view's layout and settings win
+requestAnimationFrame(loaded); // once the first frame is painted

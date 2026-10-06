@@ -398,5 +398,15 @@
       "n": "Votes for smaller candidates",
       "src": "TSE 2026, combined share of valid votes at the polling place for all candidates except Lula and Flávio Bolsonaro"
     }
+  },
+  "loader": {
+    "lines": [
+      "Downloading the votes of 5,570 municipalities",
+      "More than 1.2 million dots, one for every 250 votes",
+      "Placing each dot near one of 94,000 polling places",
+      "Lining up 2022 and 2026, polling place by polling place"
+    ],
+    "drawing": "Drawing the map",
+    "mb": "{got} of {total} MB"
   }
 }
