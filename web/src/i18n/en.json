@@ -63,11 +63,11 @@
       },
       "overview": {
         "h": "Lula lost ground almost everywhere",
-        "t": "<p>Lula's share of the vote fell in 5,468 of Brazil's 5,570 municipalities. In 2022 he led Jair Bolsonaro in the first round, 48.4 percent to 43.2 percent. This year Flávio Bolsonaro finished first, with 47.0 percent to Lula's 45.2 percent.</p><p>The losses were spread across the country. Lula's share slipped in the North and the Southeast and fell further in the South. He still finished well ahead in the Northeast. In more than 700 municipalities where he finished ahead in 2022, the Bolsonaro camp came out ahead this time.</p><p>Each circle is a municipality. Its size is the net number of votes that moved between 2022 and 2026. It is blue where they moved away from Lula and red where they moved towards him.</p><p class=\"n\">The ballot is secret. These maps show how places voted. They cannot show which voters changed their minds.</p>"
+        "t": "<p>Lula's share of the vote fell in 5,468 of Brazil's 5,570 municipalities. In 2022 he led Jair Bolsonaro in the first round, 48.4 percent to 43.2 percent. This year Flávio Bolsonaro finished first, with 47.0 percent to Lula's 45.2 percent.</p><p>The losses were spread across the country. Lula's share slipped in the North and the Southeast and fell further in the South. He still finished well ahead in the Northeast. In more than 700 municipalities where he finished ahead in 2022, the Bolsonaro camp came out ahead this time.</p><p class=\"n\">The ballot is secret. These maps show how places voted. They cannot show which voters changed their minds.</p>"
       },
       "arrows": {
         "h": "The shift, municipality by municipality",
-        "t": "<p>Each arrow is a municipality. Arrows point right and are blue where the margin moved toward the Bolsonaro camp from 2022 to 2026, and left and red where it moved toward Lula. Longer arrows mean bigger shifts.</p><p>The margin moved toward the Bolsonaro camp in 5,512 of 5,570 municipalities. The next three views sort them by how much Lula lost.</p>"
+        "t": "<p>The margin moved toward the Bolsonaro camp in 5,512 of 5,570 municipalities. The next three views sort them by how much Lula lost.</p>"
       },
       "held": {
         "h": "Where Lula kept his votes",
@@ -84,15 +84,7 @@
       },
       "small-towns": {
         "h": "The smaller the town, the bigger the shift",
-        "t": "<p>Each circle is a municipality, placed by its population and by how much Lula's share changed. The bigger the circle, the more votes it cast. The line runs through the average of each size band, weighted by votes: it falls steadily as places get smaller, from about one point lost in the biggest cities to seven in towns under 10,000 residents.</p>",
-        "chart": {
-          "title": "Lula's share by municipality size (residents)",
-          "labels": ["Under 10k", "10k–50k", "50k–200k", "200k–1M", "Over 1M"]
-        }
-      },
-      "small-towns-multiples": {
-        "h": "The same shift, one map per town size",
-        "t": "<p>The same municipalities, split into five maps by population. Each circle is the net votes that moved, blue away from Lula and red towards him. The small towns are many and spread across the interior, and almost every one is blue; among the big cities red and blue are mixed, and Lula's share there barely moved.</p>",
+        "t": "<p>The average shift grows steadily as places get smaller, from about one point lost in the biggest cities to seven in towns under 10,000 residents.</p>",
         "chart": {
           "title": "Lula's share by municipality size (residents)",
           "labels": ["Under 10k", "10k–50k", "50k–200k", "200k–1M", "Over 1M"]
@@ -201,7 +193,7 @@
       },
       "sp-vs-brazil": {
         "h": "Outside São Paulo, the drop was deepest in the middle",
-        "t": "<p>The chart compares the city with the rest of the country around polling places of the same income. Outside São Paulo, Lula's share fell 3.4 points in the lowest-income areas, below one minimum wage, and about 4.7 points between 1.5 and 2.5 minimum wages. He gained only above six minimum wages.</p><p>In São Paulo the line sits higher. Above two minimum wages, Lula did better in the city than elsewhere at the same income, by 1.3 to 2.5 points. His losses in the city were concentrated in its lowest-income areas, where he fell 5.6 points.</p><p>Most votes are cast where he lost the most. Outside São Paulo, about seven in ten valid votes come from polling places in areas below 2.5 minimum wages.</p><p>The map keeps only the polling places in areas of 1.5 to 2.5 minimum wages.</p>",
+        "t": "<p>Outside São Paulo, Lula's share fell 3.4 points in the lowest-income areas, below one minimum wage, and about 4.7 points between 1.5 and 2.5 minimum wages. He gained only above six minimum wages.</p><p>In São Paulo the line sits higher. Above two minimum wages, Lula did better in the city than elsewhere at the same income, by 1.3 to 2.5 points. His losses in the city were concentrated in its lowest-income areas, where he fell 5.6 points.</p><p>Most votes are cast where he lost the most. Outside São Paulo, about seven in ten valid votes come from polling places in areas below 2.5 minimum wages.</p><p>The map keeps only the polling places in areas of 1.5 to 2.5 minimum wages.</p>",
         "chart": {
           "title": "Change in Lula's share, by income nearby (points)",
           "axis": "Average income of household heads nearby, minimum wages",

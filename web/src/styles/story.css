@@ -581,11 +581,19 @@
     font-size: 9.5px;
   }
   .storymode .stot .scope,
-  .storymode .stot .fdesc,
   .storymode .stot .sr.sh,
   .storymode .stot .sr > span,
   .storymode .stot .sr u {
     display: none;
+  }
+  /* the filter, in one line (the badge over the map is off on phones) */
+  .storymode .stot .fdesc {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 10.5px;
+    margin-top: 2px;
   }
   .storymode .stot .sr {
     display: inline-grid;

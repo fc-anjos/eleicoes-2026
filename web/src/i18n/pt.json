@@ -63,11 +63,11 @@
       },
       "overview": {
         "h": "Lula perdeu terreno em quase todo o país",
-        "t": "<p>A votação de Lula caiu em 5.468 dos 5.570 municípios do Brasil. Em 2022, ele terminou o primeiro turno à frente de Jair Bolsonaro, com 48,4% contra 43,2%. Neste ano, Flávio Bolsonaro ficou em primeiro, com 47,0%, contra 45,2% de Lula.</p><p>As perdas se espalharam pelo país. Lula recuou no Norte e no Sudeste e caiu mais no Sul. Ele ainda ficou bem à frente no Nordeste. Em mais de 700 municípios onde ele ficou à frente em 2022, o campo bolsonarista ficou à frente desta vez.</p><p>Cada círculo é um município. O tamanho é o saldo de votos que mudaram de lado entre 2022 e 2026. Ele é azul onde os votos se afastaram de Lula e vermelho onde foram para ele.</p><p class=\"n\">O voto é secreto. Estes mapas mostram como os lugares votaram. Não mostram quais eleitores mudaram de voto.</p>"
+        "t": "<p>A votação de Lula caiu em 5.468 dos 5.570 municípios do Brasil. Em 2022, ele terminou o primeiro turno à frente de Jair Bolsonaro, com 48,4% contra 43,2%. Neste ano, Flávio Bolsonaro ficou em primeiro, com 47,0%, contra 45,2% de Lula.</p><p>As perdas se espalharam pelo país. Lula recuou no Norte e no Sudeste e caiu mais no Sul. Ele ainda ficou bem à frente no Nordeste. Em mais de 700 municípios onde ele ficou à frente em 2022, o campo bolsonarista ficou à frente desta vez.</p><p class=\"n\">O voto é secreto. Estes mapas mostram como os lugares votaram. Não mostram quais eleitores mudaram de voto.</p>"
       },
       "arrows": {
         "h": "A mudança, município a município",
-        "t": "<p>Cada seta é um município. As setas apontam para a direita e são azuis onde a margem se moveu em direção ao campo bolsonarista de 2022 para 2026, e para a esquerda e vermelhas onde se moveu em direção a Lula. Setas mais longas indicam mudanças maiores.</p><p>A margem se moveu em direção ao campo bolsonarista em 5.512 dos 5.570 municípios. As próximas três telas separam os municípios pelo tamanho da perda de Lula.</p>"
+        "t": "<p>A margem se moveu em direção ao campo bolsonarista em 5.512 dos 5.570 municípios. As próximas três telas separam os municípios pelo tamanho da perda de Lula.</p>"
       },
       "held": {
         "h": "Onde Lula manteve votos",
@@ -84,15 +84,7 @@
       },
       "small-towns": {
         "h": "Quanto menor a cidade, maior a mudança",
-        "t": "<p>Cada círculo é um município, posicionado pela população e pelo quanto a fatia de Lula mudou. Quanto maior o círculo, mais votos ele teve. A linha passa pela média de cada faixa de tamanho, ponderada pelos votos: ela cai de forma constante conforme os lugares ficam menores, de cerca de um ponto perdido nas maiores cidades a sete nas cidades com menos de 10 mil habitantes.</p>",
-        "chart": {
-          "title": "Votação de Lula por porte do município (habitantes)",
-          "labels": ["Até 10 mil", "10 mil–50 mil", "50 mil–200 mil", "200 mil–1 mi", "Mais de 1 mi"]
-        }
-      },
-      "small-towns-multiples": {
-        "h": "A mesma mudança, um mapa por tamanho de cidade",
-        "t": "<p>Os mesmos municípios, divididos em cinco mapas por população. Cada círculo são os votos líquidos que se moveram, azul para longe de Lula e vermelho na direção dele. As cidades pequenas são muitas e espalhadas pelo interior, e quase todas são azuis; entre as grandes cidades, vermelho e azul se misturam, e a fatia de Lula ali quase não se moveu.</p>",
+        "t": "<p>A perda média cresce de forma constante conforme os lugares ficam menores, de cerca de um ponto nas maiores cidades a sete nas cidades com menos de 10 mil habitantes.</p>",
         "chart": {
           "title": "Votação de Lula por porte do município (habitantes)",
           "labels": ["Até 10 mil", "10 mil–50 mil", "50 mil–200 mil", "200 mil–1 mi", "Mais de 1 mi"]
@@ -201,7 +193,7 @@
       },
       "sp-vs-brazil": {
         "h": "Fora de São Paulo, a queda foi maior no meio",
-        "t": "<p>O gráfico compara a cidade com o resto do país em volta de locais de votação de mesma renda. Fora de São Paulo, a votação de Lula caiu 3,4 pontos nas áreas de renda mais baixa, abaixo de um salário mínimo, e cerca de 4,7 pontos entre 1,5 e 2,5 salários mínimos. Ele só ganhou acima de seis salários mínimos.</p><p>Em São Paulo, a linha fica mais alta. Acima de dois salários mínimos, Lula foi melhor na cidade do que no resto do país com a mesma renda, por 1,3 a 2,5 pontos. As perdas dele na cidade se concentraram nas áreas de renda mais baixa, onde caiu 5,6 pontos.</p><p>A maior parte dos votos está onde ele mais perdeu. Fora de São Paulo, cerca de sete em cada dez votos válidos vêm de locais de votação em áreas com menos de 2,5 salários mínimos.</p><p>O mapa mantém apenas os locais de votação em áreas de 1,5 a 2,5 salários mínimos.</p>",
+        "t": "<p>Fora de São Paulo, a votação de Lula caiu 3,4 pontos nas áreas de renda mais baixa, abaixo de um salário mínimo, e cerca de 4,7 pontos entre 1,5 e 2,5 salários mínimos. Ele só ganhou acima de seis salários mínimos.</p><p>Em São Paulo, a linha fica mais alta. Acima de dois salários mínimos, Lula foi melhor na cidade do que no resto do país com a mesma renda, por 1,3 a 2,5 pontos. As perdas dele na cidade se concentraram nas áreas de renda mais baixa, onde caiu 5,6 pontos.</p><p>A maior parte dos votos está onde ele mais perdeu. Fora de São Paulo, cerca de sete em cada dez votos válidos vêm de locais de votação em áreas com menos de 2,5 salários mínimos.</p><p>O mapa mantém apenas os locais de votação em áreas de 1,5 a 2,5 salários mínimos.</p>",
         "chart": {
           "title": "Variação da votação de Lula, pela renda no entorno (pontos)",
           "axis": "Renda média dos responsáveis no entorno, em salários mínimos",

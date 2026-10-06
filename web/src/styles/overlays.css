@@ -64,11 +64,10 @@
   font-size: 11px;
   color: var(--haze);
 }
+/* phones: the badge would cover the map; the card's own filter line says it instead */
 @media (max-width: 900px) {
   .storymode .fbadge {
-    left: 50%;
-    max-width: calc(100% - 32px);
-    top: 112px; /* under the totals, clear of the cards */
+    display: none;
   }
 }
 

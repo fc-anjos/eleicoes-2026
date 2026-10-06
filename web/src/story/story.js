@@ -255,18 +255,21 @@ function fillSteps() {
     .append("p")
     .attr("class", "cue")
     .html(
-      '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>' +
+      (phone.matches
+        ? '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l-4 4 4 4M10 4l4 4-4 4"/></svg>'
+        : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>') +
         t(phone.matches ? "story.cueSwipe" : "story.cue"),
     );
   prog.attr("aria-label", (d) => copyOf(d).h).attr("title", (d) => copyOf(d).h);
   d3.select("#toexplore").on("click", () => setTab(false));
 }
 
-// Phones: a sideways swipe on the panel moves to the next or previous step. The panel follows the finger, then
-// settles on the step it was swiped to; a mostly vertical drag scrolls the step's text instead.
+// Phones: a swipe on the panel moves to the next or previous step. Sideways, the panel follows the finger, then
+// settles on the step it was swiped to. Up or down (the gesture a phone reader reaches for first) a long step's
+// text scrolls as usual, and the step changes once the swipe starts at the text's end (up) or top (down).
 function swipe() {
   const box = document.getElementById("steps");
-  let x0, y0, sl0, dir;
+  let x0, y0, sl0, dir, atTop, atEnd;
   box.addEventListener(
     "touchstart",
     (e) => {
@@ -274,6 +277,9 @@ function swipe() {
       ({ clientX: x0, clientY: y0 } = e.touches[0]);
       sl0 = box.scrollLeft;
       dir = null;
+      const el = e.target.closest(".step");
+      atTop = !el || el.scrollTop <= 1;
+      atEnd = !el || el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
     },
     { passive: true },
   );
@@ -292,12 +298,17 @@ function swipe() {
   );
   box.addEventListener("touchend", (e) => {
     if (!phone.matches || x0 == null) return;
-    const dx = e.changedTouches[0].clientX - x0;
+    const dx = e.changedTouches[0].clientX - x0,
+      dy = e.changedTouches[0].clientY - y0;
     x0 = null;
-    if (dir !== "x") return;
     const w = box.clientWidth,
-      from = Math.round(sl0 / w),
-      to = Math.abs(dx) > w * 0.18 ? from - Math.sign(dx) : from;
+      from = Math.round(sl0 / w);
+    let to = from;
+    if (dir === "x") to = Math.abs(dx) > w * 0.18 ? from - Math.sign(dx) : from;
+    else if (dir === "y" && Math.abs(dy) > 60) {
+      if (dy < 0 && atEnd) to = from + 1;
+      if (dy > 0 && atTop) to = from - 1;
+    } else return;
     showStep(Math.max(0, Math.min(STORY.length - 1, to)), true);
   });
 }
