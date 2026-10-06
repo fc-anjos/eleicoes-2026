@@ -341,24 +341,46 @@ PLACE_VARS = [
     ("setor_pct_preta_parda", "Black or Brown", "pct", "Censo 2022 tracts within 1 km", "lin", [0, 100]),
     (
         "pct_excess_2026",
-        "Excess abstention",
+        "Abstention above expected",
         "pp",
-        "2026 abstention minus expected from age, education and neighbourhood (model)",
+        "2026 abstention minus the rate expected from the roll's age and schooling (model)",
         "lin",
         [-25, 25],
     ),
+    (
+        "small_2026",
+        "Smaller candidates",
+        "pct",
+        "TSE 2026, share of valid votes at the polling place for everyone but Lula and Flávio Bolsonaro",
+        "lin",
+        [0, 40],
+    ),
 ]
+
+
+def small_shares(places):
+    """The smaller candidates' share of valid votes at each polling place (2026), a place variable of its own."""
+    out = {}
+    for mu in places["muns"].values():
+        for *_, votes, _alt, pid in mu.get("p", []):
+            valid = sum(v for k, v in votes.items() if k != "A")
+            if valid:
+                out[pid] = 100 * (valid - votes.get("13", 0) - votes.get("22", 0)) / valid
+    return out
+
+
 NEAR_KM = 2  # a 2022 polling place takes the neighbourhood values of the nearest 2026 place within this distance
 
 
-def load_places_studio():
-    """data/places_studio.csv by place id ("UF-municipality-zone-place"), with coordinates, as byte-coded rows."""
+def load_places_studio(extra):
+    """data/places_studio.csv by place id ("UF-municipality-zone-place"), with coordinates, as byte-coded rows.
+    extra: values of variables computed here rather than read from the file, {column: {place id: value}}."""
     rows, xy = {}, {}
     for r in read_csv("data/places_studio.csv"):
         pid = f"{r['uf']}-{int(r['cd_tse'])}-{int(r['zona'])}-{int(r['nr_local'])}"
         code = []
         for col, _, _, _, enc, (lo, hi) in PLACE_VARS:
-            v = r[col]
+            v = extra[col].get(pid) if col in extra else r[col]
             if v in ("", None):
                 code.append(255)
                 continue
@@ -423,7 +445,7 @@ def summary_stats(muns):
 def main():
     places = {y: load_json(f"data/places_{y}.json") for y in YEARS}
     studio = load_studio()
-    prow, pxy = load_places_studio()
+    prow, pxy = load_places_studio({"small_2026": small_shares(places[2026])})
     mgeo, sgeo = load_geometry()
     keys, cats_y = categories(places)
     order = list(range(len(mgeo["features"])))
@@ -466,7 +488,11 @@ def main():
             "PLACES": {
                 "n": len(prow),
                 "b": base64.b64encode(np.array(list(prow.values()), "u1").T.tobytes()).decode(),
-                "vars": [{"k": c, "n": n, "u": u, "src": s_, "enc": e, "r": r} for c, n, u, s_, e, r in PLACE_VARS],
+                "vars": [
+                    # at: measured at the polling place itself (its votes or its roll), not around it (Census tracts)
+                    {"k": c, "n": n, "u": u, "src": s_, "enc": e, "r": r, "at": c in ("small_2026", "pct_excess_2026")}
+                    for c, n, u, s_, e, r in PLACE_VARS
+                ],
             },
         },
         OUT,

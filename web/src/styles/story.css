@@ -325,6 +325,26 @@
 .step .ck .f {
   background: var(--c1);
 }
+/* the place chart in "find your place": every category in its own colour, so the key is neutral; the tick is
+   Brazil's figure */
+.step .ck .was {
+  border: 1.5px solid var(--haze);
+}
+.step .ck .now {
+  background: var(--haze);
+}
+.step .ck .nat {
+  width: 2px;
+  height: 10px;
+  border-radius: 0;
+  background: var(--haze);
+  vertical-align: -1px;
+}
+.dumb .nat {
+  stroke: var(--haze);
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
 /* find your place */
 .find {
   position: relative;

@@ -54,7 +54,8 @@ export function describeFilter() {
     const nudge = v.k === "setor_renda_resp_media" ? 1 : 0;
     const range =
       a && b ? showVal(v, l) + " – " + showVal(v, h) : a ? "≥ " + showVal(v, l + nudge) : "≤ " + showVal(v, h - nudge);
-    out.push(`${v.n}${v.place ? " (around polling place)" : ""}: ${range}`);
+    const where = !v.place ? "" : v.at ? " (at polling place)" : " (around polling place)";
+    out.push(`${v.n}${where}: ${range}`);
   }
   return out;
 }

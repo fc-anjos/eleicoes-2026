@@ -245,8 +245,13 @@
   },
   {
     "view": "y=2026&at=-40.5,-12.6,4&f=pct_excess_2026:90-100&only=A",
-    "h": "Abstention nobody expected",
-    "t": "<p>Some places abstain more than their voters' age, education and neighbourhood predict. Lit here: the tenth of polling places with the most of this excess abstention, in amber only. The totals above are for them nationwide.</p>"
+    "h": "More abstention than expected",
+    "t": "<p>Some abstention is predictable: some age groups and people with less schooling vote less. So each polling place gets an expected abstention: the 2022 abstention rate of every age and schooling group in its state, applied to who is on its 2026 roll, and scaled so each state's expected total matches its actual one. Where real abstention is above that, something other than the roll's age and schooling kept people away.</p><p>Lit here, in amber only: the tenth of polling places furthest above expected, by 4.5 points or more. About 11 million people are on their rolls. Their age and schooling predict about 21% abstention; 27.5% didn't vote. They aren't one region: São Paulo, Minas Gerais, Bahia and Rio Grande do Sul lead the list.</p><p class=\"n\">This marks places to look at, not causes: the model knows nothing of distance to the polling place, transport, weather or local politics.</p>"
+  },
+  {
+    "view": "y=2026&at=home&f=small_2026@10~*",
+    "h": "The voters in the middle",
+    "t": "<p>Lit: polling places where the smaller candidates, everyone but Lula and Flávio Bolsonaro, took 10% or more of the valid vote. They hold a fifth of voters, and the smaller candidates took 12.1% there, against 7.8% nationally. Most are in São Paulo state and Goiás, Ronaldo Caiado's home state, in neighbourhoods richer than average, and there Flávio Bolsonaro led Lula 51.0% to 36.9%.</p><p>Augusto Cury, Renan Santos and Caiado took 8.7 million votes between them. A Genial/Quaest poll (2–3 October 2026) asked their voters about a Lula–Flávio runoff. By its split, about 3.9 million lean to Flávio, 1.6 million to Lula, and 3.2 million are undecided or won't pick either: more than Flávio's first-round lead of 2.2 million.</p><p class=\"n\">The poll's runoff split is national, applied here to the vote counts; it isn't measured place by place.</p>"
   },
   {
     "view": "y=cmp&split=0.5&at=home",
