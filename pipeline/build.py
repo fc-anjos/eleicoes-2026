@@ -318,7 +318,7 @@ def main():
     muns = municipality_summaries(places, cats_y, studio)
     cats = [{"k": k, "col": COLOR[k]} for k in keys]
     open(OUT, "w").write(render({"__MGEO__": mgeo, "__SGEO__": sgeo, "__MUNS__": muns, "__CATS__": cats,
-                                 "__YEARS__": years, "__ORDER__": order, "__STUDIO__": summary_stats(muns), "__VPD__": VPD,
+                                 "__YEARS__": years, "__ORDER__": order, "__STUDIO__": summary_stats(muns), "__VPD__": VPD, "__STORY__": json.load(open("web/story.json")),
                                  "__PLACES__": {"n": len(prow), "b": base64.b64encode(np.array(list(prow.values()), "u1").T.tobytes()).decode(),
                                                 "vars": [{"k": c, "n": n, "u": u, "src": s_, "enc": e, "r": r} for c, n, u, s_, e, r in PLACE_VARS]}}))
     print("ok", len(muns), "municipalities;", sum(1 for f in mgeo["features"] if f["properties"]["codarea"] not in muns), "unmatched shapes;",

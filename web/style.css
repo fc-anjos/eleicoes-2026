@@ -158,3 +158,44 @@ h1{font:700 26px/1.2 var(--display);margin:0}
 .page.embed{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important}
 .page.embed aside,.page.embed .studio{display:none}
 .page.embed #wrap{grid-column:1;grid-row:1}
+/* story / explore tabs at the top of the left column */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--rule);margin:-6px 0 18px}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:8px 2px;margin-right:16px;color:var(--haze);font:600 13px/1 var(--body)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+/* story: steps scroll past the column's middle; the one there drives the map */
+#story[hidden],#explore[hidden]{display:none}
+.stot{position:sticky;top:-28px;z-index:2;background:var(--night);padding:10px 0 10px;margin:0 0 8px;border-bottom:1px solid var(--rule)}
+.stot .sl{font:600 10.5px/1.4 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--haze);margin-bottom:4px}
+.stot .sr{display:grid;grid-template-columns:10px 1fr auto 92px;align-items:baseline;gap:8px;font-size:13px;line-height:1.7}
+.stot .sr i{width:8px;height:8px;border-radius:50%;background:var(--c);align-self:center}
+.stot .sr b{font-weight:600;font-variant-numeric:tabular-nums}
+.stot .sr em{font-style:normal;font-size:11.5px;color:var(--haze);text-align:right;font-variant-numeric:tabular-nums}
+.step{padding:28px 0 28px;min-height:62vh;opacity:.35;transition:opacity .3s}
+.step:first-child{padding-top:6px}
+.step:last-child{min-height:80vh}
+.step.on{opacity:1}
+.step h2{font:700 21px/1.25 var(--display);margin:0 0 12px}
+.step p{font-size:15px;line-height:1.6;margin:0 0 12px;color:#dcdce0}
+.step p.n{font-size:13px;color:var(--haze);border-left:2px solid var(--edge);padding-left:10px}
+.step b{font-weight:600}.step .sb{color:var(--c0)}.step .sr{color:var(--c1)}.step .sa{color:var(--ca)}.step .sa2{color:var(--cb)}.step .sa3{color:var(--cc)}
+@media (max-width:900px){.step{min-height:40vh}.step:last-child{min-height:50vh}}
+/* Story layout: the map goes full-bleed and the story's cards scroll over its left side (as in map-led stories by
+   the Washington Post, SF Chronicle and Mapbox's storytelling template). The column itself is transparent: wheel
+   and touch over it scroll the story, anywhere else they move the map. */
+.page.storymode{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important}
+.storymode #wrap{grid-column:1;grid-row:1}
+.storymode .studio{display:none}
+.storymode aside{position:fixed;left:0;top:0;bottom:0;width:452px;z-index:5;background:transparent;border:0;padding:20px 24px 0 28px;overscroll-behavior:contain;scrollbar-width:none}
+.storymode aside::-webkit-scrollbar{display:none}
+.storymode .tabs{position:sticky;top:-20px;z-index:3;margin:0;padding:10px 16px 0;background:color-mix(in srgb,var(--dusk) 92%,transparent);backdrop-filter:blur(8px);border:1px solid var(--rule);border-bottom:0;border-radius:10px 10px 0 0}
+.storymode .stot{position:sticky;top:21px;margin:0 0 36vh;padding:10px 16px 12px;background:color-mix(in srgb,var(--dusk) 92%,transparent);backdrop-filter:blur(8px);border:1px solid var(--rule);border-top:1px solid var(--rule);border-radius:0 0 10px 10px}
+.storymode .step{min-height:0;margin:0 0 70vh;padding:18px 20px 8px;background:color-mix(in srgb,var(--night) 86%,transparent);backdrop-filter:blur(6px);border:1px solid var(--rule);border-radius:10px;box-shadow:0 10px 40px #0007;opacity:.55}
+.storymode .step.on{opacity:1}
+.storymode .step:first-child{padding-top:18px}
+.storymode .step:last-child{margin-bottom:45vh}
+.storymode .mapbar{left:476px}
+@media (max-width:900px){
+ .storymode aside{width:auto;right:0;padding:12px 12px 0}
+ .storymode .stot{margin-bottom:52vh}
+ .storymode .step{margin-bottom:60vh}
+ .storymode .mapbar{display:none}}

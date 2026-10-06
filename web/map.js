@@ -82,7 +82,7 @@ function figures(y){
   t.c[AO]=Math.round(Y.a*o);t.c[A8]=Math.round(Y.a*e);t.c[AB]=Y.a-t.c[AO]-t.c[A8];t.bn=Y.bn;} // abroad: split like at home
  let ab=t.c[AB]+t.c[AO]+t.c[A8];const valid=d3.sum(t.c)-ab;let all=valid+ab+t.bn;
  if(!INC80){ab-=t.c[A8];all-=t.e80;}return {...t,ab,valid,all};}
-function panel(){
+let panel=function(){
  const Y=YEARS[YEAR],oy=YS.find(v=>v!==YEAR),F=figures(YEAR),G=figures(oy);
  d3.select("#date").text(Y.date);
  list.selectAll(".cand").remove();
@@ -440,27 +440,38 @@ var saveT=0,restoring=true; // var: repaint() calls saveSoon() before this point
 function saveSoon(){if(restoring)return;clearTimeout(saveT);saveT=setTimeout(()=>{const e=new URLSearchParams(location.hash.slice(1)).get("embed")==="1";
  try{history.replaceState(null,"","#"+stateHash(e));}catch(_){}},250);}
 const catOf=k=>CATS.findIndex(c=>(c.k||"others")===k);
-function applyHash(){
- const q=new URLSearchParams(location.hash.slice(1));if(![...q.keys()].length)return;
+// Apply a view (a hash string, as in share links). The view-shaping parts are always set, to their defaults when
+// absent (year, divider, place and zoom, abstention split, 80+, filters, hidden and isolated rows); the display
+// settings, colours and panels only when given. animate: fly to the place and sweep the divider (story steps).
+function applyState(str,animate){
+ const q=new URLSearchParams(str);
  if(q.get("embed")==="1")d3.select("#page").classed("embed",true);
- if(q.get("studio")==="0"&&!d3.select("#page").classed("embed")){d3.select("#page").classed("nostudio",true);d3.select("#studiox").attr("aria-expanded","false");}
- if(q.has("ages")){SPLITA=true;d3.selectAll("#asplit button").attr("aria-pressed",function(){return String(this.dataset.v==="age");});}
- if(q.get("80plus")==="0"){INC80=false;d3.select("#inc80").property("checked",false);}
- if(q.get("size")==="zoom"){ADAPT=false;d3.selectAll("#mode button").attr("aria-pressed",function(){return String(this.dataset.m==="f");});}
+ if(q.has("studio")&&!d3.select("#page").classed("embed")){const open=q.get("studio")!=="0";d3.select("#page").classed("nostudio",!open);d3.select("#studiox").attr("aria-expanded",String(open));}
+ SPLITA=q.has("ages");d3.selectAll("#asplit button").attr("aria-pressed",function(){return String((this.dataset.v==="age")===SPLITA);});
+ INC80=q.get("80plus")!=="0";d3.select("#inc80").property("checked",INC80);
+ if(q.has("size")){ADAPT=q.get("size")!=="zoom";d3.selectAll("#mode button").attr("aria-pressed",function(){return String((this.dataset.m==="a")===ADAPT);});}
  if(q.has("vpd")){const i=STEPS.indexOf(Math.round(+q.get("vpd")/__VPD__));if(i>=0){const el=d3.select("#vpd").property("value",i).node();el.dispatchEvent(new Event("input"));}}
  if(q.has("scale")){const el=d3.select("#rad").property("value",+q.get("scale")).node();el.dispatchEvent(new Event("input"));}
  (q.get("col")||"").split(",").filter(Boolean).forEach(x=>{const [k,c]=x.split(":"),i=catOf(k);if(i>=0&&/^[0-9a-f]{6}$/i.test(c))COLS[i]="#"+c;});
  HID.fill(0);(q.get("hide")||"").split(",").filter(Boolean).forEach(k=>{const i=catOf(k);if(i>=0)HID[i]=1;});packCols();
  VARS.forEach(x=>{x.lo=0;x.hi=100;});
  (q.get("f")||"").split(",").filter(Boolean).forEach(x=>{const m=x.match(/^(.+):(\d+)-(\d+)$/);const v=m&&VARS.find(z=>z.k===m[1]);if(v){v.lo=Math.min(100,+m[2]);v.hi=Math.max(v.lo,Math.min(100,+m[3]));}});
- const y=q.get("y");if(q.has("split"))SPLIT=Math.max(.02,Math.min(.98,+q.get("split")));
- if(y==="cmp"||YS.includes(y))setMode(y);
+ const y=q.get("y")||YS[0];let sp=q.has("split")?Math.max(.02,Math.min(.98,+q.get("split"))):.5;
+ if(animate&&storyOffset()){const r=document.getElementById("wrap").getBoundingClientRect(),o=2*storyOffset()/r.width;sp=o+(1-o)*sp;} // story: within the visible map
+ const wasCmp=COMPARE;
+ if(animate&&y==="cmp"&&!wasCmp){SPLIT=.98;setMode("cmp");d3.transition().duration(1200).tween("split",()=>{const i=d3.interpolate(.98,sp);return t=>{SPLIT=i(t);placeSwipe();repaint();};});}
+ else{SPLIT=sp;setMode(y==="cmp"||YS.includes(y)?y:YS[0]);}
+ const o=q.get("only"),fi=o?catOf(o):-1;focus=fi;d3.select("#page").classed("focus",fi>=0);
  VARS.forEach(drawRange);refilter();
- const o=q.get("only");if(o){const i=catOf(o);if(i>=0){focus=i;d3.select("#page").classed("focus",true);panel();}}
- const at=(q.get("at")||"").split(",").map(Number);
  layout();zoom.translateExtent([[0,0],[w,h]]); // the panels shown may have changed the map's size
- if(at.length===3&&at.every(isFinite))setView({c:[at[0],at[1]],k:Math.max(1,Math.min(MAXK,at[2]))});
+ const at=q.get("at"),a3=(at||"").split(",").map(Number);
+ // in the story, the cards cover the map's left side: views centre on the visible part to their right
+ const off=storyOffset(),home=off?d3.zoomIdentity.translate(off*.6,0):d3.zoomIdentity;
+ const t=at==="home"?home:a3.length===3&&a3.every(isFinite)?(()=>{const p=proj([a3[0],a3[1]]);return d3.zoomIdentity.translate(w/2+off,h/2).scale(Math.max(1,Math.min(MAXK,a3[2]))).translate(-p[0],-p[1]);})():null;
+ if(t){if(animate)svg.transition().duration(1600).call(zoom.transform,t);else svg.call(zoom.transform,t);}
  repaint();}
+function storyOffset(){const a=document.querySelector("aside");return d3.select("#page").classed("storymode")&&innerWidth>900?a.getBoundingClientRect().width/2:0;}
+function applyHash(){const h=location.hash.slice(1);if(h)applyState(h,false);}
 // a reader editing the hash (or following a link within the page) gets that view
 addEventListener("hashchange",()=>{if(location.hash.slice(1)!==stateHash(new URLSearchParams(location.hash.slice(1)).get("embed")==="1")){restoring=true;applyHash();restoring=false;}});
 applyHash();restoring=false;
@@ -475,3 +486,29 @@ d3.select("#sharecopy").on("click",async()=>{let ok=false;
  d3.select("#sharecopy").text(ok?"Copied":"Select and copy");});
 d3.select("#shareclose").on("click",()=>dlg.close());
 dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close();});
+
+// Story: steps (web/story.json) in the left column; the step nearest the column's middle drives the map, which
+// flies to that step's view. A small live total sits at the top, so filtered steps show their numbers. Explore
+// is the full panel. Opening with a view in the hash starts in Explore at that view.
+const steps=d3.select("#steps").selectAll(".step").data(STORY).join("section").attr("class","step")
+ .html(d=>`<h2>${d.h}</h2>${d.t}`);
+let stepNow=-1;
+function goStep(i){if(i===stepNow)return;stepNow=i;steps.classed("on",(d,j)=>j===i);restoring=true;applyState(STORY[i].view,true);restoring=false;saveSoon();}
+function storyTotals(){if(d3.select("#story").property("hidden"))return;
+ const F=figures(YEAR),oy=YS.find(v=>v!==YEAR),G=figures(oy),r=(i,n,sh,pv)=>`<div class="sr${i===AB?" a":""}" style="--c:${COLS[i]}"><i></i><span>${n}</span><b>${(100*sh).toFixed(1)}%</b><em>${pv==null?"":((sh-pv)*100>=0?"+":"−")+Math.abs((sh-pv)*100).toFixed(1)+" vs "+oy}</em></div>`;
+ const c22=CATS.findIndex(c=>c.k==="22"),c13=CATS.findIndex(c=>c.k==="13");
+ d3.select("#stot").html(`<div class="sl">${COMPARE?`${YS[0]} totals`:YEAR}${FILTERED?(PLACEF?" · lit polling places":" · lit municipalities"):" · Brazil"}</div>`
+  +r(c22,nameOf(YEAR,"22"),F.c[c22]/F.valid,G.c[c22]/G.valid)+r(c13,"Lula",F.c[c13]/F.valid,G.c[c13]/G.valid)+r(AB,"Didn't vote",F.ab/F.all,G.ab/G.all));}
+const _panel=panel;panel=function(){_panel();storyTotals();};
+const io=new IntersectionObserver(es=>{const vis=es.filter(e=>e.isIntersecting);if(vis.length)goStep(steps.nodes().indexOf(vis[0].target));},
+ {root:document.querySelector("aside"),rootMargin:"-45% 0px -50% 0px"});
+steps.each(function(){io.observe(this);});
+function setTab(story){d3.select("#tab-story").attr("aria-selected",String(story));d3.select("#tab-explore").attr("aria-selected",String(!story));
+ d3.select("#story").property("hidden",!story);d3.select("#explore").property("hidden",story);d3.select("#page").classed("storymode",story);
+ // the story gets the studio's width for the map; Explore brings the studio back
+ if(!d3.select("#page").classed("embed")){d3.select("#page").classed("nostudio",story);d3.select("#studiox").attr("aria-expanded",String(!story));layout();
+  zoom.translateExtent(story?[[-w*.4,0],[w,h]]:[[0,0],[w,h]]);}
+ if(story){stepNow=-1;const a=document.querySelector("aside");a.scrollTop=0;goStep(0);}else panel();}
+d3.select("#tab-story").on("click",()=>setTab(true));d3.select("#tab-explore").on("click",()=>setTab(false));
+d3.select("#toexplore").on("click",()=>setTab(false));
+if(location.hash.length>1)setTab(false);else setTab(true);

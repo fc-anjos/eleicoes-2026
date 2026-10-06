@@ -14,6 +14,12 @@
    <div class="key"><span class="k-dot"></span><b>1 dot = <span class="vpd">__VPD__</span> votes</b><br>Votes placed around their polling place<br><span class="hint">Scroll to zoom · drag to pan</span></div>
    <div class="credit">Created by <b>Felipe dos Anjos</b><br><a href="https://github.com/fc-anjos">github.com/fc-anjos</a> · <a href="mailto:felipe.cavalheiro.anjos@gmail.com">felipe.cavalheiro.anjos@gmail.com</a><br>Data: <a href="https://dadosabertos.tse.jus.br/">Tribunal Superior Eleitoral (TSE)</a></div></div></div>
  <aside>
+  <div class="tabs" role="tablist" aria-label="Mode"><button role="tab" id="tab-story" aria-selected="true" aria-controls="story">Story</button><button role="tab" id="tab-explore" aria-selected="false" aria-controls="explore">Explore</button></div>
+  <div id="story" role="tabpanel" aria-labelledby="tab-story">
+   <div class="stot" id="stot" aria-live="polite"></div>
+   <div id="steps"></div>
+  </div>
+  <div id="explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
   <div class="years" id="years" role="group" aria-label="Election year"></div>
   <p class="eyebrow" id="date"></p>
   <h1>Brazil's presidential election, first round</h1>
@@ -21,6 +27,7 @@
   <div class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg><input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="qlist" aria-autocomplete="list" placeholder="Search a municipality" autocomplete="off"><ul id="qlist" role="listbox" hidden></ul></div>
 <div id="cands"></div>
   <p class="studio-note">Toggle a row to hide it; click its swatch to change its colour. <button id="reset" class="link">Reset</button></p>
+  </div>
  </aside>
  <section class="studio" id="studio" aria-label="Studio">
   <div class="sh"><button id="studiox" aria-expanded="true" aria-controls="studiob" title="Hide the studio"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button><h2>Studio</h2></div>
@@ -52,6 +59,6 @@
  <label class="sde"><input type="checkbox" id="shareembed"> Map only, for embedding (hides the side panels)</label>
 </form></dialog>
 <script>
-const MG=__MGEO__, SG=__SGEO__, M=__MUNS__, CATS=__CATS__, YEARS=__YEARS__, ORDER=__ORDER__, STUDIO=__STUDIO__, PLACES=__PLACES__;
+const MG=__MGEO__, SG=__SGEO__, M=__MUNS__, CATS=__CATS__, YEARS=__YEARS__, ORDER=__ORDER__, STUDIO=__STUDIO__, PLACES=__PLACES__, STORY=__STORY__;
 /*__JS__*/
 </script></body></html>
