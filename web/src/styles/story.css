@@ -1,0 +1,460 @@
+/* Story and Explore tabs, story cards, swing-arrow key, map notes, charts, find your place, scroll cues */
+/* story / explore tabs at the top of the left column */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--rule);
+  margin: -6px 0 18px;
+}
+.tabs button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  padding: 8px 2px;
+  margin-right: 16px;
+  color: var(--haze);
+  font: 600 13px/1 var(--body);
+}
+.tabs button[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+/* story: steps scroll past the column's middle; the one there drives the map */
+#story[hidden],
+#explore[hidden] {
+  display: none;
+}
+.stot {
+  position: sticky;
+  top: -28px;
+  z-index: 2;
+  background: var(--night);
+  padding: 10px 0 10px;
+  margin: 0 0 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.stot .sl {
+  font: 600 10.5px/1.4 var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--haze);
+  margin-bottom: 4px;
+}
+.stot .sr {
+  display: grid;
+  grid-template-columns: 10px 1fr auto 92px;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.stot .sr i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c);
+  align-self: center;
+}
+.stot .sr b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.stot .sr em {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--haze);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.step {
+  padding: 28px 0 28px;
+  min-height: 62vh;
+  opacity: 0.35;
+  transition: opacity 0.3s;
+}
+.step:first-child {
+  padding-top: 6px;
+}
+.step:last-child {
+  min-height: 80vh;
+}
+.step.on {
+  opacity: 1;
+}
+.step h2 {
+  font: 700 21px/1.25 var(--display);
+  margin: 0 0 12px;
+}
+.step p {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+  color: #dcdce0;
+}
+.step p.n {
+  font-size: 13px;
+  color: var(--haze);
+  border-left: 2px solid var(--edge);
+  padding-left: 10px;
+}
+.step b {
+  font-weight: 600;
+}
+.step .sb {
+  color: var(--c0);
+}
+.step .sr {
+  color: var(--c1);
+}
+.step .sa {
+  color: var(--ca);
+}
+.step .sa2 {
+  color: var(--cb);
+}
+.step .sa3 {
+  color: var(--cc);
+}
+@media (max-width: 900px) {
+  .step {
+    min-height: 40vh;
+  }
+  .step:last-child {
+    min-height: 50vh;
+  }
+}
+/* Story layout: the map goes full-bleed and the story's cards scroll over its left side (as in map-led stories by
+   the Washington Post, SF Chronicle and Mapbox's storytelling template). The column itself is transparent: wheel
+   and touch over it scroll the story, anywhere else they move the map. */
+.page.storymode {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+.storymode #wrap {
+  grid-column: 1;
+  grid-row: 1;
+}
+.storymode .studio {
+  display: none;
+}
+.storymode aside {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 452px;
+  z-index: 5;
+  background: transparent;
+  border: 0;
+  padding: 0 24px 0 40px;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.storymode aside::-webkit-scrollbar {
+  display: none;
+}
+.storymode .tabs {
+  position: sticky;
+  top: 20px;
+  margin-top: 20px !important;
+  z-index: 3;
+  margin: 0;
+  padding: 10px 16px 0;
+  background: color-mix(in srgb, var(--dusk) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+.storymode .stot {
+  position: sticky;
+  top: 57px;
+  margin: 0 0 36vh;
+  padding: 10px 16px 12px;
+  background: color-mix(in srgb, var(--dusk) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-top: 1px solid var(--rule);
+  border-radius: 0 0 10px 10px;
+}
+.storymode .step {
+  min-height: 0;
+  margin: 0 0 70vh;
+  padding: 18px 20px 8px;
+  background: color-mix(in srgb, var(--night) 86%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px #0007;
+  opacity: 0.55;
+}
+.storymode .step.on {
+  opacity: 1;
+}
+.storymode .step:first-child {
+  padding-top: 18px;
+}
+.storymode .step:last-child {
+  margin-bottom: 45vh;
+}
+.storymode .mapbar {
+  left: 476px;
+}
+@media (max-width: 900px) {
+  .storymode aside {
+    width: auto;
+    right: 0;
+    padding: 12px 12px 0;
+  }
+  .storymode .stot {
+    margin-bottom: 52vh;
+  }
+  .storymode .step {
+    margin-bottom: 60vh;
+  }
+  .storymode .mapbar {
+    display: none;
+  }
+}
+/* swing arrows key, on the map's top left */
+.akey {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  z-index: 3;
+  font-size: 12px;
+  color: var(--haze);
+  background: color-mix(in srgb, var(--dusk) 90%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 6px 10px;
+  pointer-events: none;
+}
+.akey[hidden] {
+  display: none;
+}
+.akey .ar {
+  font-weight: 700;
+}
+.akey .r {
+  color: var(--c1);
+}
+.akey .b {
+  color: var(--c0);
+}
+.akey i {
+  display: inline-block;
+  height: 2px;
+  background: var(--haze);
+  vertical-align: middle;
+  margin: 0 2px;
+}
+.storymode .akey {
+  left: 476px;
+}
+/* map notes: a dot on the place, a leader line and a haloed label */
+.notes {
+  pointer-events: none;
+}
+.note line {
+  stroke: var(--ink);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+.note circle {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.note text {
+  font: 600 12.5px var(--body);
+  fill: var(--ink);
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: var(--night);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+/* dumbbell charts in story cards */
+.dumb {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 6px 0 2px;
+}
+.dumb .ct {
+  font: 600 11.5px var(--body);
+  fill: var(--ink);
+}
+.dumb .tk {
+  font: 10px var(--body);
+  fill: var(--haze);
+  text-anchor: middle;
+}
+.dumb .rl {
+  font: 12px var(--body);
+  fill: #dcdce0;
+}
+.dumb .rv {
+  font: 600 11.5px var(--body);
+  fill: var(--haze);
+  font-variant-numeric: tabular-nums;
+}
+.step .ck {
+  font-size: 11px;
+  color: var(--haze);
+  margin: 0 0 12px;
+}
+.step .ck i {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  line-height: 0;
+  border-radius: 50%;
+  margin: 0 4px 0 8px;
+  vertical-align: 0;
+}
+.step .ck i:first-child {
+  margin-left: 0;
+}
+.step .ck .h {
+  border: 1.5px solid var(--c1);
+}
+.step .ck .f {
+  background: var(--c1);
+}
+/* find your place */
+.find {
+  position: relative;
+  margin: 4px 0 12px;
+}
+.find input {
+  width: 100%;
+  height: 38px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--dusk);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 0 12px;
+}
+.find .fl {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  background: var(--dusk);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+.find .fl:empty {
+  display: none;
+}
+.find li {
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 13.5px;
+  display: flex;
+  justify-content: space-between;
+}
+.find li:hover {
+  background: var(--rule);
+}
+.find li span {
+  color: var(--haze);
+}
+.fres p {
+  margin-top: 12px;
+}
+.step .scope {
+  display: inline-flex;
+  margin: 2px 0 14px;
+}
+
+/* scroll cues, after map-led stories: a "scroll" prompt on the first card, and progress dots beside the cards
+   that show where you are and jump to a step */
+.cue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--haze);
+  font-size: 12.5px;
+  margin: 14px 0 6px;
+}
+.cue svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: nudge 1.6s ease-in-out infinite;
+}
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cue svg {
+    animation: none;
+  }
+}
+.prog {
+  display: none;
+}
+.storymode .prog {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  position: fixed;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+}
+.prog button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--haze);
+  background: transparent;
+  opacity: 0.6;
+}
+.prog button[aria-current="step"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  opacity: 1;
+}
+@media (max-width: 900px) {
+  .storymode .prog {
+    display: none;
+  }
+}
+.areasel {
+  width: 100%;
+  height: 32px;
+  margin: 0 0 8px;
+  background: var(--night);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 12.5px;
+}
+.areasel[hidden] {
+  display: none;
+}

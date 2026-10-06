@@ -3,8 +3,13 @@
 Also saves the TSE municipality list (data/mun-config.json), which maps TSE codes to IBGE codes.
 Municipalities that fail on the first pass are retried with fewer workers and a backoff.
 """
-import json, time, urllib.request
+
+import json
+import time
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+
+from .jsonio import dump_json
 
 BASE = "https://resultados.tse.jus.br/oficial/ele2026/6257"
 
@@ -27,7 +32,7 @@ def parse(d):
 
 def main():
     cfg = get("config/mun-e006257-cm.json")
-    json.dump(cfg, open("data/mun-config.json", "w"), ensure_ascii=False)
+    dump_json(cfg, "data/mun-config.json")
     states = [uf["cd"] for uf in cfg["abr"]]
     muns = [(uf["cd"], m["cd"], m["cdi"], m["nm"]) for uf in cfg["abr"] for m in uf["mu"]]
     out = {"national": parse(get("dados/br/br-c0001-e006257-u.json")), "states": {}, "municipalities": {}}
@@ -37,13 +42,14 @@ def main():
         return uf, parse(d) if d else None
 
     def fmun(m, **kw):
-        uf, cd, ibge, nm = m
+        uf, cd, _ibge, _nm = m
         d = get(f"dados/{uf}/{uf}{cd}-c0001-e006257-u.json", **kw)
         return m, parse(d) if d else None
 
     def collect(results):
         for (uf, cd, ibge, nm), r in results:
-            if r: out["municipalities"][ibge or uf + cd] = {"uf": uf, "name": nm, **r}
+            if r:
+                out["municipalities"][ibge or uf + cd] = {"uf": uf, "name": nm, **r}
 
     with ThreadPoolExecutor(32) as ex:
         out["states"] = dict(ex.map(fstate, states))
@@ -52,7 +58,7 @@ def main():
     with ThreadPoolExecutor(4) as ex:  # the server throttles bursts: retry slowly
         collect(ex.map(lambda m: fmun(m, tries=6, backoff=2), todo))
     print(len(states), "states;", len(out["municipalities"]), "of", len(muns), "municipalities")
-    json.dump(out, open("data/results.json", "w"), ensure_ascii=False)
+    dump_json(out, "data/results.json")
 
 
 if __name__ == "__main__":

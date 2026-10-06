@@ -1,0 +1,298 @@
+/* Tokens, page layout, the map and its borders, place names */
+:root {
+  /* cool-tinted neutrals: the page reads as one surface from map to sidebar to panels */
+  --night: #151517;
+  --dusk: #1e1e21;
+  --lift: #26262a;
+  --ink: #f2f2f3;
+  --haze: #a3a3a8;
+  --rule: #2c2c31;
+  --edge: #3d3d43;
+  /* default palette: Bolsonaro's camp blue, Lula red, abstention amber (Okabe–Ito's blue / vermilion / yellow core:
+    all pairs pass dataviz validate_palette for colour-blind readers), everyone else grey; each is changeable in the
+    panel. Split by age, abstention goes from deep (had to vote) to pale amber (80+) */
+  --c0: #3987e5;
+  --c1: #e5484d;
+  --c2: #8a8a8a;
+  --c3: #8a8a8a;
+  --c4: #8a8a8a;
+  --c5: #8a8a8a;
+  --c6: #8a8a8a;
+  --c7: #8a8a8a;
+  --ca: #e0a800;
+  --cb: #f0c75e;
+  --cc: #f6e3b4;
+  --display: "Open Sans", Helvetica, Arial, sans-serif;
+  --body: "Open Sans", Helvetica, Arial, sans-serif;
+  --mono: "Open Sans", Helvetica, Arial, sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--ink);
+  font: 16px/1.55 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+.page {
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+}
+#wrap {
+  position: relative;
+  overflow: hidden;
+  grid-column: 2;
+  grid-row: 1;
+  background: var(--night);
+}
+#cv,
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* place names: a halo in the background colour separates them from the dots beneath */
+.place text {
+  font: 500 11px var(--body);
+  fill: var(--haze);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: var(--night);
+  stroke-opacity: 0.7;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.place text.big {
+  font-weight: 600;
+  fill: var(--ink);
+}
+#map {
+  cursor: grab;
+}
+#map:active {
+  cursor: grabbing;
+}
+/* municipality borders fade in with zoom (--mu-o, set from JS); hovered and selected ones are drawn on top */
+path.mu {
+  fill: transparent;
+  stroke: var(--haze);
+  stroke-opacity: var(--mu-o, 0);
+  stroke-width: var(--mu-w, 0.5);
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+}
+path.hl {
+  fill: none;
+  stroke: var(--ink);
+  stroke-opacity: 0.9;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+path.sel {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+path.outer {
+  fill: none;
+  stroke: var(--ink);
+  stroke-opacity: 0.18;
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+path.uf {
+  fill: none;
+  stroke: var(--haze);
+  stroke-opacity: 0.28;
+  stroke-width: 0.7;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+.mapbar {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  font: 11.5px/1.6 var(--body);
+  color: var(--haze);
+  pointer-events: none;
+}
+.mapbar > div {
+  text-shadow:
+    0 0 3px var(--night),
+    0 0 6px var(--night),
+    0 0 10px var(--night);
+  pointer-events: auto;
+}
+.mapbar b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.mapbar a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+.mapbar a:hover {
+  color: var(--ink);
+  border-color: var(--haze);
+}
+.mapbar .k-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  margin-right: 7px;
+  vertical-align: 1px;
+}
+.mapbar .credit {
+  text-align: right;
+}
+button {
+  font: 500 12px/1 var(--mono);
+  color: var(--ink);
+  background: var(--night);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+button:hover {
+  border-color: var(--haze);
+}
+:focus-visible {
+  outline: 2px solid var(--c0);
+  outline-offset: 2px;
+}
+
+aside {
+  overflow-y: auto;
+  padding: 28px 28px 22px;
+  border-right: 1px solid var(--rule);
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+}
+.eyebrow {
+  font: 600 11px/1.5 var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--haze);
+  margin: 0 0 12px;
+}
+h1 {
+  font: 700 26px/1.2 var(--display);
+  margin: 0;
+}
+.deck {
+  color: var(--haze);
+  font-size: 14px;
+  margin: 14px 0 20px;
+}
+.deck b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.search {
+  position: relative;
+  margin: 0 0 20px;
+}
+.search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 15px;
+  height: 15px;
+  transform: translateY(-50%);
+  stroke: var(--haze);
+  fill: none;
+  stroke-width: 1.8;
+  pointer-events: none;
+}
+.search input {
+  display: block;
+  width: 100%;
+  height: 40px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--dusk);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 0 12px 0 36px;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.search input:hover {
+  border-color: var(--edge);
+}
+.search input:focus {
+  border-color: var(--haze);
+  background: var(--lift);
+}
+.search input::placeholder {
+  color: var(--haze);
+}
+.search ul {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--dusk);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px #000a;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.search li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13.5px;
+  line-height: 1.3;
+}
+.search li span {
+  color: var(--haze);
+  font-size: 12px;
+  margin: 0;
+}
+.search li[aria-selected="true"] {
+  background: var(--rule);
+}
+.search .none {
+  color: var(--haze);
+  cursor: default;
+}

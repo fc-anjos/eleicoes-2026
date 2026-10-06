@@ -2,31 +2,47 @@
 
 A dot-density map of the Brazilian presidential election, first round, in 2026 and 2022 (switchable): one dot per
 250 votes, placed around the polling place where the votes were cast. Abstentions (people on the roll who didn't
-vote) can be shown as grey dots, placed the same way. The output is a single self-contained page,
-`brazil_2026_president_map.html` (d3 and fonts load from CDNs).
+vote) can be shown as grey dots, placed the same way. A scrolling story walks through how the vote moved between
+the two elections; Explore has the full results panel and the studio's filters.
 
 ## Layout
 
 ```
-pipeline/            Python data pipeline (run as modules from the repo root)
-  fetch_results.py   TSE results API -> data/results.json, data/mun-config.json
-  prep_places.py     TSE open-data CSVs (data/raw/) -> data/places_YYYY.json: votes and abstentions per polling place
-  geometry.py        polygon helpers: point-in-polygon, distances, Voronoi-cell placement
-  build.py           data/ + web/ -> brazil_2026_president_map.html
-web/                 the page, as source
-  index.html         markup; build.py inlines the CSS, JS and data into it
-  style.css
-  map.js             canvas dot renderer, zoom, selection, search, controls
-data/                inputs (committed; data/raw/ is not)
+pipeline/              Python data pipeline (run as modules from the repo root)
+  fetch_results.py     TSE results API -> data/results.json, data/mun-config.json
+  prep_places.py       TSE open-data CSVs (data/raw/) -> data/places_YYYY.json: votes and abstentions per polling place
+  geometry.py          polygon helpers: point-in-polygon, distances, Voronoi-cell placement
+  build.py             data/ -> web/public/data/map.json, the page's data (dots, outlines, figures, filters)
+  jsonio.py            JSON/CSV file helpers
+web/                   the page (Vite root)
+  index.html           markup
+  src/main.js          entry point: sets up each part of the page in order
+  src/data.js          loads map.json; story/story.json holds the story's steps
+  src/state.js         shared view state (year, filters, focus…), colour categories and their colours
+  src/format.js, stats.js, totals.js, dots.js       formatting, per-municipality figures, totals, packed dots
+  src/filters/         filter variables and the filter itself
+  src/map/             SVG base map and zoom, the dot canvas (render.js), swing arrows, labels, notes, year divider
+  src/panel/           results panel and studio controls
+  src/story/           story steps, card charts, "find your place"
+  src/view/            the view in the URL, share dialog, first-visit hints
+  src/styles/          CSS, one file per area, imported in cascade order by main.css
+data/                  inputs (committed; data/raw/ is not)
   br-mun.geojson, br-states.geojson   IBGE outlines
+tests/smoke.mjs        opens the built page in headless Chromium and checks each mode draws
 ```
 
 ## Building
 
+Needs Python 3.11+ with numpy, Node 20+ and [uv](https://docs.astral.sh/uv/) (for ruff).
+
 ```
-make          # rebuild the page (python3 with numpy)
-make open
+make          # build the data (web/public/data/map.json) and the site (dist/)
+make dev      # serve the page with live reload
+make lint     # ruff, ESLint and Prettier (make format fixes what it can)
+make test     # smoke test (once: npx playwright install chromium)
 ```
+
+`dist/` is a static site: serve it from any path (e.g. GitHub Pages).
 
 To regenerate the data: `make results` refetches the totals, and `make places` rebuilds the polling-place file
 from these TSE open-data files, unzipped into `data/raw/`:
@@ -41,5 +57,5 @@ Each year uses its own polling-place coordinates. Only where that year's record 
 them for ~30% of voters in BA, ES and SE) are the same place's 2024 or 2026 coordinates used, matched by
 municipality and place number and name, then name, then address.
 
-Tuning: `VPD`, `PER_PLACE` and `TOL_KM` at the top of `pipeline/build.py`; dot radius, opacity and border
-zoom behaviour at the top of the relevant sections of `web/map.js`.
+Tuning: `VPD`, `PER_PLACE` and `TOL_KM` at the top of `pipeline/build.py`; dot radius and opacity at the top of
+`web/src/map/render.js`, border zoom behaviour in `web/src/map/base.js`.

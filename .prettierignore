@@ -1,0 +1,6 @@
+dist/
+node_modules/
+data/
+web/public/
+brazil_2026_president_map.html
+package-lock.json
