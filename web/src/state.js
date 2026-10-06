@@ -33,12 +33,13 @@ export const S = {
   PLACEF: false, // some neighbourhood (polling-place) filter is on
   INSET: null, // the area: a Set of IBGE codes the map and totals are limited to, or null
   ARROWS: false, // swing arrows shown
+  BIG: false, // circles: only the capitals and the cities big enough for the zoom, the biggest named (big=1)
   SIZE: 1, // dot radius multiplier
   STEP: 1, // draw every STEP-th dot
   ADAPT: true, // adaptive dot size (else by zoom)
   VIZALL: false, // the zoomed-in view at every zoom (viz=margins* in the view)
   VIZK: 3, // the zoom where the zoomed-in view starts to fade in (fully in at 7/3 of it)
-  VCOL: "change", // what the zoomed-in view's colour shows: change, margin, abst or share-<ballot number> (map/marks.js)
+  VCOL: "change", // what the zoomed-in view's colour shows: moved, change, margin, abst or share-<ballot number> (map/marks.js)
   VIZ: "dots", // zoomed in: dots, outline (dots + winner), circles or margins (see map/marks.js)
   sel: null, // the selected municipality (a feature of MG)
   NOTES: [], // map notes of the current story step

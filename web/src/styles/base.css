@@ -173,6 +173,11 @@ path.uf {
   margin-right: 7px;
   vertical-align: 1px;
 }
+/* once circles or filled shapes have replaced the dots, their key leaves only the zoom hint */
+.mapbar .key.nodots .k-dot,
+.mapbar .key.nodots .kd {
+  display: none;
+}
 .mapbar .credit {
   text-align: right;
 }

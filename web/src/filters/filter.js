@@ -51,6 +51,10 @@ export function describeFilter() {
   }
   for (const v of VARS) {
     if (!isOn(v)) continue;
+    if (v.flag) {
+      out.push(v.n);
+      continue;
+    }
     const a = v.vlo != null || v.lo > 0,
       b = v.vhi != null || v.hi < 100,
       l = lo_(v),

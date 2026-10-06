@@ -3,6 +3,7 @@
 import * as d3 from "d3";
 import { S } from "../state.js";
 import { proj, svg } from "./base.js";
+import { cityNotes } from "./marks.js";
 
 let notesG = null;
 
@@ -11,7 +12,7 @@ export function drawNotes(t) {
   t = t || d3.zoomTransform(svg.node());
   notesG
     .selectAll("g.note:not(.gone)")
-    .data(S.NOTES, (d) => d.t)
+    .data(cityNotes(t) || S.NOTES, (d) => d.t)
     .join(
       (en) => {
         const g = en.append("g").attr("class", "note").style("opacity", 0);
@@ -26,7 +27,7 @@ export function drawNotes(t) {
     );
   // every note follows the map, those fading out included
   notesG.selectAll("g.note").each(function (d) {
-    const p = proj(d.at),
+    const p = d.p || proj(d.at),
       x = p[0] * t.k + t.x,
       y = p[1] * t.k + t.y,
       dx = d.dx ?? 40,

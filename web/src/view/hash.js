@@ -28,6 +28,7 @@ export function stateHash(embed) {
   }
   if (S.SPLITA) q.set("ages", "1");
   if (S.ARROWS) q.set("arrows", "1");
+  if (S.BIG) q.set("big", "1");
   if (!S.INC80) q.set("80plus", "0");
   const f = VARS.filter(isOn).map((x) =>
     x.vlo != null || x.vhi != null ? `${x.k}@${x.vlo ?? "*"}~${x.vhi ?? "*"}` : `${x.k}:${x.lo}-${x.hi}`,
@@ -159,10 +160,14 @@ export function applyState(str, animate) {
       return String((this.dataset.m === "a") === S.ADAPT);
     });
   }
+  S.BIG = q.has("big");
   setViz(q.get("viz"), false);
   setVcol(q.get("vc"), false);
   if (q.has("vizk") && +q.get("vizk") > 0)
-    d3.select("#vizk").property("value", Math.log2(+q.get("vizk"))).node().dispatchEvent(new Event("input"));
+    d3.select("#vizk")
+      .property("value", Math.log2(+q.get("vizk")))
+      .node()
+      .dispatchEvent(new Event("input"));
   if (q.has("vpd")) {
     const i = STEPS.indexOf(Math.round(+q.get("vpd") / VPD));
     if (i >= 0) d3.select("#vpd").property("value", i).node().dispatchEvent(new Event("input"));

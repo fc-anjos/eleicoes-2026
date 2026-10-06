@@ -39,7 +39,7 @@
     "divider": "Divider between years",
     "dragCompare": "Drag to compare",
     "share": "Share view",
-    "key": "<b>1 dot = <span class=\"vpd\"></span> votes</b><br />Votes placed around their polling place<br /><span class=\"hint\">Scroll to zoom · drag to pan</span>",
+    "key": "<span class=\"kd\"><b>1 dot = <span class=\"vpd\"></span> votes</b><br />Votes placed around their polling place<br /></span><span class=\"hint\">Scroll to zoom · drag to pan</span>",
     "credit": "Created by <b>Felipe dos Anjos</b><br /><a href=\"https://github.com/fc-anjos\">github.com/fc-anjos</a> · <a href=\"mailto:felipe.cavalheiro.anjos@gmail.com\">felipe.cavalheiro.anjos@gmail.com</a><br />Data: <a href=\"https://dadosabertos.tse.jus.br/\">Tribunal Superior Eleitoral (TSE)</a>",
     "compare": "Compare",
     "language": "Language"
@@ -63,7 +63,7 @@
       },
       "overview": {
         "h": "Lula lost ground almost everywhere",
-        "t": "<p>Lula's share of the vote fell in 5,468 of Brazil's 5,570 municipalities. In 2022 he led Jair Bolsonaro in the first round, 48.4 percent to 43.2 percent. This year Flávio Bolsonaro finished first, with 47.0 percent to Lula's 45.2 percent.</p><p>The losses were spread across the country. Lula's share slipped in the North and the Southeast and fell further in the South. He still finished well ahead in the Northeast. In more than 700 municipalities where he finished ahead in 2022, the Bolsonaro camp came out ahead this time.</p><p>Drag the divider to compare 2022, on the left, with 2026.</p><p class=\"n\">The ballot is secret. These maps show how places voted. They cannot show which voters changed their minds.</p>"
+        "t": "<p>Lula's share of the vote fell in 5,468 of Brazil's 5,570 municipalities. In 2022 he led Jair Bolsonaro in the first round, 48.4 percent to 43.2 percent. This year Flávio Bolsonaro finished first, with 47.0 percent to Lula's 45.2 percent.</p><p>The losses were spread across the country. Lula's share slipped in the North and the Southeast and fell further in the South. He still finished well ahead in the Northeast. In more than 700 municipalities where he finished ahead in 2022, the Bolsonaro camp came out ahead this time.</p><p>Each circle is a municipality. Its size is the net number of votes that moved between 2022 and 2026. It is blue where they moved away from Lula and red where they moved towards him.</p><p class=\"n\">The ballot is secret. These maps show how places voted. They cannot show which voters changed their minds.</p>"
       },
       "arrows": {
         "h": "The shift, municipality by municipality",
@@ -84,7 +84,7 @@
       },
       "small-towns": {
         "h": "The smaller the town, the bigger the shift",
-        "t": "<p>Each circle is a municipality, sized by its valid votes and coloured by the change in Lula's share. The smallest quarter of municipalities have fewer than about 5,200 residents each. The fall in Lula's share grows steadily as places get smaller.</p>",
+        "t": "<p>These are the smallest quarter of municipalities, each with fewer than about 5,200 residents. 2022 is on the left of the divider. The fall in Lula's share grows steadily as places get smaller.</p>",
         "chart": {
           "title": "Lula's share by municipality size (residents)",
           "labels": ["Under 10k", "10k–50k", "50k–200k", "200k–1M", "Over 1M"]
@@ -92,7 +92,7 @@
       },
       "abstention": {
         "h": "Abstention barely changed",
-        "t": "<p>In 2026, 33.5 million people on the roll did not vote, more than voted for any candidate except the two leaders. Abstention has risen in every presidential first round since 2006, from 16.8 percent to 21.1 percent.</p><p>It rose by only 0.1 points from 2022, so it does not explain Lula's losses. He lost 3.4 million votes, and the Bolsonaro camp gained 5.0 million. In the quarter of municipalities with the lowest average income, where Lula is strongest, abstention fell 2.5 points. In the quarter with the highest average income, abstention rose 0.9 points.</p>",
+        "t": "<p>In 2026, 33.5 million people on the roll did not vote, more than voted for any candidate except the two leaders. Abstention has risen in every presidential first round since 2006, from 16.8 percent to 21.1 percent.</p><p>It rose by only 0.1 points from 2022, so it does not explain Lula's losses. He lost 3.4 million votes, and the Bolsonaro camp gained 5.0 million. In the quarter of municipalities with the lowest average income, where Lula is strongest, abstention fell 2.5 points. In the quarter with the highest average income, abstention rose 0.9 points.</p><p>Each circle is a municipality. Its size is the change in the number of people who did not vote. It is amber where more stayed home than in 2022 and green where fewer did.</p>",
         "chart": {
           "title": "Abstention, presidential first round (% of the roll)",
           "note": "Source: TSE. Includes voters abroad."
@@ -115,13 +115,6 @@
       "capitals": {
         "h": "The capitals held",
         "t": "<p>In the 27 state capitals, Lula's share slipped from 45.5 percent to 44.9 percent. Everywhere else it fell from 49.3 percent to 45.2 percent.</p><p>The difference is visible around Rio. The city and Niterói held. Next door, in the Baixada Fluminense and São Gonçalo, the vote moved toward the Bolsonaro camp. Lula's share in each, 2022 to 2026:</p>",
-        "notes": [
-          "Rio 43.5% → 43.9%",
-          "Niterói 46.6% → 48.3%",
-          "Duque de Caxias 40.1% → 37.3%",
-          "Nova Iguaçu 35.8% → 33.7%",
-          "São Gonçalo 42.4% → 40.4%"
-        ],
         "chart": {
           "title": "Lula's share: capitals vs the rest",
           "labels": ["27 state capitals", "All other municipalities"]
@@ -199,13 +192,24 @@
       },
       "sp-vs-brazil": {
         "h": "Outside São Paulo, the drop was deepest in the middle",
-        "t": "<p>The chart compares the city with the rest of the country around polling places of the same income. Outside São Paulo, Lula's share fell 3.4 points in the lowest-income areas, below one minimum wage, and about 4.7 points between 1.5 and 2.5 minimum wages. He gained only above six minimum wages.</p><p>In São Paulo the line sits higher. Above two minimum wages, Lula did better in the city than elsewhere at the same income, by 1.3 to 2.5 points. His losses in the city were concentrated in its lowest-income areas, where he fell 5.6 points.</p><p>Most votes are cast where he lost the most. Outside São Paulo, about seven in ten valid votes come from polling places in areas below 2.5 minimum wages.</p>",
+        "t": "<p>The chart compares the city with the rest of the country around polling places of the same income. Outside São Paulo, Lula's share fell 3.4 points in the lowest-income areas, below one minimum wage, and about 4.7 points between 1.5 and 2.5 minimum wages. He gained only above six minimum wages.</p><p>In São Paulo the line sits higher. Above two minimum wages, Lula did better in the city than elsewhere at the same income, by 1.3 to 2.5 points. His losses in the city were concentrated in its lowest-income areas, where he fell 5.6 points.</p><p>Most votes are cast where he lost the most. Outside São Paulo, about seven in ten valid votes come from polling places in areas below 2.5 minimum wages.</p><p>The map shows only polling places in areas of 1.5 to 2.5 minimum wages.</p>",
         "chart": {
           "title": "Change in Lula's share, by income nearby (points)",
           "axis": "Average income of household heads nearby, minimum wages",
           "labels": ["São Paulo city", "Rest of Brazil"],
           "weight": "share of the rest of Brazil's vote"
         }
+      },
+      "flipped": {
+        "h": "Where the lead changed hands",
+        "t": "<p>Lula led in 3,379 municipalities in 2022. In 716 of them, the Bolsonaro camp finished ahead this time. No municipality went the other way.</p><p>Most are in Minas Gerais (178), Rio Grande do Sul (134), São Paulo and Paraná (91 each). The largest are Osasco, Ananindeua, Betim, Montes Claros and Barueri. Together these 716 places cast 6.9 percent of the valid vote.</p>",
+        "notes": [
+          "Osasco 45.7% → 43.3%",
+          "Betim 45.8% → 41.2%",
+          "Montes Claros 46.6% → 42.6%",
+          "Ananindeua 45.3% → 45.0%",
+          "Santa Maria 45.4% → 41.9%"
+        ]
       }
     },
     "cue": "Scroll to read the story",
@@ -224,7 +228,16 @@
     "colVotes": "Votes",
     "colChange": "Since {year}",
     "ofRoll": "of registered voters",
-    "ofValid": "of valid votes"
+    "ofValid": "of valid votes",
+    "blocks": {
+      "shift": "The shift",
+      "size": "Town size",
+      "regions": "Regions",
+      "income": "Income",
+      "religion": "Religion",
+      "abstention": "Abstention",
+      "runoff": "The runoff"
+    }
   },
   "explore": {
     "years": "Election year",
@@ -401,6 +414,10 @@
     "small_2026": {
       "n": "Votes for smaller candidates",
       "src": "TSE 2026, combined share of valid votes at the polling place for all candidates except Lula and Flávio Bolsonaro"
+    },
+    "flip": {
+      "n": "Leader changed since 2022",
+      "src": "TSE, candidate with the most votes, 2022 and 2026"
     }
   },
   "loader": {
@@ -426,23 +443,41 @@
     "outline": "Outlines",
     "outlineTitle": "Dots at a fixed size, over each municipality outlined in its leader's colour",
     "circles": "Circles",
-    "circlesTitle": "One circle per municipality: size is votes, colour the leader, strength the margin",
+    "circlesTitle": "One circle per municipality: its area is the votes, its colour the measure chosen below",
     "margins": "Margins",
     "marginsTitle": "Each municipality filled by its leader's margin, hatched where few people live",
-    "keyMargin": "Leader's margin over the runner-up, in points",
-    "keyCircles": "valid votes (circle area)",
+    "keyMargin": "Who led, and by how many points",
+    "keyCircles": "valid votes",
     "colour": "Colour by",
     "vc": {
+      "moved": "Votes that moved",
       "change": "Change in Lula's share",
       "margin": "Leader's margin",
-      "abst": "Abstention"
+      "abst": "Abstention",
+      "mix": "Everyone (hatching)",
+      "dabst": "Abstention: change in people"
     },
     "small": "Smaller candidates (all but the top two)",
-    "keyChange": "Change in Lula's share, 2022 → 2026, in points",
-    "lost": "he lost {n}+",
-    "gained": "he gained {n}+",
-    "keyAbst": "Abstention, share of the roll",
+    "keyChange": "Change in Lula's share, 2022 → 2026",
+    "lost": "−{n} points",
+    "gained": "+{n} points",
+    "keyAbst": "Didn't vote, share of the roll",
     "keyShare": "{name}: share of valid votes",
-    "keyFlip": "Hatched: the leader changed since 2022"
+    "keyFlip": "the leader changed since 2022",
+    "keyMix": "Lines in proportion to each share of the roll",
+    "camp": "Bolsonaro camp",
+    "others": "others",
+    "didnt": "didn't vote",
+    "keyGrain": "Closer lines: more voters per km²",
+    "same": "0",
+    "keyMoved": "Net votes that moved, 2022 → 2026",
+    "movedAway": "away from Lula",
+    "movedTo": "towards Lula",
+    "keyMovedSize": "votes moved",
+    "keyDabst": "Change in the number who didn't vote, 2022 → 2026",
+    "abstUp": "more stayed home",
+    "abstDown": "fewer stayed home",
+    "keyDabstSize": "people",
+    "keyDabstRate": "Change in abstention, 2022 → 2026, in points"
   }
 }

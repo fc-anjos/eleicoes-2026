@@ -5,15 +5,18 @@
   },
   {
     "id": "overview",
-    "view": "y=cmp&split=0.5&at=home&viz=margins*&vc=margin"
+    "block": "shift",
+    "view": "y=2026&at=home&viz=circles*&vc=moved"
   },
   {
     "id": "arrows",
+    "block": "shift",
     "view": "y=2026&at=home&arrows=1"
   },
   {
     "id": "held",
-    "view": "y=2026&at=home&f=dlula@0~*&viz=margins*",
+    "block": "shift",
+    "view": "y=2026&at=home&f=dlula@0~*&viz=circles*&vc=moved",
     "notes": [
       {
         "at": [-43.2, -22.9],
@@ -44,39 +47,67 @@
   },
   {
     "id": "slipped",
-    "view": "y=2026&at=home&f=dlula@-5~0&viz=margins*"
+    "block": "shift",
+    "view": "y=2026&at=home&f=dlula@-5~0&viz=circles*&vc=moved"
   },
   {
     "id": "shifted",
-    "view": "y=2026&at=home&f=dlula@*~-5&viz=margins*"
+    "block": "shift",
+    "view": "y=2026&at=home&f=dlula@*~-5&viz=circles*&vc=moved"
+  },
+  {
+    "id": "flipped",
+    "block": "shift",
+    "view": "y=2026&at=home&f=flip@1~*&viz=circles*&vc=moved",
+    "notes": [
+      {
+        "at": [-46.79, -23.53],
+        "dx": -45,
+        "dy": 30
+      },
+      {
+        "at": [-44.2, -19.97],
+        "dx": 45,
+        "dy": 10
+      },
+      {
+        "at": [-43.86, -16.73],
+        "dx": 40,
+        "dy": -25
+      },
+      {
+        "at": [-48.37, -1.37],
+        "dx": -40,
+        "dy": -30
+      },
+      {
+        "at": [-53.81, -29.68],
+        "dx": -45,
+        "dy": 20
+      }
+    ]
   },
   {
     "id": "small-towns",
-    "view": "y=2026&at=home&viz=circles*",
+    "block": "size",
+    "view": "y=cmp&split=0.5&at=home&f=pop_2022:0-25",
     "chart": {
       "by": "pop_2022",
       "cuts": [10000, 50000, 200000, 1000000]
     }
   },
   {
-    "id": "abstention",
-    "view": "y=2026&at=home&only=A",
+    "id": "capitals",
+    "block": "size",
+    "view": "y=2026&at=-43.25,-22.85,12&viz=circles*&vc=moved&big=1",
     "chart": {
-      "by": "series",
-      "min": 10,
-      "points": [
-        [2006, 16.75],
-        [2010, 18.12],
-        [2014, 19.39],
-        [2018, 20.33],
-        [2022, 20.95],
-        [2026, 21.08]
-      ]
+      "by": "capital"
     }
   },
   {
     "id": "northeast",
-    "view": "y=cmp&split=0.5&at=-39.8,-8.6,2.6&viz=margins*&vc=margin",
+    "block": "regions",
+    "view": "y=2026&at=-39.8,-8.6,2.6&viz=circles*&vc=moved",
     "chart": {
       "by": "region",
       "keys": ["NE", "N", "SE", "CW", "S"]
@@ -105,42 +136,21 @@
     ]
   },
   {
-    "id": "capitals",
-    "view": "y=2026&at=-43.25,-22.85,12&viz=circles*",
+    "id": "south",
+    "block": "regions",
+    "view": "y=2026&at=-51.5,-27.3,2.8&viz=circles*&vc=moved",
     "notes": [
       {
-        "at": [-43.2, -22.91],
-        "dx": -30,
-        "dy": 45
-      },
-      {
-        "at": [-43.1, -22.9],
+        "at": [-51.18, -29.17],
         "dx": 40,
-        "dy": 40
-      },
-      {
-        "at": [-43.31, -22.79],
-        "dx": -40,
-        "dy": -35
-      },
-      {
-        "at": [-43.45, -22.76],
-        "dx": -50,
-        "dy": 20
-      },
-      {
-        "at": [-43.05, -22.83],
-        "dx": 45,
         "dy": -30
       }
-    ],
-    "chart": {
-      "by": "capital"
-    }
+    ]
   },
   {
     "id": "goias",
-    "view": "y=2026&at=-49.6,-16.0,5&in=uf:GO&viz=margins*&vc=share-55",
+    "block": "regions",
+    "view": "y=2026&at=-49.6,-16.0,3.6&viz=margins*&vc=share-55",
     "notes": [
       {
         "at": [-49.25, -16.82],
@@ -160,19 +170,9 @@
     ]
   },
   {
-    "id": "south",
-    "view": "y=2026&at=-53.2,-29.9,4.5&viz=margins*",
-    "notes": [
-      {
-        "at": [-51.18, -29.17],
-        "dx": 40,
-        "dy": -30
-      }
-    ]
-  },
-  {
     "id": "sp-classes-ac",
-    "view": "y=cmp&split=0.5&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@4848~*",
+    "block": "income",
+    "view": "y=2026&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@4848~*&viz=circles*&vc=moved",
     "chart": {
       "by": "places",
       "muni": "3550308",
@@ -183,7 +183,8 @@
   },
   {
     "id": "sp-class-d",
-    "view": "y=cmp&split=0.5&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@2424~4848",
+    "block": "income",
+    "view": "y=2026&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@2424~4848&viz=circles*&vc=moved",
     "chart": {
       "by": "places",
       "muni": "3550308",
@@ -194,7 +195,8 @@
   },
   {
     "id": "sp-class-e",
-    "view": "y=cmp&split=0.5&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@*~2424",
+    "block": "income",
+    "view": "y=2026&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@*~2424&viz=circles*&vc=moved",
     "chart": {
       "by": "places",
       "muni": "3550308",
@@ -205,7 +207,8 @@
   },
   {
     "id": "sp-income",
-    "view": "y=cmp&split=0.5&at=-46.63,-23.65,48&in=3550308",
+    "block": "income",
+    "view": "y=2026&at=-46.63,-23.65,48&in=3550308&viz=circles*&vc=moved",
     "chart": {
       "by": "deciles",
       "muni": "3550308",
@@ -215,7 +218,8 @@
   },
   {
     "id": "sp-vs-brazil",
-    "view": "y=cmp&split=0.5&at=home",
+    "block": "income",
+    "view": "y=cmp&split=0.5&at=home&f=setor_renda_resp_media@1818~3030",
     "chart": {
       "by": "bands",
       "var": "setor_renda_resp_media",
@@ -227,23 +231,44 @@
   },
   {
     "id": "religion",
-    "view": "y=2026&at=home&f=pct_catolica_2022:75-100&viz=margins*",
+    "block": "religion",
+    "view": "y=2026&at=home&f=pct_catolica_2022:75-100&viz=circles*&vc=moved",
     "chart": {
       "by": "pct_catolica_2022",
       "cuts": [58.4, 69.9, 79.9]
     }
   },
   {
+    "id": "abstention",
+    "block": "abstention",
+    "view": "y=2026&at=home&viz=circles*&vc=dabst",
+    "chart": {
+      "by": "series",
+      "min": 10,
+      "points": [
+        [2006, 16.75],
+        [2010, 18.12],
+        [2014, 19.39],
+        [2018, 20.33],
+        [2022, 20.95],
+        [2026, 21.08]
+      ]
+    }
+  },
+  {
     "id": "who-didnt-vote",
+    "block": "abstention",
     "view": "y=2026&at=home&ages=1"
   },
   {
     "id": "excess-abstention",
+    "block": "abstention",
     "view": "y=2026&at=-40.5,-12.6,4&f=pct_excess_2026:90-100&only=A"
   },
   {
     "id": "smaller-candidates",
-    "view": "y=2026&at=home&f=small_2026@10~*&viz=margins*&vc=share-small"
+    "block": "runoff",
+    "view": "y=2026&at=home&viz=margins*&vc=share-small"
   },
   {
     "id": "find",

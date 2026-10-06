@@ -10,22 +10,25 @@
 // - change: Lula's share 2026 minus 2022, diverging from a grey midpoint (red: he gained; blue: he lost);
 // - margin: the leader's colour, stronger the bigger the lead; places where the leader changed are hatched;
 // - share-<ballot number> or share-small: one candidate's (or the smaller candidates') share, one hue light→dark;
-// - abst: abstention, amber light→dark.
+// - abst: abstention, amber light→dark;
+// - mix: every group at once, as hairline hatching in one direction, the lines' colours alternating in proportion to
+//   each group's share of the roll and their spacing set by voters per km². Where every place has the same leader (the Northeast),
+//   "who won" paints one colour on both sides of the divider; the stripes show how much of each there was.
 // In compare mode each side shows its own year. A story step picks its view in its hash (viz=margins&vc=change); a
 // trailing * (viz=margins*) shows it at every zoom, for steps framed on the whole country.
 import * as d3 from "d3";
-import { M, MG, YEARS } from "../data.js";
+import { M, MG, ORDER, YEARS } from "../data.js";
 import { PASS } from "../filters/filter.js";
-import { fmt, num } from "../format.js";
+import { hum, num, pctN } from "../format.js";
 import { t as tr } from "../i18n/index.js";
-import { CI, COLS, S, YS, css } from "../state.js";
-import { lulaShift, tally } from "../stats.js";
-import { layers } from "../dots.js";
+import { A8, AB, AO, CI, COLS, K, S, YS, css } from "../state.js";
+import { CAPITALS, abRate, lulaShift, tally } from "../stats.js";
+import { DOT, layers } from "../dots.js";
 import { path, svg } from "./base.js";
 
 export const VIZS = ["dots", "outline", "circles", "margins"];
 // what the colour shows; candidates' shares are added as share-<ballot number>
-export const VCOLS = ["change", "margin", "abst"];
+export const VCOLS = ["moved", "change", "margin", "mix", "abst", "dabst"];
 // the fade between dots and the comparison view, by zoom: it starts at S.VIZK (Studio → Display) and is
 // fully in at 7/3 of it
 // 0: dots only, 1: the comparison view fully in
@@ -66,9 +69,110 @@ function results(y) {
       small: 100 - big.reduce((t, i) => t + (sh[i] || 0), 0),
       ab: a.all ? (100 * a.ab) / a.all : null,
       dl: lulaShift(m),
+      roll: a.all,
+      da: dAbst(m),
+      grp: groups(y, a),
     };
   }));
 }
+// the change in the abstention rate, 2026 minus 2022, in points
+const dAbst = (m) => {
+  const a = abRate(YS[0], m),
+    b = abRate(YS[1], m);
+  return a == null || b == null ? null : a - b;
+};
+// proportional hatching: hairlines in one direction (45°), their colours alternating in proportion to each group's
+// share of the roll (abstention included), as in Ondrejka's proportional striping (Journal of Maps, 2016) and Gaffuri's striped circles
+// (2022), and their spacing by voters per km², Bertin's "grain": the number of marks per area at a constant colour.
+// So the colour mix says who, the line density says how many. N lines per repeat (5% each) are shared out by
+// largest remainder and interleaved, each line going to the group furthest behind its share. Spacing is in screen
+// pixels on a sqrt scale of density (as circle radius is of votes), clamped to [GMIN, GMAX]
+const HAIR = 0.55, // css px
+  N = 20,
+  GMIN = 1.4,
+  GMAX = 22,
+  GLEVELS = 24, // log-spaced spacings, which also bounds the pattern cache
+  GREF = 3; // the spacing at the median place's density
+export const HATCHES = [
+  ["l", "13"],
+  ["b", "22"],
+  ["o", ""],
+  ["a", "A"],
+];
+// the votes of each group: Lula, the Bolsonaro camp, the other candidates folded together (their 1–3% shares would
+// vanish among N lines), and those who did not vote
+function groups(y, a) {
+  const [l, b] = [CI("13"), CI("22")],
+    v = YEARS[y].cands.reduce((t, c) => t + a.d.c[c.i], 0);
+  return { l: a.d.c[l], b: a.d.c[b], o: v - a.d.c[l] - a.d.c[b], a: a.ab };
+}
+let DMED = 0,
+  dmedGen = -1;
+function gapFor(d) {
+  if (dmedGen !== S.layoutGen) {
+    dmedGen = S.layoutGen;
+    const { area } = geo(),
+      R = results(YS[0]);
+    DMED = d3.median(R.map((r, i) => (r && area[i] > 0 ? r.valid / area[i] : null)).filter((x) => x)) || 1;
+  }
+  const g = Math.min(GMAX, Math.max(GMIN, GREF * Math.sqrt(DMED / d))),
+    lv = Math.round((Math.log(g / GMIN) / Math.log(GMAX / GMIN)) * (GLEVELS - 1));
+  return GMIN * (GMAX / GMIN) ** (lv / (GLEVELS - 1));
+}
+const HP = new Map();
+// fixed: circles, whose size already says how many (Gaffuri's striped circles)
+function hatchMix(cx, r, i, dpr, fixed) {
+  const ar = geo().area[i],
+    tot = d3.sum(HATCHES, ([k]) => r.grp[k]);
+  if (!(ar > 0) || !tot) return [];
+  const want = HATCHES.map(([k]) => (r.grp[k] / tot) * N),
+    cnt = want.map(Math.floor);
+  want
+    .map((w, g) => [w - cnt[g], g])
+    .sort((a, b) => b[0] - a[0])
+    .slice(0, N - d3.sum(cnt))
+    .forEach(([, g]) => cnt[g]++);
+  const seq = [],
+    put = cnt.map(() => 0);
+  for (let j = 0; j < N; j++) {
+    let best = -1,
+      lag = -Infinity;
+    cnt.forEach((c, g) => {
+      const l = (c * (j + 1)) / N - put[g];
+      if (c > put[g] && l > lag) ((lag = l), (best = g));
+    });
+    put[best]++;
+    seq.push(best);
+  }
+  const gap = Math.max(2, Math.round((fixed ? GREF : gapFor(tot / ar)) * dpr)),
+    n = N * gap,
+    key = `${n}|${seq.join("")}`;
+  let p = HP.get(key);
+  if (!p) {
+    const c = new OffscreenCanvas(n, n),
+      g = c.getContext("2d"),
+      img = g.createImageData(n, n),
+      rgb = HATCHES.map(([, cat]) => d3.rgb(COLS[CI(cat)])),
+      w = HAIR * dpr * Math.SQRT2; // the line's width measured along x + y
+    for (let y = 0; y < n; y++)
+      for (let x = 0; x < n; x++) {
+        const u = (x + y) % n,
+          o = u % gap;
+        if (o >= w) continue;
+        const q = rgb[seq[Math.floor(u / gap)]],
+          a = 4 * (y * n + x);
+        img.data[a] = q.r;
+        img.data[a + 1] = q.g;
+        img.data[a + 2] = q.b;
+        img.data[a + 3] = 255 * Math.min(1, w - o);
+      }
+    g.putImageData(img, 0, 0);
+    HP.set(key, (p = cx.createPattern(c, "repeat")));
+  }
+  p.setTransform(cx.getTransform().inverse());
+  return [p];
+}
+
 // the leader changed between the years
 const flipped = (i) => {
   const a = results(YS[0])[i],
@@ -85,8 +189,9 @@ function geo() {
   const shapes = MG.features.map((f) => new Path2D(path(f) || "")),
     cen = MG.features.map((f) => path.centroid(f)),
     bb = MG.features.map((f) => path.bounds(f)),
-    area = MG.features.map((f) => path.area(f));
-  return (GEO = { shapes, cen, bb, area });
+    area = MG.features.map((f) => path.area(f)),
+    perim = MG.features.map((f) => path.measure(f));
+  return (GEO = { shapes, cen, bb, area, perim });
 }
 
 // margin → how far the colour goes from the background towards the leader's (40+ points: all the way)
@@ -94,53 +199,227 @@ const MSAT = 40;
 const tint = (col, margin, bg) => d3.interpolateRgb(bg, col)(0.18 + 0.82 * Math.min(1, margin / MSAT));
 // change: a grey midpoint (no change) out to Lula's colour where he gained and the Bolsonaro camp's where he lost,
 // full at ±CSAT points; a sequential ramp from near the background to one hue for shares and abstention
-const CSAT = 15,
-  MID = "#6b7079";
+const CSAT = 12,
+  MID = "#3d4048";
 const diverge = (v) => d3.interpolateRgb(MID, COLS[v >= 0 ? CI("13") : CI("22")])(Math.min(1, Math.abs(v) / CSAT));
 const seq = (col, u, bg) => d3.interpolateRgb(bg, col)(0.15 + 0.85 * Math.max(0, Math.min(1, u)));
+const DSAT = 8; // abstention change, points
 const ABR = [10, 35]; // abstention range, %
 const SHARE = "#3fbf8f";
 // the measure behind the colour: {col(r) → colour or null, hatch(i)}
 function measure(y, bg) {
   const v = S.VCOL;
-  if (v === "change") return { col: (r) => (r.dl == null ? null : diverge(r.dl)) };
+  if (v === "change" || v === "moved") return { col: (r) => (r.dl == null ? null : diverge(r.dl)) };
+  if (v === "dabst")
+    return {
+      col: (r) =>
+        r.da == null
+          ? null
+          : d3.interpolateRgb(MID, r.da > 0 ? COLS[CI("A")] : SHARE)(Math.min(1, Math.abs(r.da) / DSAT)),
+    };
   if (v === "abst")
     return { col: (r) => (r.ab == null ? null : seq(COLS[CI("A")], (r.ab - ABR[0]) / (ABR[1] - ABR[0]), bg)) };
   if (v.startsWith("share-")) {
-    const { get, col, max } = shareOf(v.slice(6));
-    return { col: (r) => (get(r) == null ? null : seq(col, get(r) / max, bg)) };
+    const { get, col } = shareOf(v.slice(6));
+    return { col: (r) => (get(r) == null ? null : seq(col, SSTEP[sclass(get(r))], bg)) };
   }
+  if (v === "mix") return { col: (r) => COLS[r.lead], layers: hatchMix };
   return { col: (r) => tint(COLS[r.lead], r.margin, bg), hatch: flipped };
 }
 // a candidate's (or the smaller candidates') share: its getter, colour and the top of its scale (the highest value
 // over both years, so the two sides of the divider share one scale). One hue for every candidate, since some
 // candidates' own colours are greys that make no ramp on the dark map
-const SHM = {};
+// drawn in five classes of five points (under 5%, 5–10 … 20% and over): steps are easier to tell apart than a
+// continuous shade, and the same class means the same share for every candidate
+const SCUTS = [5, 10, 15, 20],
+  SSTEP = [0, 0.3, 0.55, 0.78, 1];
+const sclass = (x) => SCUTS.filter((c) => x >= c).length;
 export function shareOf(k) {
   const get = k === "small" ? (r) => r.small : ((i) => (r) => (i in r.sh ? r.sh[i] : null))(CI(k));
-  if (!(k in SHM)) {
-    const vs = YS.flatMap((y) => results(y).filter(Boolean).map(get)).filter((x) => x != null);
-    SHM[k] = Math.max(5, Math.ceil((d3.max(vs) || 5) / 5) * 5);
-  }
-  return { get, col: SHARE, max: SHM[k] };
+  return { get, col: SHARE };
 }
 // circle radius in css px: area ∝ votes (a sqrt scale, as in Bostock's bubble maps), following the zoom gently so a
 // city doesn't swallow the screen. One national scale whatever the filter, so a small town always looks small: the
 // circles of all municipalities together cover about a third of the country's land at zoom 1.
-const COVER = 0.33;
+const COVER = { votes: 0.33, moved: 0.14 };
+// the scale: css px per √vote at zoom K0 (1 for the country; for one municipality's polling places, the zoom at which
+// it fills the window, so its circles cover the same share of it as the country's do of the country)
 let RC = 0.012,
-  rcGen = -1;
+  K0 = 1,
+  rcKey = "";
+// what a circle's area counts: the valid votes or, for "votes that moved", the net votes the change in Lula's share
+// is worth (the points it moved times the votes cast), in two flat colours by direction, as in the Times' "size of
+// lead": colour answers which way, size how many
+// The same form serves abstention ("dabst"): the area is the change in the number who did not vote (the points the
+// rate moved times the roll), amber where more stayed home and green where fewer did.
+const NET = {
+  moved: { val: (r) => (Math.abs(r.dl || 0) / 100) * r.valid, col: (r) => COLS[CI(r.dl < 0 ? "22" : "13")] },
+  dabst: { val: (r) => (Math.abs(r.da || 0) / 100) * r.roll, col: (r) => (r.da > 0 ? COLS[CI("A")] : SHARE) },
+};
+const moved = () => NET[S.VCOL];
+const sizeOf = (r) => (moved() ? moved().val(r) : r.valid);
 function fitScale(y) {
-  if (rcGen === S.layoutGen) return RC;
-  rcGen = S.layoutGen;
-  const { area } = geo(),
-    R = results(y);
+  const one = byPlace(),
+    key = [S.layoutGen, S.VCOL, one ? [...S.INSET][0] : "", S.w, S.h].join("|");
+  if (rcKey === key) return RC;
+  rcKey = key;
+  const { area, bb } = geo(),
+    cover = COVER[moved() ? "moved" : "votes"];
   let a = 0,
     v = 0;
-  for (let i = 0; i < R.length; i++) if (R[i]) ((a += area[i]), (v += R[i].valid));
-  return (RC = v ? Math.sqrt((COVER * a) / (Math.PI * v)) : RC);
+  K0 = 1;
+  if (one) {
+    const fi = insetFeature(),
+      [[x0, y0], [x1, y1]] = bb[fi];
+    K0 = Math.min(S.w / (x1 - x0), S.h / (y1 - y0));
+    a = area[fi] * K0 * K0;
+    v = d3.sum(places(y), sizeOf);
+  } else {
+    const R = results(y);
+    for (let i = 0; i < R.length; i++) if (R[i]) ((a += area[i]), (v += sizeOf(R[i])));
+  }
+  return (RC = v ? Math.sqrt((cover * a) / (Math.PI * v)) : RC);
 }
-const rad = (v, k) => RC * Math.sqrt(k) * Math.sqrt(v);
+const rad = (v, k) => RC * Math.sqrt(k / K0) * Math.sqrt(v);
+
+// Inside one municipality (a view limited to it, as the São Paulo steps are) the circles are its polling places: one
+// per place at the middle of its dots, from each place's exact votes in both years (matched by the place's row), so
+// a city reads in the same terms as the country. Places outside a polling-place filter stay as faint discs.
+const byPlace = () => S.VIZ === "circles" && !!S.INSET && S.INSET.size === 1;
+const insetFeature = () => MG.features.findIndex((f) => f.properties.codarea === [...S.INSET][0]);
+const PL = {};
+let plKey = "";
+function places(y) {
+  const key = [[...S.INSET][0], S.layoutGen, S.INC80].join("|");
+  if (plKey !== key) for (const k in PL) delete PL[k];
+  plKey = key;
+  if (PL[y]) return PL[y];
+  const row = ORDER.indexOf(insetFeature()),
+    L = CI("13"),
+    big = [L, CI("22")],
+    cands = YEARS[y].cands.filter((c) => c.k).map((c) => c.i);
+  // each place's Lula share and abstention rate, by year
+  const lula = YS.map((yy) => {
+    const D = DOT[yy],
+      m = new Map();
+    for (let g = D.GM[row]; g < D.GM[row + 1]; g++) {
+      if (D.GR[g] < 0) continue;
+      let valid = 0;
+      for (let i = 0; i < K; i++) if (i !== AB && i !== AO && i !== A8) valid += D.GV[g * K + i];
+      const ab = D.GV[g * K + AB] + D.GV[g * K + AO] + (S.INC80 ? D.GV[g * K + A8] : 0);
+      if (valid) m.set(D.GR[g], [(100 * D.GV[g * K + L]) / valid, (100 * ab) / (valid + ab)]);
+    }
+    return m;
+  });
+  const D = DOT[y],
+    out = [];
+  for (let g = D.GM[row]; g < D.GM[row + 1]; g++) {
+    const n = D.S[g + 1] - D.S[g],
+      c = Array.from({ length: K }, (_, i) => D.GV[g * K + i]),
+      ab = c[AB] + c[AO] + (S.INC80 ? c[A8] : 0),
+      valid = d3.sum(c) - c[AB] - c[AO] - c[A8];
+    if (!n || !valid || D.GR[g] < 0) continue;
+    let x = 0,
+      yy = 0;
+    for (let i = D.S[g]; i < D.S[g + 1]; i++) ((x += D.P[2 * i]), (yy += D.P[2 * i + 1]));
+    const [p, q] = cands.map((i) => c[i]).sort((u, v) => v - u),
+      sh = YEARS[y].cands.map((k) => k.i).reduce((o, i) => ((o[i] = (100 * c[i]) / valid), o), {}),
+      a = lula[0].get(D.GR[g]),
+      b = lula[1].get(D.GR[g]),
+      vv = d3.sum(YEARS[y].cands, (k) => c[k.i]);
+    out.push({
+      g,
+      x: x / n,
+      y: yy / n,
+      valid,
+      lead: cands.find((i) => c[i] === p),
+      margin: (100 * (p - q)) / valid,
+      sh,
+      small: 100 - big.reduce((t, i) => t + (sh[i] || 0), 0),
+      ab: (100 * ab) / (valid + ab),
+      dl: a == null || b == null ? null : a[0] - b[0],
+      roll: valid + ab,
+      da: a == null || b == null ? null : a[1] - b[1],
+      grp: { l: c[L], b: c[big[1]], o: vv - c[L] - c[big[1]], a: ab },
+    });
+  }
+  return (PL[y] = out);
+}
+
+const RMIN = 1.3,
+  GHOST = 0.06;
+function disc(cx, x, y, r, fills) {
+  cx.beginPath();
+  cx.arc(x, y, Math.max(0.5, r), 0, 2 * Math.PI);
+  for (const f of fills) {
+    cx.fillStyle = f;
+    cx.fill();
+  }
+}
+
+// "Capitals and big cities" (big=1 in a view): the circles kept are the state capitals and the cities with enough
+// votes for the zoom, so zooming out drops what is only regional and brings in the country's other big cities. The
+// biggest in view are named, with Lula's share in both years, on leader lines placed clear of one another.
+const BIG0 = 4e5,
+  NAMED = 8;
+const CAP = MG.features.map((f) => CAPITALS.has(f.properties.codarea));
+const isBig = (i, k) => !S.BIG || CAP[i] || results(YS[0])[i].valid >= BIG0 / k ** 0.75;
+const SPOTS = [
+  [40, -30],
+  [40, 30],
+  [-40, -30],
+  [-40, 30],
+  [55, 0],
+  [-55, 0],
+  [30, -55],
+  [-30, 55],
+  [30, 55],
+  [-30, -55],
+];
+const kept = new Map(); // each name's last spot, tried first so labels don't jump about as the map moves
+export function cityNotes(t) {
+  if (!S.BIG || S.VIZ !== "circles" || !blend(t.k)) return null;
+  const { cen } = geo(),
+    R = results(YS[0]),
+    P = results(YS[1]),
+    L = CI("13"),
+    story = d3.select("#page").classed("storymode") && innerWidth > 900,
+    x0 = story ? document.querySelector("aside").getBoundingClientRect().width : 0,
+    key = document.getElementById("vkey").getBoundingClientRect(),
+    wrap = document.getElementById("wrap").getBoundingClientRect(),
+    // taken: the key, then each label as it is placed
+    boxes = [[key.left - wrap.left, key.top - wrap.top, key.right - wrap.left, key.bottom - wrap.top]],
+    hits = (b) => boxes.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+  const at = (i) => [cen[i][0] * t.k + t.x, cen[i][1] * t.k + t.y];
+  const top = d3
+    .range(R.length)
+    .filter((i) => {
+      if (!R[i] || !P[i] || !PASS[i] || !isBig(i, t.k)) return false;
+      const [x, y] = at(i);
+      return x > x0 + 20 && x < S.w - 20 && y > 20 && y < S.h - 20;
+    })
+    .sort((i, j) => CAP[j] - CAP[i] || R[j].valid - R[i].valid)
+    .slice(0, NAMED);
+  const out = [];
+  for (const i of top) {
+    const name = M[MG.features[i].properties.codarea].n,
+      text = `${name} ${pctN(P[i].sh[L])} → ${pctN(R[i].sh[L])}`,
+      [x, y] = at(i),
+      w = 7.4 * text.length;
+    const box = ([dx, dy]) =>
+      dx < 0 ? [x + dx - w, y + dy - 9, x + dx, y + dy + 9] : [x + dx, y + dy - 9, x + dx + w, y + dy + 9];
+    const fits = (s) => {
+      const b = box(s);
+      return b[0] > x0 && b[2] < S.w && b[1] > 0 && b[3] < S.h && !hits(b);
+    };
+    const s = [kept.get(name), ...SPOTS].filter(Boolean).find(fits);
+    if (!s) continue;
+    kept.set(name, s);
+    boxes.push(box(s));
+    out.push({ p: cen[i], t: text, dx: s[0], dy: s[1] });
+  }
+  return out;
+}
 
 // diagonal hatching in a colour, fixed in screen pixels whatever the zoom
 const HATCH = new Map();
@@ -190,8 +469,12 @@ export function drawMarks(cx, t, W, H, dpr) {
         if (S.VIZ === "margins") {
           // one measure in the shade; hatching marks the places where the leader changed (margin only)
           cx.globalAlpha = b;
-          cx.fillStyle = ms.hatch && ms.hatch(i) ? hatch(cx, col, dpr) : col;
-          cx.fill(shapes[i]);
+          for (const f of ms.layers
+            ? ms.layers(cx, r, i, dpr)
+            : [ms.hatch && ms.hatch(i) ? hatch(cx, col, dpr) : col]) {
+            cx.fillStyle = f;
+            cx.fill(shapes[i]);
+          }
         } else {
           cx.globalAlpha = b * 0.9;
           cx.strokeStyle = col;
@@ -199,29 +482,28 @@ export function drawMarks(cx, t, W, H, dpr) {
         }
       }
     } else {
-      // circles, biggest first so small ones stay on top
-      const ord = d3
-        .range(R.length)
-        .filter((i) => R[i] && PASS[i] && vis(i) && ms.col(R[i]))
-        .sort((i, j) => R[j].valid - R[i].valid);
+      // circles, biggest first so small ones stay on top; under a filter the places outside it stay as faint
+      // discs, so the lit ones read against the rest
+      // one item per municipality, or per polling place inside a single municipality
+      const mv = moved(),
+        GP = DOT[y].GP,
+        items = (
+          byPlace()
+            ? places(y).map((r) => ({ r, x: r.x, y: r.y, pass: GP[r.g], i: -1 }))
+            : d3
+                .range(R.length)
+                .filter((i) => R[i] && vis(i) && isFinite(cen[i][0]) && isBig(i, t.k))
+                .map((i) => ({ r: R[i], x: cen[i][0], y: cen[i][1], pass: PASS[i], i }))
+        )
+          .filter((d) => ms.col(d.r) && sizeOf(d.r) > 0)
+          .sort((u, v) => u.pass - v.pass || sizeOf(v.r) - sizeOf(u.r));
       cx.lineWidth = 0.75 * dpr;
       cx.strokeStyle = bg;
-      for (const i of ord) {
-        const r = R[i],
-          c = cen[i];
-        if (!isFinite(c[0])) continue;
-        cx.globalAlpha = b * 0.85;
-        cx.fillStyle = ms.col(r);
-        cx.beginPath();
-        cx.arc(
-          (c[0] * t.k + t.x) * dpr,
-          (c[1] * t.k + t.y) * dpr,
-          Math.max(1, rad(r.valid, t.k)) * dpr,
-          0,
-          2 * Math.PI,
-        );
-        cx.fill();
-        cx.stroke();
+      for (const { r, x, y: py, pass, i } of items) {
+        const fills = mv ? [mv.col(r)] : pass && ms.layers && i >= 0 ? ms.layers(cx, r, i, dpr, true) : [ms.col(r)];
+        cx.globalAlpha = b * (pass ? 0.88 : GHOST);
+        disc(cx, (x * t.k + t.x) * dpr, (py * t.k + t.y) * dpr, Math.max(RMIN, rad(sizeOf(r), t.k)) * dpr, fills);
+        if (pass) cx.stroke();
       }
     }
     cx.restore();
@@ -243,50 +525,110 @@ export function vizHint(k = d3.zoomTransform(svg.node()).k) {
     );
 }
 
-// The key, fixed in meaning at every zoom: the colour's ramp for the measure shown, and for circles three reference
-// sizes at this zoom
-const sw = (c, cls = "sw") => `<i class="${cls}" style="background:${c}"></i>`;
+// The key, fixed in meaning at every zoom: a title, the measure's colour bar with its ends labelled, and for circles
+// three nested reference sizes at this zoom
+const bar = (cols, ends) =>
+  `<div class="kbar" style="background:linear-gradient(90deg,${cols.join(",")})"></div>` +
+  `<div class="kax">${ends.map((e) => `<span>${e}</span>`).join("")}</div>`;
+const chip = (c, n, cls = "") => `<span><i class="${cls}" style="--c:${c}"></i>${n}</span>`;
+// nested circles on one baseline: the biggest round number that fits the key, then about a fifth and a twentieth of it
+const STEPS = [1e7, 5e6, 2e6, 1e6, 5e5, 2e5, 1e5, 5e4, 2e4, 1e4, 5e3, 2e3, 1e3, 500, 200, 100];
+function sizes(k) {
+  const i = Math.max(
+      0,
+      STEPS.findIndex((n) => rad(n, k) <= 22),
+    ),
+    ns = [STEPS[i], STEPS[i + 2], STEPS[i + 4]].filter(Boolean),
+    R = rad(ns[0], k),
+    pad = 7,
+    w = 2 * R + 52,
+    h = 2 * R + pad + 1;
+  // labels sit at each circle's top, pushed down where two would touch
+  let last = -Infinity;
+  const rows = ns.map((n) => {
+    const r = rad(n, k),
+      y = h - 1 - 2 * r,
+      ty = (last = Math.max(y, last + 11));
+    return { n, r, y, ty };
+  });
+  const H = Math.max(h, last + 5);
+  return (
+    `<svg class="ksize" viewBox="0 0 ${w} ${H}" width="${w}" height="${H}">` +
+    rows
+      .map(
+        ({ n, r, y, ty }) =>
+          `<circle cx="${R + 1}" cy="${h - 1 - r}" r="${r}"/>` +
+          `<line x1="${R + 1}" y1="${y}" x2="${2 * R + 9}" y2="${ty}"/>` +
+          `<text x="${2 * R + 12}" y="${ty}" dy="0.32em">${hum(n, 0)}</text>`,
+      )
+      .join("") +
+    `</svg>`
+  );
+}
+let keyHtml = "";
 export function drawKey(t = d3.zoomTransform(svg.node())) {
   vizHint(t.k);
   const key = d3.select("#vkey"),
-    b = blend(t.k);
-  key.property("hidden", !b || S.VIZ === "dots");
-  if (!b) return;
+    b = blend(t.k),
+    on = b > 0 && S.VIZ !== "dots";
+  key.property("hidden", !on);
+  // the dots' own key steps back once the view has fully replaced them
+  d3.select(".mapbar .key").classed("nodots", on && b >= 1 && S.VIZ !== "outline");
+  if (!on) return;
   const bg = css("--night") || "#0b0e14",
-    v = S.VCOL;
+    v = S.VCOL,
+    lula = COLS[CI("13")],
+    camp = COLS[CI("22")],
+    name = { l: "Lula", b: tr("viz.camp"), o: tr("viz.others"), a: tr("viz.didnt") };
   let h;
-  if (v === "change")
+  if (v === "change" || v === "moved") {
     h =
-      `<div>${tr("viz.keyChange")}</div><div class="ramp">${[-15, -8, -3].map((x) => sw(diverge(x))).join("")}` +
-      `${sw(MID)}${[3, 8, 15].map((x) => sw(diverge(x))).join("")}</div>` +
-      `<div class="ends"><span>${tr("viz.lost", { n: CSAT })}</span><span>${tr("viz.gained", { n: CSAT })}</span></div>`;
-  else if (v === "abst")
+      `<div class="kt">${tr("viz.keyChange")}</div>` +
+      bar(
+        [-1, -0.5, 0, 0.5, 1].map((u) => diverge(u * CSAT)),
+        [tr("viz.lost", { n: CSAT }), tr("viz.same"), tr("viz.gained", { n: CSAT })],
+      );
+  } else if (v === "mix")
     h =
-      `<div>${tr("viz.keyAbst")}</div><div class="ramp">${[0, 0.33, 0.66, 1].map((u) => sw(seq(COLS[CI("A")], u, bg))).join("")}` +
-      `<span>${ABR[0]}–${ABR[1]}%</span></div>`;
-  else if (v.startsWith("share-")) {
-    const k = v.slice(6),
-      { col, max } = shareOf(k);
+      `<div class="kt">${tr("viz.keyMix")}</div><div class="kchips">` +
+      HATCHES.map(([k, cat]) => chip(COLS[CI(cat)], name[k], "hatch")).join("") +
+      `</div>` +
+      (S.VIZ === "circles" ? "" : `<div class="kn">${tr("viz.keyGrain")}</div>`);
+  else if (v === "dabst")
     h =
-      `<div>${tr("viz.keyShare", { name: vcolName(v) })}</div><div class="ramp">` +
-      `${[0, 0.33, 0.66, 1].map((u) => sw(seq(col, u, bg))).join("")}<span>0–${max}%</span></div>`;
+      `<div class="kt">${tr("viz.keyDabstRate")}</div>` +
+      bar([SHARE, MID, COLS[CI("A")]], [`−${DSAT}`, "0", tr("viz.gained", { n: DSAT })]);
+  else if (v === "abst") {
+    const cols = [0, 0.5, 1].map((u) => seq(COLS[CI("A")], u, bg));
+    h = `<div class="kt">${tr("viz.keyAbst")}</div>` + bar(cols, [ABR[0] + "%", ABR[1] + "%"]);
+  } else if (v.startsWith("share-")) {
+    const { col } = shareOf(v.slice(6));
+    h =
+      `<div class="kt">${tr("viz.keyShare", { name: vcolName(v) })}</div><div class="ksteps">` +
+      SSTEP.map(
+        (u, i) =>
+          `<span><i style="background:${seq(col, u, bg)}"></i>${i ? SCUTS[i - 1] + (i === SCUTS.length ? "%+" : "") : "0"}</span>`,
+      ).join("") +
+      `</div>`;
   } else {
-    const ramp = (i) => [0, 10, 20, 40].map((m) => sw(tint(COLS[i], m, bg))).join("");
-    h = `<div>${tr("viz.keyMargin")}</div><div class="ramp">${ramp(CI("13"))}<span>0 → 40+</span>${ramp(CI("22"))}</div>`;
-    if (S.VIZ === "margins")
-      h += `<div class="hk"><i class="sw hatch" style="color:${tint(COLS[CI("13")], 40, bg)}"></i>${tr("viz.keyFlip")}</div>`;
+    const ramp = (c, rev) => (rev ? [MSAT, 20, 0] : [0, 20, MSAT]).map((m) => tint(c, m, bg));
+    h =
+      `<div class="kt">${tr("viz.keyMargin")}</div>` +
+      bar([...ramp(lula, true), ...ramp(camp)], [`Lula +${MSAT}`, "0", `${name.b} +${MSAT}`]);
+    if (S.VIZ === "margins") h += `<div class="kchips">${chip(tint(lula, MSAT, bg), tr("viz.keyFlip"), "hatch")}</div>`;
   }
-  if (S.VIZ === "circles")
-    h +=
-      `<div class="sizes">` +
-      [1e4, 1e5, 1e6]
-        .map((n) => {
-          const d = 2 * rad(n, t.k);
-          return `<span><i class="cc" style="width:${d}px;height:${d}px"></i>${fmt(n)}</span>`;
-        })
-        .join("") +
-      `</div><div>${tr("viz.keyCircles")}</div>`;
-  key.html(h);
+  if (S.VIZ === "circles") {
+    const mv = moved();
+    if (mv)
+      h =
+        `<div class="kt">${tr(v === "dabst" ? "viz.keyDabst" : "viz.keyMoved")}</div><div class="kchips">` +
+        (v === "dabst"
+          ? chip(COLS[CI("A")], tr("viz.abstUp")) + chip(SHARE, tr("viz.abstDown"))
+          : chip(camp, tr("viz.movedAway")) + chip(lula, tr("viz.movedTo"))) +
+        `</div>`;
+    h += `<div class="kcirc"><div class="krow">${sizes(t.k)}<div class="kn">${tr(v === "dabst" ? "viz.keyDabstSize" : mv ? "viz.keyMovedSize" : "viz.keyCircles")}</div></div></div>`;
+  }
+  if (h !== keyHtml) key.html((keyHtml = h));
 }
 
 // a measure's name, for the Studio menu and the key

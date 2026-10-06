@@ -38,8 +38,7 @@ function showStep(i, smooth) {
   if (phone.matches) {
     el.parentNode.scrollTo({ left: el.offsetLeft, behavior: beh });
     goStep(i);
-  }
-  else {
+  } else {
     const aside = document.querySelector("aside");
     aside.scrollTo({ top: el.offsetTop - aside.clientHeight * 0.4, behavior: beh });
   }
@@ -241,7 +240,11 @@ function setTab(story) {
 // each step's copy, charts and the find box, and the progress dots' labels; redrawn when the language changes
 function fillSteps() {
   steps
-    .html((d) => `<h2>${copyOf(d).h}</h2>${copyOf(d).t}`)
+    .html(
+      (d) =>
+        (d.block ? `<div class="kick">${t("story.blocks." + d.block)}</div>` : "") +
+        `<h2>${copyOf(d).h}</h2>${copyOf(d).t}`,
+    )
     .each(function (d) {
       if (d.chart) chart(this, { ...d.chart, ...copyOf(d).chart });
       if (d.find) findStep(this);

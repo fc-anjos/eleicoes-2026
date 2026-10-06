@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import { M, MG, PLACES, STUDIO } from "../data.js";
 import { onLang, tOr } from "../i18n/index.js";
 import { S, YS } from "../state.js";
-import { abRate, lulaShift } from "../stats.js";
+import { abRate, flipped, lulaShift } from "../stats.js";
 
 // neighbourhood variables, per polling place (PLACES: one byte per place and variable, column by column; 255 = none)
 const PB = (() => {
@@ -39,6 +39,8 @@ export const VARS = [
   ...PVARS,
   ...STUDIO.map((v, j) => ({ ...v, get: (m) => (m.x ? m.x[j] : null) })),
   { k: "dlula", u: "pp", get: (m) => lulaShift(m) },
+  // a yes/no variable: a filter on it (flip@1~*) reads as its name alone
+  { k: "flip", flag: true, get: (m) => flipped(m) },
   { k: "abst", u: "pct", get: (m) => abRate(S.YEAR, m), dyn: true },
   {
     k: "dabst",

@@ -251,18 +251,19 @@ function paint(t) {
     const v = TI[j];
     if (v) hist[((v - ilo) * sc) | 0]++;
   }
-  // under swing arrows the dots recede; under circles or margins they fade to a faint texture
+  // under swing arrows the dots recede; under margins they fade to a faint texture; under circles they go, so a
+  // map never shows two kinds of round mark at once
   const b = S.VIZ === "circles" || S.VIZ === "margins" ? blend(t.k) : 0,
-    dim = (S.ARROWS ? 0.3 : 1) * (1 - 0.85 * b);
+    dim = (S.ARROWS ? 0.3 : 1) * (1 - (S.VIZ === "circles" ? 1 : 0.85) * b);
   for (let b = 0, below = 0; b < 1024; b++) {
     LUT[b] = 255 * dim * (ALO + ((1 - ALO) * below) / Math.max(1, m));
     below += hist[b];
   }
-  const grey = ((22 << 24) | (150 << 16) | (150 << 8) | 150) >>> 0;
+  const grey = ((8 << 24) | (150 << 16) | (150 << 8) | 150) >>> 0;
   for (let j = 0; j < N; j++) {
     const v = TI[j];
     if (!v) {
-      out[j] = trace && O[j] ? grey : 0;
+      out[j] = trace && O[j] && dim ? grey : 0;
       continue;
     }
     let b = ((v - ilo) * sc) | 0;

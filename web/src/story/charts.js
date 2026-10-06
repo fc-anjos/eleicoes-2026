@@ -9,7 +9,7 @@ import { VARS } from "../filters/vars.js";
 import { num, pctN, signed } from "../format.js";
 import { t } from "../i18n/index.js";
 import { A8, AB, AO, CI, COLS, K, YS, css } from "../state.js";
-import { tally } from "../stats.js";
+import { CAPITALS, tally } from "../stats.js";
 
 const REGION = {
   ...Object.fromEntries(["AC", "AM", "AP", "PA", "RO", "RR", "TO"].map((u) => [u, "N"])),
@@ -18,13 +18,6 @@ const REGION = {
   ...Object.fromEntries(["ES", "MG", "RJ", "SP"].map((u) => [u, "SE"])),
   ...Object.fromEntries(["PR", "RS", "SC"].map((u) => [u, "S"])),
 };
-// state capitals, by IBGE code
-const CAPITALS = new Set(
-  (
-    "1100205 1200401 1302603 1400100 1501402 1600303 1721000 2111300 2211001 2304400 2408102 2507507 2611606 " +
-    "2704302 2800308 2927408 3106200 3205309 3304557 3550308 4106902 4205407 4314902 5002704 5103403 5208707 5300108"
-  ).split(" "),
-);
 
 // spec.by: "region" (spec.keys: region codes), "capital", or a variable key with spec.cuts between groups
 function groupShares(spec) {

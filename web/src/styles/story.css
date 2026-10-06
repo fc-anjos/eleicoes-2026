@@ -777,56 +777,125 @@
   }
 }
 
-/* the zoomed-in view's key (map/marks.js): bottom right, above the credits */
+/* the zoomed-in view's key (map/marks.js): a card at the bottom right, above the credits. A title, the colour bar
+   with labelled ends, then for circles the reference sizes beside a labelled specimen */
 .akey.vkey {
   top: auto;
   left: auto;
   right: 20px;
   bottom: 104px;
-  display: grid;
-  gap: 4px;
+  width: 236px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--night) 86%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 40px #0007;
+  font-size: 11.5px;
+  line-height: 1.35;
+  white-space: normal;
+  transform: none;
 }
-.vkey .ramp {
+.akey.vkey[hidden] {
+  display: none;
+}
+.vkey .kt {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.vkey .kbar {
+  height: 8px;
+  border-radius: 4px;
+}
+.vkey .kax {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+/* a classed scale: one block per class, each labelled with where it starts */
+.vkey .ksteps {
+  display: flex;
   gap: 2px;
+  font-variant-numeric: tabular-nums;
 }
-.vkey .ramp span {
-  margin: 0 6px;
-  font: 11px var(--mono);
+.vkey .ksteps span {
+  flex: 1;
 }
-.vkey .sw {
+.vkey .ksteps i {
+  display: block;
+  width: auto;
+  height: 8px;
+  margin: 0 0 4px;
+  border-radius: 2px;
+}
+.vkey .kn {
+  color: var(--haze);
+}
+.vkey .kchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+.vkey .kchips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.vkey .kchips i {
+  width: 8px;
+  height: 8px;
+  margin: 0;
+  border-radius: 50%;
+  background: var(--c);
+}
+.vkey .kchips i.hatch {
   width: 14px;
   height: 10px;
   border-radius: 2px;
+  background: repeating-linear-gradient(135deg, var(--c) 0 1px, transparent 1px 3px);
 }
-.vkey .sizes {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
+.vkey .kcirc {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
 }
-.vkey .sizes span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  font: 11px var(--mono);
-}
-.vkey .cc {
-  border: 1px solid var(--haze);
-  border-radius: 50%;
-}
-
-/* the margins key's hatched swatch, as on the map */
-.vkey .hk {
+.vkey .krow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
-.vkey .sw.hatch {
-  background: repeating-linear-gradient(135deg, currentColor 0 1.4px, transparent 1.4px 5px);
+.vkey .ksize,
+.vkey .kspec {
+  flex: none;
+  display: block;
 }
-.vkey .ends {
-  display: flex;
-  justify-content: space-between;
+.vkey .ksize circle {
+  fill: none;
+  stroke: var(--haze);
+}
+.vkey .ksize line {
+  stroke: var(--edge);
+  stroke-dasharray: 2 2;
+}
+.vkey .ksize text {
+  fill: var(--haze);
+  font-size: 10.5px;
+}
+.vkey .krow b {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+}
+/* a story block's name above its steps' headlines */
+.step .kick {
+  font: 600 10.5px/1 var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--haze);
+  margin-bottom: 8px;
 }
