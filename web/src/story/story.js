@@ -26,12 +26,22 @@ const notesOf = (i) => (STORY[i].notes || []).map((n, j) => ({ ...n, t: copyOf(S
 let steps, prog;
 let stepNow = -1;
 
+// the first view (on opening the story, or a shared link to a step) is set in place, not flown to
+let jump = false;
+
 function goStep(i) {
   if (i > 0) hintDone("maphint");
   if (i === stepNow) return;
   stepNow = i;
   steps.classed("on", (d, j) => j === i);
   prog.attr("aria-current", (d, j) => (j === i ? "step" : null));
+  if (jump) {
+    jump = false;
+    restoring(() => applyState(viewOf(i), false));
+    setNotes(notesOf(i));
+    saveSoon();
+    return;
+  }
   // the card lights at once; the map's work waits for the next frame so the highlight paints first
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
@@ -152,6 +162,8 @@ function openAtStep() {
   const i = STORY.findIndex((d) => d.id === id);
   if (i < 0 || !d3.select("#page").classed("storymode")) return;
   const aside = document.querySelector("aside");
+  stepNow = -1;
+  jump = true;
   requestAnimationFrame(() => (aside.scrollTop = steps.nodes()[i].offsetTop - aside.clientHeight * 0.4));
 }
 
@@ -172,6 +184,7 @@ function setTab(story) {
   }
   if (story) {
     stepNow = -1;
+    jump = true;
     document.querySelector("aside").scrollTop = 0;
     goStep(0);
   } else {

@@ -43,4 +43,10 @@ places:
 	$(PY) -m pipeline.prep_places 2026
 	$(PY) -m pipeline.prep_places 2022
 
-.PHONY: all data build dev lint format test results places
+.PHONY: all data build dev lint format test results places deploy
+
+# Publish: push main and start the Pages workflow (GitHub isn't delivering push events for this repo yet, so the
+# workflow is also started by hand; harmless if a push already started it)
+deploy:
+	git push origin main
+	gh workflow run pages.yml --ref main
