@@ -93,7 +93,7 @@
           <div class="years" id="years" role="group" data-i18n-attr="aria-label:explore.years"></div>
           <p class="eyebrow" id="date"></p>
           <h1 data-i18n="explore.h1"></h1>
-          <p class="deck" data-i18n-html="explore.deck"></p>
+          <p class="deck"></p>
           <div class="search">
             <svg viewBox="0 0 16 16" aria-hidden="true">
               <circle cx="7" cy="7" r="5" />
@@ -147,7 +147,36 @@
             <div class="lbl">
               <span data-i18n="viz.label"></span>
               <div id="viz" class="seg" role="group" data-i18n-attr="aria-label:viz.label">
-                <button data-v="dots" aria-pressed="true" data-i18n-attr="title:viz.dotsTitle" data-i18n="viz.dots"></button><button data-v="outline" aria-pressed="false" data-i18n-attr="title:viz.outlineTitle" data-i18n="viz.outline"></button><button data-v="circles" aria-pressed="false" data-i18n-attr="title:viz.circlesTitle" data-i18n="viz.circles"></button><button data-v="margins" aria-pressed="false" data-i18n-attr="title:viz.marginsTitle" data-i18n="viz.margins"></button>
+                <button
+                  data-v="dots"
+                  aria-pressed="true"
+                  data-i18n-attr="title:viz.dotsTitle"
+                  data-i18n="viz.dots"
+                ></button
+                ><button
+                  data-v="outline"
+                  aria-pressed="false"
+                  data-i18n-attr="title:viz.outlineTitle"
+                  data-i18n="viz.outline"
+                ></button
+                ><button
+                  data-v="circles"
+                  aria-pressed="false"
+                  data-i18n-attr="title:viz.circlesTitle"
+                  data-i18n="viz.circles"
+                ></button
+                ><button
+                  data-v="margins"
+                  aria-pressed="false"
+                  data-i18n-attr="title:viz.marginsTitle"
+                  data-i18n="viz.margins"
+                ></button
+                ><button
+                  data-v="hex"
+                  aria-pressed="false"
+                  data-i18n-attr="title:viz.hexTitle"
+                  data-i18n="viz.hex"
+                ></button>
               </div>
               <p id="vizhint" class="vizhint" hidden></p>
             </div>
@@ -157,7 +186,9 @@
             ></label>
             <label
               ><span data-i18n="viz.from" data-i18n-attr="title:viz.fromTitle"></span
-              ><input id="vizk" type="range" min="0" max="4.33" step=".05" value="1.58" /><output id="vizkv">3×</output></label
+              ><input id="vizk" type="range" min="0" max="4.33" step=".05" value="1.58" /><output id="vizkv"
+                >3×</output
+              ></label
             >
             <label
               ><span data-i18n="studio.votesPerDot"></span

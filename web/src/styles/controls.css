@@ -342,3 +342,9 @@
   font-size: 11px;
   color: var(--haze);
 }
+/* once a comparison view has replaced the dots, the dot controls step back */
+.nodots .disp .lbl:has(#mode),
+.nodots .disp label:has(#vpd),
+.nodots .disp label:has(#rad) {
+  opacity: 0.4;
+}

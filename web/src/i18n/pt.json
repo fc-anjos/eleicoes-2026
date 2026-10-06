@@ -239,7 +239,15 @@
   "explore": {
     "years": "Ano da eleição",
     "h1": "Eleição presidencial no Brasil, primeiro turno",
-    "deck": "1 ponto = <b><span class=\"vpd\"></span> votos</b>, posicionados ao redor do local de votação. Passe o mouse sobre um candidato para ver só os votos dele; clique num município para destacá-lo.",
+    "deck": {
+      "dots": "1 ponto = <b><span class=\"vpd\"></span> votos</b>, posicionados ao redor do local de votação. Passe o mouse sobre um candidato para ver só os votos dele; clique num município para destacá-lo.",
+      "outline": "1 ponto = <b><span class=\"vpd\"></span> votos</b>, e cada município tem o contorno na cor de quem liderou. Passe o mouse sobre um candidato para ver só os votos dele; clique num município para destacá-lo.",
+      "circles": "Um círculo por município, colorido por <b>{name}</b>. Passe o mouse sobre um candidato para colorir pela votação dele; clique num município para ver seus locais de votação como círculos.",
+      "margins": "Cada município sombreado por <b>{name}</b>. Passe o mouse sobre um candidato para sombrear pela votação dele; clique num município para destacá-lo.",
+      "hex": "Locais de votação agrupados em hexágonos de área igual, coloridos por <b>{name}</b>. Aproxime para células mais finas; passe o mouse sobre um candidato para colorir pela votação dele.",
+      "scatter": "Um gráfico no lugar do mapa: cada círculo é um município, posicionado por <b>{name}</b> e pela mudança na votação de Lula, com área proporcional aos votos.",
+      "multiples": "Um mapa pequeno por faixa de <b>{name}</b>, cada um com os círculos de votos que mudaram de lado dessa faixa."
+    },
     "search": "Buscar município",
     "noMatch": "Nenhum município encontrado",
     "rowsNote": "Use a chave para ocultar uma linha; clique na cor para trocá-la.",

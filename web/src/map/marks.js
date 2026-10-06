@@ -17,10 +17,10 @@
 // In compare mode each side shows its own year. A story step picks its view in its hash (viz=margins&vc=change); a
 // trailing * (viz=margins*) shows it at every zoom, for steps framed on the whole country.
 import * as d3 from "d3";
-import { M, MG, ORDER, YEARS } from "../data.js";
+import { CATS, M, MG, ORDER, VPD, YEARS } from "../data.js";
 import { PASS, fsig } from "../filters/filter.js";
 import { hum, num, pctN } from "../format.js";
-import { t as tr } from "../i18n/index.js";
+import { onLang, t as tr } from "../i18n/index.js";
 import { A8, AB, AO, CI, COLS, K, S, YS, css } from "../state.js";
 import { CAPITALS, abRate, lulaShift, tally } from "../stats.js";
 import { DOT, layers } from "../dots.js";
@@ -220,9 +220,20 @@ const dclass = (d) => DCUTS.filter((c) => Math.abs(d) >= c).length;
 const dabstCol = (d) => (dclass(d) ? arm(d > 0 ? COLS[CI("A")] : SHARE, DSTEP[dclass(d)]) : MID);
 const ABR = [10, 35]; // abstention range, %
 export const SHARE = "#3fbf8f";
+// a candidate in focus (hovered or clicked in the panel) colours the comparison views by their share, as it
+// singles out their dots: the leaders' and the smaller candidates' shares, or the abstention rate
+export function focusCol() {
+  if (S.focus < 0 || S.VIZ === "dots" || S.VIZ === "outline") return null;
+  const c = CATS[S.focus];
+  if (!c) return null;
+  if (S.focus === AB || S.focus === AO || S.focus === A8) return "abst";
+  return c.k ? "share-" + c.k : "share-small";
+}
+// the colour measure in force: the focus, or the chosen one
+export const vcol = () => focusCol() || S.VCOL;
 // the measure behind the colour: {col(r) → colour or null, hatch(i)}
 export function measure(y, bg) {
-  const v = S.VCOL;
+  const v = vcol();
   if (v === "change" || v === "moved") return { col: (r) => (r.dl == null ? null : diverge(r.dl)) };
   if (v === "dabst") return { col: (r) => (r.da == null ? null : dabstCol(r.da)) };
   if (v === "abst")
@@ -264,12 +275,12 @@ const NET = {
   moved: { val: (r) => (Math.abs(r.dl || 0) / 100) * r.valid, col: (r) => COLS[CI(r.dl < 0 ? "22" : "13")] },
   dabst: { val: (r) => (Math.abs(r.da || 0) / 100) * r.roll, col: (r) => (r.da > 0 ? COLS[CI("A")] : SHARE) },
 };
-export const moved = () => NET[S.VCOL];
+export const moved = () => (focusCol() ? null : NET[S.VCOL]);
 const sizeOf = (r) => (moved() ? moved().val(r) : r.valid);
 export function fitScale(y) {
   const one = byPlace(),
     lit = S.PLACEF && !one,
-    key = [S.layoutGen, S.VCOL, one ? [...S.INSET][0] : "", lit ? fsig() : "", S.w, S.h].join("|");
+    key = [S.layoutGen, S.VCOL, !!focusCol(), one ? [...S.INSET][0] : "", lit ? fsig() : "", S.w, S.h].join("|");
   if (rcKey === key) return RC;
   rcKey = key;
   const { area, bb } = geo(),
@@ -485,7 +496,7 @@ export function cityNotes(t) {
       mg = (r) => r.sh[L] - (r.sh[B] || 0),
       sg = (v) => (v >= 0 ? "+" : "−") + num(Math.abs(v), 0),
       text =
-        S.VCOL === "margin"
+        vcol() === "margin"
           ? `${name} ${sg(mg(P[i]))} → ${sg(mg(R[i]))}`
           : `${name} ${pctN(P[i].sh[L])} → ${pctN(R[i].sh[L])}`,
       [x, y] = at(i),
@@ -776,6 +787,23 @@ function sizes(k, rf = (n) => rad(n, k)) {
     `</svg>`
   );
 }
+// Explore's opening line, for the view that shows
+let deckKey = "";
+onLang(() => (deckKey = ""));
+function deck(view) {
+  // the chosen measure's name, lower-cased in the sentence unless it is a candidate's
+  const name =
+    view === "scatter" || view === "multiples"
+      ? panelVar().n
+      : S.VCOL.startsWith("share-") && S.VCOL !== "share-small"
+        ? vcolName(S.VCOL)
+        : vcolName(S.VCOL).toLowerCase();
+  const key = view + "|" + name;
+  if (key === deckKey) return;
+  deckKey = key;
+  d3.select(".deck").html(tr("explore.deck." + view, { name }));
+  d3.selectAll(".vpd").text(num(S.STEP * VPD, 0));
+}
 let keyHtml = "";
 export function drawKey(t = d3.zoomTransform(svg.node())) {
   vizHint(t.k);
@@ -784,11 +812,15 @@ export function drawKey(t = d3.zoomTransform(svg.node())) {
     on = b > 0 && S.VIZ !== "dots" && S.VIZ !== "scatter"; // the scatter carries its own key
   key.property("hidden", !on);
   d3.select("#page").classed("flat", flat());
-  // the dots' own key steps back once the view has fully replaced them
-  d3.select(".mapbar .key").classed("nodots", flat() || (on && b >= 1 && S.VIZ !== "outline"));
+  // the dots' own key steps back once the view has fully replaced them; so do Explore's opening line and the
+  // Studio's dot controls, which then describe the view that shows
+  const nodots = flat() || (on && b >= 1 && S.VIZ !== "outline");
+  d3.select(".mapbar .key").classed("nodots", nodots);
+  d3.select("#page").classed("nodots", nodots);
+  deck(nodots ? S.VIZ : S.VIZ === "outline" && on ? "outline" : "dots");
   if (!on) return;
   const bg = css("--night") || "#0b0e14",
-    v = S.VCOL,
+    v = vcol(),
     lula = COLS[CI("13")],
     camp = COLS[CI("22")],
     name = { l: "Lula", b: tr("viz.camp"), o: tr("viz.others"), a: tr("viz.didnt") };

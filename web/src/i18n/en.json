@@ -239,7 +239,15 @@
   "explore": {
     "years": "Election year",
     "h1": "Brazil's presidential election, first round",
-    "deck": "1 dot = <b><span class=\"vpd\"></span> votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.",
+    "deck": {
+      "dots": "1 dot = <b><span class=\"vpd\"></span> votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.",
+      "outline": "1 dot = <b><span class=\"vpd\"></span> votes</b>, and each municipality is outlined in its leader's colour. Hover a candidate to show only their votes; click a municipality to outline it.",
+      "circles": "One circle per municipality, coloured by <b>{name}</b>. Hover a candidate to colour by their share; click a municipality to see its polling places as circles.",
+      "margins": "Each municipality shaded by <b>{name}</b>. Hover a candidate to shade by their share; click a municipality to outline it.",
+      "hex": "Polling places pooled into equal-area hexagons, coloured by <b>{name}</b>. Zoom in for finer cells; hover a candidate to colour by their share.",
+      "scatter": "A chart in place of the map: each circle is a municipality, placed by <b>{name}</b> and the change in Lula's share, its area the votes cast.",
+      "multiples": "One small map per band of <b>{name}</b>, each with that band's circles of votes that moved."
+    },
     "search": "Search a municipality",
     "noMatch": "No municipality found",
     "rowsNote": "Toggle a row to hide it; click its swatch to change its colour.",
