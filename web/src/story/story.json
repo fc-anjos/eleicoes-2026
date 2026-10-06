@@ -213,9 +213,14 @@
     "t": "<p>Inside one city, lit: São Paulo's polling places in neighbourhoods of classes A to C, where the average household head earns more than 4 minimum wages (R$ 4,848 a month at the 2022 Census), from Census tracts within 1 km. 2022 is left of the divider, 2026 right. Here Lula <b>rose</b>, 39.6% → 41.9%, while the Bolsonaro camp went 42.0% → 45.4%: both gained from the smaller candidates. Abstention rose 22.2% → 23.4%.</p><p class=\"n\">Classes here use the household head's income, an approximation of the usual household-income definition.</p>"
   },
   {
+    "view": "y=cmp&split=0.5&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@2424~4848",
+    "h": "…class D",
+    "t": "<p>Class D neighbourhoods, where the average household head earns 2 to 4 minimum wages, are where the city turns. Here Lula <b>fell</b>, 47.0% → 45.5%, while the Bolsonaro camp rose 39.3% → 43.4%. Abstention rose 21.2% → 23.2%.</p>"
+  },
+  {
     "view": "y=cmp&split=0.5&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@*~2424",
     "h": "…and class E",
-    "t": "<p>And class E neighbourhoods, where the average household head earns up to 2 minimum wages. Here Lula still wins, but he <b>fell</b>, 58.4% → 54.5%, and the Bolsonaro camp grew most, 30.8% → 35.7%. Abstention rose the most too, 20.2% → 23.7%. In the city, the shift came from the poorest neighbourhoods, not the richest.</p>"
+    "t": "<p>And class E neighbourhoods, where the average household head earns up to 2 minimum wages. Here Lula still wins, but he <b>fell</b>, 58.4% → 54.5%, and the Bolsonaro camp grew most, 30.8% → 35.7%. Abstention rose the most too, 20.2% → 23.7%. In the city, the shift came from neighbourhoods below 4 minimum wages, and most of all from the poorest, not the richest.</p>"
   },
   {
     "view": "y=cmp&split=0.5&at=home&f=pct_catolica_2022:75-100",
