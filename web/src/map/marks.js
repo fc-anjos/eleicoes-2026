@@ -247,7 +247,7 @@ export function shareOf(k) {
   return { get, col: SHARE };
 }
 // circle radius in css px: area ∝ votes (a sqrt scale, as in Bostock's bubble maps), following the zoom gently so a
-// city doesn't swallow the screen. One national scale whatever the filter, so a small town always looks small: the
+// city doesn't swallow the screen. One national scale whatever the municipal filter, so a small town always looks small: the
 // circles of all municipalities together cover about a fifth of the country's land at zoom 1.
 const COVER = { votes: 0.2, moved: 0.14 };
 // the scale: css px per √vote at zoom K0 (1 for the country; for one municipality's polling places, the zoom at which
@@ -268,7 +268,8 @@ export const moved = () => NET[S.VCOL];
 const sizeOf = (r) => (moved() ? moved().val(r) : r.valid);
 export function fitScale(y) {
   const one = byPlace(),
-    key = [S.layoutGen, S.VCOL, one ? [...S.INSET][0] : "", S.w, S.h].join("|");
+    lit = S.PLACEF && !one,
+    key = [S.layoutGen, S.VCOL, one ? [...S.INSET][0] : "", lit ? fsig() : "", S.w, S.h].join("|");
   if (rcKey === key) return RC;
   rcKey = key;
   const { area, bb } = geo(),
@@ -283,7 +284,9 @@ export function fitScale(y) {
     a = area[fi] * K0 * K0;
     v = d3.sum(places(y), sizeOf);
   } else {
-    const R = results(y);
+    // under a polling-place filter the circles count only the passing places, so the scale is fitted to those
+    // votes: the lit tenth reads at a size a reader can see, and the key says what the sizes mean
+    const R = lit ? placeResults(y) : results(y);
     for (let i = 0; i < R.length; i++) if (R[i]) ((a += area[i]), (v += sizeOf(R[i])));
   }
   return (RC = v ? Math.sqrt((cover * a) / (Math.PI * v)) : RC);
