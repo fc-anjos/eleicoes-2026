@@ -10,8 +10,14 @@ from .geometry import round_coords, rewind, polygons, edges, bbox, inside, unifo
 VPD = 250  # votes per dot (the page can show coarser samples: multiples of this)
 PER_PLACE = int(os.environ.get("PER_PLACE", 50))  # lattice points per polling place: how finely cells are resolved
 TOL_KM = lambda a: max(1, .05 * np.sqrt(a))  # outline tolerance for polling places: 1 km, or 5% of the width
-MIN_SHARE = .01  # candidates above this national share get their own colour; the rest are "Others"
-LABEL = {"FLAVIO BOLSONARO": "Flávio Bolsonaro", "LULA": "Lula", "ESCRITOR AUGUSTO CURY": "Augusto Cury"}
+MIN_SHARE = .01  # candidates above this national share (in either year) get their own colour; the rest are "Others"
+YEARS = (2026, 2022)  # the first is shown on load
+DATE = {2026: "4 October 2026", 2022: "2 October 2022"}
+# Candidates are keyed by ballot number, which follows the party: 22 (PL) is Jair Bolsonaro in 2022 and Flávio in
+# 2026, 13 (PT) is Lula in both, so each camp keeps its colour across years. Colours are tokens in web/style.css.
+LABEL = {"22": {2026: "Flávio Bolsonaro", 2022: "Jair Bolsonaro"}, "13": "Lula", "70": "Augusto Cury", "14": "Renan Santos",
+         "55": "Ronaldo Caiado", "15": "Simone Tebet", "12": "Ciro Gomes"}
+COLOR = {"22": "c0", "13": "c1", "70": "c2", "14": "c3", "55": "c4", "15": "c6", "12": "c7", "": "c5", "A": "ca"}
 OUT = "brazil_2026_president_map.html"
 
 random.seed(2026)
@@ -38,31 +44,59 @@ def load_geometry():
     return mgeo, sgeo
 
 
-def municipality_summaries(results):
-    """Name, state, total and top four candidates per municipality, for the tooltip and search."""
+def label(year, k, names):
+    l = LABEL.get(k)
+    return (l.get(year) if isinstance(l, dict) else l) or pt_title(names.get(k, k))
+
+
+def categories(places):
+    """Colour categories shared by both years: candidates above MIN_SHARE in either, then "Others", then abstentions
+    ("A": people on the roll who didn't vote). Returns the keys in order and, per year, key -> index."""
+    keys, mains = [], {}
+    for y in YEARS:
+        nat = places[y]["nat"]; valid = sum(v for k, v in nat.items() if k not in ("A", "BN"))
+        for k, v in sorted(nat.items(), key=lambda x: -x[1]):
+            if k not in ("A", "BN") and v / valid > MIN_SHARE:
+                assert k in COLOR, f"no colour for candidate {k} ({y}): add it to COLOR and web/style.css"
+                mains.setdefault(y, []).append(k)
+                if k not in keys: keys.append(k)
+    keys += ["", "A"]
+    cat = {k: i for i, k in enumerate(keys)}
+    # per year, only that year's own main candidates: a number reused by another party's candidate (14 was PTB in
+    # 2022, Missão in 2026) falls into "Others" rather than borrowing a colour
+    return keys, {y: {k: cat[k] for k in mains[y] + ["", "A"]} for y in YEARS}
+
+
+def year_summary(y, pl, keys, cat):
+    """National results for one year, for the side panel: [{k, n (label), v (votes), i (category)}], with the
+    smaller candidates folded into "Others" (who lists them), plus abstentions and blank/null votes."""
+    nat, names = pl["nat"], pl["names"]
+    ranked = sorted(((k, v) for k, v in nat.items() if k not in ("A", "BN")), key=lambda x: -x[1])
+    cands = [{"k": k, "n": label(y, k, names), "v": v, "i": cat[k]} for k, v in ranked if k in cat]
+    rest = [(k, v) for k, v in ranked if k not in cat]
+    cands.append({"k": "", "n": "Others", "v": sum(v for _, v in rest), "i": cat[""], "who": [label(y, k, names) for k, _ in rest]})
+    return {"date": DATE[y], "cands": cands, "a": nat["A"], "bn": nat["BN"], "names": {k: label(y, k, names) for k, _ in ranked}}
+
+
+def municipality_summaries(places):
+    """Name, state and, per year, valid votes, abstentions, blank/null and top four candidates: tooltip and search."""
+    cfg = json.load(open("data/mun-config.json"))
+    where = {m["cdi"]: (uf["cd"].upper(), m["nm"]) for uf in cfg["abr"] for m in uf["mu"] if m["cdi"]}
     muns = {}
-    for code, m in results["municipalities"].items():
-        if m["uf"] == "zz": continue  # votes cast abroad
-        ranked = sorted(m["votes"].items(), key=lambda x: -x[1])[:4]
-        muns[code] = {"n": pt_title(m["name"]), "uf": m["uf"].upper(), "t": sum(m["votes"].values()), "v": ranked}
+    for y in YEARS:
+        for code, m in places[y]["muns"].items():
+            tot = {}
+            for votes in [p[2] for p in m["p"]] + [m["u"]]:
+                for k, v in votes.items(): tot[k] = tot.get(k, 0) + v
+            a = tot.pop("A", 0)
+            uf, nm = where[code]
+            d = muns.setdefault(code, {"n": pt_title(nm), "uf": uf, "y": {}})
+            d["y"][y] = {"t": sum(tot.values()), "a": a, "bn": m["bn"], "v": sorted(tot.items(), key=lambda x: -x[1])[:4]}
     return muns
 
 
-def candidates(results):
-    """Colour categories: one per candidate above MIN_SHARE nationally, then "Others". Returns (list, name -> index)."""
-    nat = results["national"]["votes"]; total = sum(nat.values())
-    label = lambda k: LABEL.get(k, k.title())
-    ranked = sorted(nat.items(), key=lambda x: -x[1])
-    main = [k for k, v in ranked if v / total > MIN_SHARE]
-    cat = {k: i for i, k in enumerate(main)}
-    rest = [(k, v) for k, v in ranked if k not in cat]
-    cands = [{"k": k, "n": label(k), "v": nat[k]} for k in main]
-    cands.append({"k": "", "n": "Others", "v": sum(v for _, v in rest), "who": [label(k) for k, _ in rest]})
-    return cands, cat
-
-
-def make_dots(mgeo, places, cat, n_cats):
-    """Flat [lon*1000, lat*1000, category, ...] list, shuffled so no colour systematically paints over another.
+def make_dots(mgeo, places, cat, others):
+    """Flat [lon*1000, lat*1000, category, ...] list (abstentions are dots too, at their polling place), shuffled so no colour systematically paints over another.
 
     Places slightly outside our simplified outline (rounded to ~100 m, coarse on coasts and rivers) still count,
     with a tolerance that grows with the municipality's size; farther out means bad coordinates, so the 2024
@@ -70,8 +104,8 @@ def make_dots(mgeo, places, cat, n_cats):
     the municipality's other places in proportion to their votes.
     """
     def ndots(votes):  # one category per dot; random rounding keeps totals unbiased
-        cats = [0] * n_cats
-        for name, v in votes.items(): cats[cat.get(name, n_cats - 1)] += v
+        cats = [0] * (max(cat.values()) + 1)
+        for k, v in votes.items(): cats[cat.get(k, others)] += v
         return [c for c, v in enumerate(cats) for _ in range(int(v // VPD) + (random.random() < v % VPD / VPD))]
 
     dots, spacing = [], []
@@ -136,15 +170,19 @@ def render(data):
 
 
 def main():
-    results = json.load(open("data/results.json"))
-    places = json.load(open("data/places.json"))
+    places = {y: json.load(open(f"data/places_{y}.json")) for y in YEARS}
     mgeo, sgeo = load_geometry()
-    muns = municipality_summaries(results)
-    cands, cat = candidates(results)
-    dots = make_dots(mgeo, places, cat, len(cands))
-    print(len(dots) // 3, "dots")
-    open(OUT, "w").write(render({"__MGEO__": mgeo, "__SGEO__": sgeo, "__MUNS__": muns, "__CANDS__": cands,
-                                 "__DOTS__": pack(dots), "__VPD__": VPD}))
+    keys, cats_y = categories(places)
+    years = {}
+    for y in YEARS:
+        cat = cats_y[y]
+        dots = make_dots(mgeo, places[y]["muns"], cat, cat[""])
+        print(y, len(dots) // 3, "dots")
+        years[y] = {**year_summary(y, places[y], keys, cat), "dots": pack(dots)}
+    muns = municipality_summaries(places)
+    cats = [{"k": k, "col": COLOR[k]} for k in keys]
+    open(OUT, "w").write(render({"__MGEO__": mgeo, "__SGEO__": sgeo, "__MUNS__": muns, "__CATS__": cats,
+                                 "__YEARS__": years, "__VPD__": VPD}))
     print("ok", len(muns), "municipalities;", sum(1 for f in mgeo["features"] if f["properties"]["codarea"] not in muns), "unmatched shapes")
 
 

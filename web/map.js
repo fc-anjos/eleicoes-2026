@@ -1,32 +1,65 @@
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const K=CANDS.length, COLS=CANDS.map((c,i)=>css(i<K-1?`--c${i}`:"--c5"));
-const NAME=Object.fromEntries(CANDS.filter(c=>c.k).map(c=>[c.k,c.n]));
-const title=s=>s.toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase());
-const natTot=d3.sum(CANDS,c=>c.v);
+// colour categories are shared by both years (see categories() in build.py): candidates keyed by ballot number, so
+// a camp keeps its colour from one year to the other, then "Others", then abstentions (AB)
+const COLS=CATS.map(c=>css("--"+c.col)), AB=CATS.length-1, YS=Object.keys(YEARS).sort().reverse();
 const pct=(v,t)=>(100*v/t).toFixed(1)+'%';
 const fmt=d3.format(",");
-let focus=-1, repaint=()=>{};
+let focus=-1, repaint=()=>{}, YEAR=YS[0];
+const nameOf=(y,k)=>YEARS[y].names[k]||k;
+const electorate=y=>d3.sum(YEARS[y].cands,c=>c.v)+YEARS[y].a+YEARS[y].bn;
 
-// results panel: same dot language as the map, one dot per million votes
+// Display state, per category: visible or hidden, and its colour (the studio controls in each panel row). Colours
+// start from the CSS tokens; changes and hidden rows are remembered in this browser.
+const HID=new Uint8Array(CATS.length);
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+{const c=store.get("cols"),hd=store.get("hid");if(c&&c.length===COLS.length)c.forEach((v,i)=>{if(/^#[0-9a-f]{6}$/i.test(v))COLS[i]=v;});
+ if(hd&&hd.length===HID.length)HID.set(hd);}
+let PX=[];const packCols=()=>{PX=COLS.map(h=>{const c=d3.rgb(h);return (c.b<<16|c.g<<8|c.r)>>>0;});}; // little-endian RGB
+packCols();
+
+// results panel: same dot language as the map, one dot per million. Abstention is ranked among the candidates by
+// head count (in both years it's third, behind only the two leaders); its share is of everyone on the roll, the
+// candidates' of valid votes, as TSE reports them. "Others" stays last.
 const list=d3.select("#cands");
-CANDS.forEach((c,i)=>{
- const b=list.append("button").attr("class","cand").attr("aria-pressed","false").style("--c",COLS[i]);
- b.append("div").attr("class","row").html(`<span class="nm">${c.n}</span><span class="pc">${pct(c.v,natTot)}</span>`);
- b.append("div").attr("class","vt").text(`${fmt(c.v)} votes`);
- if(c.who)b.append("div").attr("class","who").text(c.who.join(", "));
- const m=c.v/1e6, gr=b.append("div").attr("class","grains");
- for(let j=0;j<Math.ceil(m);j++)gr.append("i").classed("part",j>=Math.floor(m)&&m%1<.5);
- const set=on=>{focus=on?i:-1;list.selectAll(".cand").attr("aria-pressed",(_,j)=>String(j===focus));
-  d3.select("#page").classed("focus",focus>=0);repaint();};
- b.on("mouseenter",()=>set(true)).on("mouseleave",()=>set(false)).on("click",()=>set(focus!==i));
-});
+function panel(){
+ const Y=YEARS[YEAR],valid=d3.sum(Y.cands,c=>c.v);
+ d3.select("#date").text(Y.date);
+ list.selectAll(".cand").remove();
+ const rows=[{n:"Didn't vote",v:Y.a,i:AB,share:pct(Y.a,electorate(YEAR)),unit:"people on the roll didn't vote",abst:true},
+  ...Y.cands.map(c=>({...c,share:pct(c.v,valid),unit:"votes"}))].sort((a,b)=>(a.k==="")-(b.k==="")||b.v-a.v);
+ rows.forEach(c=>{const i=c.i;
+  const r=list.append("div").datum(c).attr("class","cand").classed("ab",!!c.abst).classed("off",!!HID[i]).style("--c",COLS[i]);
+  // visibility switch | the row itself (hover or click: show only this category) | colour
+  r.append("input").attr("type","checkbox").attr("class","vis").property("checked",!HID[i]).attr("aria-label",`Show ${c.n}`)
+   .on("change",e=>{HID[i]=e.target.checked?0:1;r.classed("off",!!HID[i]);store.set("hid",[...HID]);repaint();});
+  const b=r.append("button").attr("class","body").attr("aria-pressed",String(focus===i));
+  b.append("div").attr("class","row").html(`<span class="nm">${c.n}</span><span class="pc">${c.share}</span>`);
+  b.append("div").attr("class","vt").text(`${fmt(c.v)} ${c.unit}`);
+  if(c.who)b.append("div").attr("class","who").text(c.who.join(", "));
+  const m=c.v/1e6, gr=b.append("div").attr("class","grains");
+  for(let j=0;j<Math.ceil(m);j++)gr.append("i").classed("part",j>=Math.floor(m)&&m%1<.5);
+  r.append("input").attr("type","color").attr("class","col").property("value",COLS[i]).attr("aria-label",`Colour for ${c.n}`)
+   .on("input",e=>{COLS[i]=e.target.value;r.style("--c",COLS[i]);packCols();store.set("cols",COLS);repaint();});
+  const set=on=>{focus=on?i:-1;list.selectAll(".cand .body").attr("aria-pressed",d=>String(d.i===focus));
+   d3.select("#page").classed("focus",focus>=0);repaint();};
+  b.on("mouseenter",()=>set(true)).on("mouseleave",()=>set(false)).on("click",()=>set(focus!==i));
+ });
+}
+d3.select("#reset").on("click",()=>{COLS.splice(0,COLS.length,...CATS.map(c=>css("--"+c.col)));HID.fill(0);packCols();
+ store.set("cols",null);store.set("hid",null);panel();repaint();});
 
 const proj=d3.geoMercator(), path=d3.geoPath(proj);
 const svg=d3.select("#map"), tip=d3.select("#tip"), g=svg.append("g");
 const mu=g.append("g").selectAll("path").data(MG.features).join("path").attr("class","mu")
- .on("mousemove",(e,f)=>{const m=M[f.properties.codarea];if(!m)return;
-  tip.style("opacity",1).style("left",Math.min(e.clientX+16,innerWidth-240)+"px").style("top",Math.min(e.clientY+16,innerHeight-160)+"px")
-  .html(`<b>${m.n}, ${m.uf}</b>`+m.v.map(([n,v])=>`<div class="l"><span>${NAME[n]||title(n)}</span><span>${pct(v,m.t)}</span></div>`).join("")+`<div class="t">${fmt(m.t)} valid votes</div>`);})
+ .on("mousemove",(e,f)=>{const m=M[f.properties.codarea];if(!m||!m.y[YEAR])return;
+  // this year's top candidates, then the same camps in the other year, and abstention in both
+  const y=m.y[YEAR],oy=YS.find(v=>v!==YEAR),o=m.y[oy],ov=o?Object.fromEntries(o.v):{};
+  const ab=d=>d.a/(d.t+d.a+d.bn);
+  tip.style("opacity",1).style("left",Math.min(e.clientX+16,innerWidth-260)+"px").style("top",Math.min(e.clientY+16,innerHeight-220)+"px")
+  .html(`<b>${m.n}, ${m.uf}</b><div class="l h"><span></span><span>${YEAR}</span><span>${oy}</span></div>`
+   +y.v.map(([k,v])=>`<div class="l"><span>${nameOf(YEAR,k)}</span><span>${pct(v,y.t)}</span><span>${o&&ov[k]!=null?pct(ov[k],o.t):"–"}</span></div>`).join("")
+   +`<div class="l a"><span>Didn't vote</span><span>${pct(y.a,y.t+y.a+y.bn)}</span><span>${o?pct(o.a,o.t+o.a+o.bn):"–"}</span></div>`
+   +`<div class="t">${fmt(y.t)} valid votes in ${YEAR}</div>`);})
  .on("mouseenter",(e,f)=>hl.datum(f).attr("d",path).style("display",null))
  .on("mouseleave",()=>{tip.style("opacity",0);hl.style("display","none");})
  .on("click",(e,f)=>{e.stopPropagation();select(sel===f?null:f);})
@@ -45,20 +78,30 @@ let sel=null;const hl=g.append("path").attr("class","hl").style("display","none"
 // the map fills its container: on load and on resize, refit the projection and reallocate the pixel buffers
 // dots arrive packed (see pack() in build.py). They are projected once, with the raw Mercator formula, into U;
 // fitting the map to the window is then just a scale and offset of U (layout() runs again on every resize).
-const n=DOTS.n, P=new Float32Array(2*n), U=new Float32Array(2*n), C=new Uint8Array(n);
-{const bin=atob(DOTS.b),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+// Each year has its own dots (n, U, C, and P projected to the screen). The map shows one year, or both side by
+// side in compare mode, split by a draggable divider (see layers()).
+const DOT={};
+for(const y of YS){const D=YEARS[y].dots,n=D.n,U=new Float32Array(2*n),C=new Uint8Array(n);
+ const bin=atob(D.b),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
  const X=new Uint16Array(bytes.buffer,0,n),Y=new Uint16Array(bytes.buffer,2*n,n),rad=Math.PI/180000;C.set(bytes.subarray(4*n,5*n));
- for(let i=0;i<n;i++){U[2*i]=(X[i]+DOTS.x0)*rad;U[2*i+1]=-Math.log(Math.tan(Math.PI/4+(Y[i]+DOTS.y0)*rad/2));}}
-const cv=document.getElementById("cv"),dpr=devicePixelRatio||1,cx=cv.getContext("2d"),cc=COLS.map(h=>d3.rgb(h));
+ for(let i=0;i<n;i++){U[2*i]=(X[i]+D.x0)*rad;U[2*i+1]=-Math.log(Math.tan(Math.PI/4+(Y[i]+D.y0)*rad/2));}
+ DOT[y]={n,U,C,P:new Float32Array(2*n)};delete D.b;}
+function useYear(y){YEAR=y;}
+function project(){const k=proj.scale(),[tx,ty]=proj.translate();
+ for(const y of YS){const {n,U,P}=DOT[y];for(let i=0;i<n;i++){P[2*i]=U[2*i]*k+tx;P[2*i+1]=U[2*i+1]*k+ty;}}}
+// compare mode: the older year left of the divider, the newer right; SPLIT is the divider's position (0–1)
+let COMPARE=false,SPLIT=.5;
+function layers(){const sx=Math.round(SPLIT*w);
+ return COMPARE?[{...DOT[YS[1]],x0:0,x1:sx},{...DOT[YS[0]],x0:sx,x1:w}]:[{...DOT[YEAR],x0:0,x1:w}];}
+const cv=document.getElementById("cv"),dpr=devicePixelRatio||1,cx=cv.getContext("2d");
 let w,h,W,H,img,px,T,O,TOP,cnt,layoutGen=0;
-const PX=cc.map(c=>(c.b<<16|c.g<<8|c.r)>>>0); // candidate colours packed as little-endian RGB
 function layout(){
  const r=document.getElementById("wrap").getBoundingClientRect();w=r.width;h=r.height;
  const pad=Math.min(w,h)*.05,lg=0;
  proj.fitExtent([[pad,pad],[w-pad,h-pad-24]],SG);
  svg.attr("viewBox",`0 0 ${w} ${h}`);mu.attr("d",path);uf.attr("d",path);outer.attr("d",path(SG));mskIn.attr("d",path(SG));if(typeof sl!=="undefined"&&sel)sl.attr("d",path);
  layoutGen++;
- {const k=proj.scale(),[tx,ty]=proj.translate();for(let i=0;i<n;i++){P[2*i]=U[2*i]*k+tx;P[2*i+1]=U[2*i+1]*k+ty;}}
+ project();
  W=Math.round(w*dpr);H=Math.round(h*dpr);cv.width=W;cv.height=H;
  img=cx.createImageData(W,H);px=new Uint32Array(img.data.buffer);
  [T,O]=[0,0].map(()=>new Float32Array(W*H));TOP=new Uint8Array(W*H);
@@ -79,7 +122,8 @@ function radius(t){ // in css px
  const k=t.k,rz=R0*Math.sqrt(k);
  if(!ADAPT)return rz*SIZE;
  const gw=Math.ceil(w/CELL);cnt.fill(0);
- for(let i=0;i<n;i+=STEP){const x=P[2*i]*k+t.x,y=P[2*i+1]*k+t.y;if(x>=0&&x<w&&y>=0&&y<h)cnt[((y/CELL)|0)*gw+((x/CELL)|0)]++;}
+ for(const {n,P,C,x0,x1} of layers())
+  for(let i=0;i<n;i+=STEP){if(HID[C[i]])continue;const x=P[2*i]*k+t.x,y=P[2*i+1]*k+t.y;if(x>=x0&&x<x1&&y>=0&&y<h)cnt[((y/CELL)|0)*gw+((x/CELL)|0)]++;}
  // Two views of the density: as seen by the average dot (Σc²/Σc over cells, dominated by crowded town cells) and
  // of a typical occupied cell (geometric mean of counts, dominated by sparse rural cells). Sizing by the first
  // leaves the countryside as faint specks; by the second, cities and zoomed-out views clutter. The radius uses
@@ -125,18 +169,21 @@ function paint(t){
  // Sub-pixel dots add their area to the one pixel they fall in: crisp and saturated (sharing it across
  // neighbours looked washed out). Larger dots are anti-aliased discs at their exact sub-pixel centre, adding ~1
  // per covered pixel; fringe pixels add partial coverage but only take the colour when mostly inside.
+ // Each layer (one year, or one per side when comparing) draws only within its own columns [xa, xb), into the
+ // same buffers, so both sides share one opacity scale and stay comparable.
+ for(const {n,P,C,x0,x1} of layers()){const xa=Math.round(x0*dpr),xb=Math.round(x1*dpr);
  if(rd<.75){const area=Math.PI*rd*rd;
   for(let i=0;i<n;i+=STEP){const x=(P[2*i]*sx+ox)|0,y=(P[2*i+1]*sx+oy)|0;
-   if(x<0||x>=Wq||y<0||y>=Hq)continue;const j=y*Wq+x,c=C[i];
+   if(x<xa||x>=xb||y<0||y>=Hq)continue;const j=y*Wq+x,c=C[i];if(HID[c])continue;
    if(f<0||c===f){T[j]+=area;TOP[j]=c;}else O[j]+=area;}
  }else{const {Rr,start,off,wt}=stamps(rd);
   for(let i=0;i<n;i+=STEP){const fx=P[2*i]*sx+ox-.5,fy=P[2*i+1]*sx+oy-.5,X=Math.floor(fx),Y=Math.floor(fy);
-   if(X<-Rr||X>=Wq+Rr||Y<-Rr||Y>=Hq+Rr)continue;const c=C[i],mine=f<0||c===f,p=((fy-Y)*PH|0)*PH+((fx-X)*PH|0);
-   const inside=X>=Rr&&X<Wq-Rr&&Y>=Rr&&Y<Hq-Rr;
+   if(X<xa-Rr||X>=xb+Rr||Y<-Rr||Y>=Hq+Rr)continue;const c=C[i];if(HID[c])continue;const mine=f<0||c===f,p=((fy-Y)*PH|0)*PH+((fx-X)*PH|0);
+   const inside=X>=xa+Rr&&X<xb-Rr&&Y>=Rr&&Y<Hq-Rr;
    for(let q2=start[p],e=start[p+1];q2<e;q2++){const x=X+off[2*q2],y=Y+off[2*q2+1];
-    if(!inside&&(x<0||x>=Wq||y<0||y>=Hq))continue;const j=y*Wq+x,a=wt[q2];
+    if(!inside&&(x<xa||x>=xb||y<0||y>=Hq))continue;const j=y*Wq+x,a=wt[q2];
     if(mine){T[j]+=a;if(a>=.5||T[j]===a)TOP[j]=c;}else O[j]+=a;}}
- }
+ }}
  // histogram-equalised opacity (as in Datashader's eq_hist): pixels are ranked by coverage within the
  // current view, so a pixel with 50 overlapping dots reads denser than one with 5 instead of both saturating.
  // A sample of pixels is counted into 1024 log-coverage bins, and the running count gives each bin its rank.
@@ -167,12 +214,13 @@ const zoom=d3.zoom().scaleExtent([1,MAXK]).on("zoom",e=>{const t=e.transform;
  g.attr("transform",t);placeLabels(t);svg.style("--mu-o",borderOpacity(t.k)).style("--mu-w",t.k<20?.5:Math.min(1.1,.5+.6*Math.log(t.k/20)/Math.log(3)));
  if(!pending)requestAnimationFrame(()=>{paint(pending);pending=null;});pending=t;});
 
-layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));
+useYear(YEAR);layout();svg.call(zoom.translateExtent([[0,0],[w,h]]));panel();
 // Place names. Municipalities are tried in order of votes cast; a name is shown when
 // it falls in view and doesn't collide with one already placed, so big cities win and more names appear as you
 // zoom in. Names sit at the municipality's centroid.
 const LABELS_K=2.5,labG=svg.append("g").attr("class","place");
-const LAB=MG.features.filter(f=>M[f.properties.codarea]).map(f=>({f,n:M[f.properties.codarea].n,t:M[f.properties.codarea].t,c:[0,0]})).sort((a,b)=>b.t-a.t);
+const tot=m=>(m.y[YS[0]]||Object.values(m.y)[0]).t;
+const LAB=MG.features.filter(f=>M[f.properties.codarea]).map(f=>({f,n:M[f.properties.codarea].n,t:tot(M[f.properties.codarea]),c:[0,0]})).sort((a,b)=>b.t-a.t);
 let labGen=-1;
 function placeLabels(t){
  if(labGen!==layoutGen){LAB.forEach(d=>d.c=path.centroid(d.f));labGen=layoutGen;} // centroids follow the fitted projection
@@ -194,6 +242,27 @@ svg.on("dblclick.zoom",null).on("dblclick",()=>{select(null);svg.transition().du
 svg.on("click",()=>select(null));
 addEventListener("keydown",e=>{if(e.key==="Escape"&&e.target!==q)select(null);});
 repaint=()=>paint(d3.zoomTransform(svg.node()));repaint();
+// year switch: same view, same colours per camp, the other year's dots
+// "Compare" splits the map: the older year left of a draggable divider, the newer right; the side panel keeps
+// showing the year last picked
+const swipe=d3.select("#swipe");
+function setMode(y){const cmp=y==="cmp";COMPARE=cmp;if(!cmp)useYear(y);
+ d3.selectAll("#years button").attr("aria-pressed",v=>String(cmp?v==="cmp":v===YEAR));
+ swipe.property("hidden",!cmp);if(cmp)placeSwipe();
+ if(focus>=0&&!YEARS[YEAR].cands.some(c=>c.i===focus)){focus=-1;d3.select("#page").classed("focus",false);}
+ panel();repaint();}
+d3.select("#years").selectAll("button").data([...YS,"cmp"]).join("button").text(y=>y==="cmp"?"Compare":y)
+ .attr("aria-pressed",y=>String(y===YEAR)).on("click",(e,y)=>setMode(y));
+d3.select("#swl").text(YS[1]);d3.select("#swr").text(YS[0]);
+function placeSwipe(){swipe.style("left",SPLIT*100+"%");swipe.select(".grip").attr("aria-valuenow",Math.round(SPLIT*100));}
+// dragging the divider (pointer or arrow keys); it never starts a pan
+let swRaf=0;const moveSplit=v=>{SPLIT=Math.max(.02,Math.min(.98,v));placeSwipe();if(!swRaf)swRaf=requestAnimationFrame(()=>{swRaf=0;repaint();});};
+swipe.select(".grip").on("pointerdown",e=>{e.stopPropagation();e.preventDefault();const el=e.currentTarget;el.setPointerCapture(e.pointerId);
+  const r=document.getElementById("wrap").getBoundingClientRect();
+  const mv=ev=>moveSplit((ev.clientX-r.left)/r.width),up=()=>{el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);};
+  el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up);})
+ .on("keydown",e=>{const d={ArrowLeft:-.02,ArrowRight:.02}[e.key];if(d){e.preventDefault();moveSplit(SPLIT+d);}});
+
 // controls. Dots are shuffled, so keeping every STEP-th one is a random sample at STEP × __VPD__ votes per dot.
 // display settings: hidden behind the gear until asked for
 d3.select("#gear").on("click",e=>{const b=e.currentTarget,o=b.getAttribute("aria-expanded")!=="true";b.setAttribute("aria-expanded",o);d3.select("#ctlp").property("hidden",!o);});
@@ -210,7 +279,7 @@ function select(f,zoomTo){sel=f;if(!f&&typeof q!=="undefined")q.value="";sl.datu
 
 // municipality search: accent- and case-insensitive; prefix matches first, then substring matches, each by size
 const fold=t=>t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
-const index=MG.features.filter(f=>M[f.properties.codarea]).map(f=>{const m=M[f.properties.codarea];return {f,label:m.n,uf:m.uf,key:fold(m.n),t:m.t};}).sort((a,b)=>b.t-a.t); // bigger municipalities first
+const index=MG.features.filter(f=>M[f.properties.codarea]).map(f=>{const m=M[f.properties.codarea];return {f,label:m.n,uf:m.uf,key:fold(m.n),t:tot(m)};}).sort((a,b)=>b.t-a.t); // bigger municipalities first
 const q=document.getElementById("q"),ql=d3.select("#qlist");let hits=[],cur=-1;
 function show(){const t=fold(q.value.trim());
  hits=t?[...index.filter(d=>d.key.startsWith(t)),...index.filter(d=>!d.key.startsWith(t)&&d.key.includes(t))].slice(0,8):[];cur=hits.length?0:-1;

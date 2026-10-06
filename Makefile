@@ -2,16 +2,17 @@
 PY ?= python3
 OUT = brazil_2026_president_map.html
 
-$(OUT): pipeline/build.py pipeline/geometry.py web/index.html web/style.css web/map.js data/places.json data/results.json
+$(OUT): pipeline/build.py pipeline/geometry.py web/index.html web/style.css web/map.js data/places_2026.json data/places_2022.json data/mun-config.json
 	$(PY) -m pipeline.build
 
 # Refetch results from the TSE API (data/results.json, data/mun-config.json)
 results:
 	$(PY) -m pipeline.fetch_results
 
-# Rebuild data/places.json; needs the TSE open-data CSVs unzipped into data/raw/ (see README)
+# Rebuild data/places_YYYY.json; needs the TSE open-data CSVs unzipped into data/raw/ (see README)
 places:
-	$(PY) -m pipeline.prep_places
+	$(PY) -m pipeline.prep_places 2026
+	$(PY) -m pipeline.prep_places 2022
 
 open: $(OUT)
 	open $(OUT)
