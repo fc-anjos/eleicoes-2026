@@ -172,15 +172,58 @@
   },
   {
     "id": "sp-classes-ac",
-    "view": "y=cmp&split=0.5&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@4848~*"
+    "view": "y=cmp&split=0.5&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@4848~*",
+    "chart": {
+      "by": "places",
+      "muni": "3550308",
+      "var": "setor_renda_resp_media",
+      "cuts": [2424, 4848],
+      "hl": 2
+    }
   },
   {
     "id": "sp-class-d",
-    "view": "y=cmp&split=0.5&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@2424~4848"
+    "view": "y=cmp&split=0.5&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@2424~4848",
+    "chart": {
+      "by": "places",
+      "muni": "3550308",
+      "var": "setor_renda_resp_media",
+      "cuts": [2424, 4848],
+      "hl": 1
+    }
   },
   {
     "id": "sp-class-e",
-    "view": "y=cmp&split=0.5&at=-46.63,-23.6,14&in=3550308&f=setor_renda_resp_media@*~2424"
+    "view": "y=cmp&split=0.5&at=-46.63,-23.65,48&in=3550308&f=setor_renda_resp_media@*~2424",
+    "chart": {
+      "by": "places",
+      "muni": "3550308",
+      "var": "setor_renda_resp_media",
+      "cuts": [2424, 4848],
+      "hl": 0
+    }
+  },
+  {
+    "id": "sp-income",
+    "view": "y=cmp&split=0.5&at=-46.63,-23.65,48&in=3550308",
+    "chart": {
+      "by": "deciles",
+      "muni": "3550308",
+      "var": "setor_renda_resp_media",
+      "unit": 1212
+    }
+  },
+  {
+    "id": "sp-vs-brazil",
+    "view": "y=cmp&split=0.5&at=home",
+    "chart": {
+      "by": "bands",
+      "var": "setor_renda_resp_media",
+      "unit": 1212,
+      "edges": [1, 1.5, 2, 2.5, 3, 4, 6, 10],
+      "series": ["3550308", "!3550308"],
+      "min": 20000
+    }
   },
   {
     "id": "religion",
@@ -193,10 +236,6 @@
   {
     "id": "who-didnt-vote",
     "view": "y=2026&at=home&ages=1"
-  },
-  {
-    "id": "over-80",
-    "view": "y=2026&at=home&ages=1&80plus=0"
   },
   {
     "id": "excess-abstention",

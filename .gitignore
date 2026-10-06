@@ -5,5 +5,4 @@ __pycache__/
 node_modules/
 dist/
 data/raw/
-# built by `make data` (pipeline/build.py)
-web/public/data/
+# web/public/data/map.json is built by `make data` (pipeline/build.py) and committed, so Pages can build the site

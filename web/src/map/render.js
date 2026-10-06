@@ -16,7 +16,9 @@ import { drawArrows } from "./arrows.js";
 import { svg } from "./base.js";
 
 const cv = document.getElementById("cv"),
-  cx = cv.getContext("2d");
+  cx = cv.getContext("2d"),
+  ghost = document.getElementById("cvg"),
+  gx = ghost.getContext("2d");
 export const dpr = devicePixelRatio || 1;
 // canvas size in device px, its pixels, coverage (T: in focus, O: the grey trace), the colour on top, density cells
 let W, H, img, px, T, O, TI, TOP, cnt;
@@ -36,8 +38,8 @@ const R0 = 0.32,
 export function resizeCanvas() {
   W = Math.round(S.w * dpr);
   H = Math.round(S.h * dpr);
-  cv.width = W;
-  cv.height = H;
+  cv.width = ghost.width = W;
+  cv.height = ghost.height = H;
   img = cx.createImageData(W, H);
   px = new Uint32Array(img.data.buffer);
   [T, O] = [0, 0].map(() => new Float32Array(W * H));
@@ -268,8 +270,30 @@ function paint(t) {
   if (S.ARROWS) drawArrows(cx, t, W, H);
 }
 
+// Cross-fade: the old frame is copied to the ghost canvas on top, which fades out while the new one shows beneath.
+// Changes in quick succession (a slider being dragged) skip it, so the map follows the hand without lag; a zoom
+// cuts it short, since the old frame would sit still over a moving map.
+const FADE = 450,
+  still = matchMedia("(prefers-reduced-motion: reduce)");
+let lastRepaint = 0,
+  fade = null;
+function crossfade() {
+  const now = performance.now(),
+    quick = now - lastRepaint < 150;
+  lastRepaint = now;
+  if (still.matches || quick || !W) return;
+  gx.clearRect(0, 0, W, H);
+  gx.drawImage(cv, 0, 0);
+  fade?.cancel();
+  fade = ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: FADE, easing: "ease-out" });
+}
+function cutFade() {
+  if (fade && fade.playState === "running") fade.playbackRate = Math.max(fade.playbackRate, 4);
+}
+
 // paint on the next frame (during zoom gestures)
 export function schedulePaint(t) {
+  cutFade();
   if (!pending)
     requestAnimationFrame(() => {
       paint(pending);
@@ -281,6 +305,7 @@ export function schedulePaint(t) {
 // paint now, at the current zoom, and record the view in the URL
 export function repaint() {
   if (!W) return; // before the first layout
+  crossfade();
   paint(d3.zoomTransform(svg.node()));
   saveSoon();
 }

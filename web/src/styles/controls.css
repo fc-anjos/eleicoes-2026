@@ -305,6 +305,9 @@
   border: 0;
   font-weight: 600;
 }
+.sde[hidden] {
+  display: none;
+}
 .sde {
   display: flex;
   align-items: center;

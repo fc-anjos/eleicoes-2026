@@ -7,7 +7,7 @@ import { AB, COLS, OT, S, YS, nameOf } from "../state.js";
 import { num, pctN, signed } from "../format.js";
 import { t } from "../i18n/index.js";
 import { find } from "../search.js";
-import { changeArrows } from "./charts.js";
+import { changeArrows, chartW } from "./charts.js";
 import { tally } from "../stats.js";
 import { natFig } from "../totals.js";
 import { applyState, restoring } from "../view/hash.js";
@@ -48,7 +48,7 @@ function placeRows(m) {
 
 // one row per category: an arrow from 2022 to 2026, Brazil's 2026 as a tick; the change on the right
 function placeChart(el, title, rows) {
-  const W = 330,
+  const W = chartW(el),
     rh = 21,
     top = 34,
     H = top + rows.length * rh + 4,

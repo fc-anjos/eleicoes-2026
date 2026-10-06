@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Where Brazil Voted</title>
+    <title>How Brazil Voted</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="color-scheme" content="dark" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,7 +14,8 @@
   <body>
     <div class="page" id="page">
       <div id="wrap">
-        <canvas id="cv"></canvas><svg id="map" data-i18n-attr="aria-label:map.aria"></svg>
+        <canvas id="cv"></canvas><canvas id="cvg" aria-hidden="true"></canvas
+        ><svg id="map" data-i18n-attr="aria-label:map.aria"></svg>
         <div class="akey" id="akey" data-i18n-html="map.arrowKey" hidden></div>
         <div class="maphint" id="maphint" aria-hidden="true">
           <svg viewBox="0 0 40 40">
@@ -176,10 +178,10 @@
     <dialog id="sharedlg" aria-labelledby="sharet">
       <form method="dialog" class="sd">
         <div class="sdh">
-          <h2 id="sharet" data-i18n="share.title"></h2>
+          <h2 id="sharet"></h2>
           <button id="shareclose" type="button" class="x" data-i18n-attr="aria-label:share.close">×</button>
         </div>
-        <p data-i18n="share.body"></p>
+        <p id="sharebody"></p>
         <div class="sdr">
           <input id="shareurl" type="text" readonly data-i18n-attr="aria-label:share.link" /><button
             id="sharecopy"
@@ -187,7 +189,12 @@
             data-i18n="share.copy"
           ></button>
         </div>
-        <label class="sde"><input type="checkbox" id="shareembed" /> <span data-i18n="share.embed"></span></label>
+        <label class="sde" id="sharesteprow"
+          ><input type="checkbox" id="sharestep" /> <span id="sharesteplabel"></span
+        ></label>
+        <label class="sde" id="shareembedrow"
+          ><input type="checkbox" id="shareembed" /> <span data-i18n="share.embed"></span
+        ></label>
       </form>
     </dialog>
   </body>

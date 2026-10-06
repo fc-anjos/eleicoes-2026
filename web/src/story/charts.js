@@ -2,11 +2,13 @@
 // groups of municipalities, summed over the group, computed from the same data as the map; and a column chart for
 // a series given in the step.
 import * as d3 from "d3";
-import { M, MG } from "../data.js";
+import { M, MG, ORDER } from "../data.js";
+import { DOT } from "../dots.js";
+import { codeOf } from "../filters/filter.js";
 import { VARS } from "../filters/vars.js";
-import { pctN, signed } from "../format.js";
+import { num, pctN, signed } from "../format.js";
 import { t } from "../i18n/index.js";
-import { CI, COLS, YS, css } from "../state.js";
+import { A8, AB, AO, CI, COLS, K, YS, css } from "../state.js";
 import { tally } from "../stats.js";
 
 const REGION = {
@@ -64,6 +66,61 @@ function groupShares(spec) {
   });
 }
 
+// Polling places inside one municipality, by a place variable: each place's exact votes (GV) summed per bucket, for
+// both years. bucket(x) gives a place's bucket from its value, or -1 to leave it out. Returns, per bucket, Lula's
+// votes and the valid votes, by year, and the 2026 valid votes (to weigh the deciles).
+// where: a municipality's code, "*" for all of Brazil, "!code" for Brazil without that municipality
+const rowsOf = (where) => {
+  const all = d3.range(ORDER.length);
+  if (where === "*") return all;
+  if (where[0] === "!") return all.filter((r) => codeOf[ORDER[r]] !== where.slice(1));
+  return all.filter((r) => codeOf[ORDER[r]] === where);
+};
+function placeSums(where, v, bucket, nb) {
+  const out = d3.range(nb).map(() => ({ [YS[0]]: [0, 0], [YS[1]]: [0, 0] })),
+    lula = CI("13"),
+    rows = rowsOf(where);
+  for (const y of YS) {
+    const D = DOT[y];
+    for (const r of rows)
+      for (let g = D.GM[r]; g < D.GM[r + 1]; g++) {
+        const row = D.GR[g],
+          x = row >= 0 ? v.val(row) : null,
+          b = x == null ? -1 : bucket(x);
+        if (b < 0) continue;
+        let valid = 0;
+        for (let i = 0, o = g * K; i < K; i++) if (i !== AB && i !== AO && i !== A8) valid += D.GV[o + i];
+        out[b][y][0] += D.GV[g * K + lula];
+        out[b][y][1] += valid;
+      }
+  }
+  return out;
+}
+const shareOf = (s, y) => (100 * s[y][0]) / s[y][1];
+
+// spec.by "places": buckets by spec.cuts on a place variable inside spec.muni, rows as in the other dumbbells
+function placeRows(spec) {
+  const v = VARS.find((z) => z.k === spec.var),
+    cuts = spec.cuts,
+    b = (x) => {
+      const i = cuts.findIndex((c) => x < c);
+      return i < 0 ? cuts.length : i;
+    };
+  return placeSums(spec.muni, v, b, cuts.length + 1).map((s, i) => ({
+    label: spec.labels[i],
+    a: shareOf(s, YS[1]),
+    b: shareOf(s, YS[0]),
+  }));
+}
+
+// Charts are drawn at the card's own width in css px, so their text keeps its set size however wide the column is
+// (a fixed viewBox would scale the type up with the column)
+export const chartW = (el) => {
+  const cs = getComputedStyle(el),
+    w = el.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  return w > 200 ? Math.round(w) : 330;
+};
+
 const chartSvg = (el, W, H, title) => {
   const s = d3
     .select(el)
@@ -110,8 +167,10 @@ export function changeArrows(r, x, col) {
 
 export function chart(el, spec) {
   if (spec.by === "series") return seriesChart(el, spec);
-  const rows = groupShares(spec),
-    W = 330,
+  if (spec.by === "deciles") return decileChart(el, spec);
+  if (spec.by === "bands") return bandChart(el, spec);
+  const rows = spec.by === "places" ? placeRows(spec) : groupShares(spec),
+    W = chartW(el),
     rh = 22,
     top = 36,
     H = top + rows.length * rh + 6,
@@ -138,7 +197,8 @@ export function chart(el, spec) {
     .selectAll("g")
     .data(rows)
     .join("g")
-    .attr("transform", (d, i) => `translate(0,${top + i * rh + rh / 2})`);
+    .attr("transform", (d, i) => `translate(0,${top + i * rh + rh / 2})`)
+    .attr("opacity", (d, i) => (spec.hl == null || spec.hl === i ? 1 : 0.3));
   r.append("text")
     .attr("class", "rl")
     .attr("x", 0)
@@ -159,7 +219,7 @@ export function chart(el, spec) {
 
 // a small column chart for a series given in the step (e.g. abstention by election), the last column highlighted
 function seriesChart(el, spec) {
-  const W = 330,
+  const W = chartW(el),
     H = 128,
     top = 36,
     bot = 18,
@@ -196,4 +256,197 @@ function seriesChart(el, spec) {
     .attr("y", H - 4)
     .text((p) => p[0]);
   if (spec.note) d3.select(el).append("p").attr("class", "ck").text(spec.note);
+}
+
+// spec.by "deciles": a municipality's polling places in ten groups of equal 2026 valid vote by a place variable,
+// a bar per group for the change in Lula's share, labelled with the group's range (in minimum wages for income)
+function decileChart(el, spec) {
+  const v = VARS.find((z) => z.k === spec.var),
+    vals = [],
+    D = DOT[YS[0]],
+    muni = rowsOf(spec.muni);
+  for (const r of muni)
+    for (let g = D.GM[r]; g < D.GM[r + 1]; g++) {
+      const row = D.GR[g],
+        x = row >= 0 ? v.val(row) : null;
+      if (x == null) continue;
+      let valid = 0;
+      for (let i = 0, o = g * K; i < K; i++) if (i !== AB && i !== AO && i !== A8) valid += D.GV[o + i];
+      vals.push([x, valid]);
+    }
+  vals.sort((p, q) => p[0] - q[0]);
+  // cuts at each tenth of the valid vote
+  const tot = d3.sum(vals, (p) => p[1]),
+    cuts = [];
+  let acc = 0;
+  for (const [x, w] of vals) {
+    acc += w;
+    if (cuts.length < 9 && acc >= (tot * (cuts.length + 1)) / 10) cuts.push(x);
+  }
+  const bucket = (x) => {
+      const i = cuts.findIndex((c) => x <= c);
+      return i < 0 ? 9 : i;
+    },
+    sums = placeSums(spec.muni, v, bucket, 10),
+    lo = [vals[0][0], ...cuts],
+    hi = [...cuts, vals[vals.length - 1][0]],
+    mw = (x) => num(x / spec.unit, 1),
+    rows = sums.map((s, i) => ({
+      d: shareOf(s, YS[0]) - shareOf(s, YS[1]),
+      label: i === 9 ? `>${mw(lo[i])}` : `${mw(lo[i])}–${mw(hi[i])}`,
+    }));
+  const W = chartW(el),
+    H = 158,
+    top = 34,
+    bot = 36,
+    x = d3.scaleBand().domain(d3.range(10)).range([0, W]).padding(0.22),
+    ext = d3.max(rows, (q) => Math.abs(q.d)),
+    y = d3
+      .scaleLinear()
+      .domain([
+        Math.min(0, -ext),
+        Math.max(
+          0,
+          d3.max(rows, (q) => q.d),
+        ),
+      ])
+      .nice()
+      .range([H - bot, top]),
+    lula = COLS[CI("13")];
+  const s = chartSvg(el, W, H, spec.title);
+  s.append("line").attr("x1", 0).attr("x2", W).attr("y1", y(0)).attr("y2", y(0)).attr("stroke", css("--rule"));
+  const g = s
+    .append("g")
+    .selectAll("g")
+    .data(rows)
+    .join("g")
+    .attr("transform", (q, i) => `translate(${x(i)},0)`);
+  g.append("rect")
+    .attr("y", (q) => Math.min(y(0), y(q.d)))
+    .attr("height", (q) => Math.abs(y(q.d) - y(0)))
+    .attr("width", x.bandwidth())
+    .attr("rx", 2)
+    .attr("fill", lula)
+    .attr("opacity", (q) => (q.d < 0 ? 1 : 0.45));
+  g.append("text")
+    .attr("class", "rv")
+    .attr("x", x.bandwidth() / 2)
+    .attr("y", (q) => (q.d < 0 ? y(q.d) + 11 : y(q.d) - 4))
+    .attr("text-anchor", "middle")
+    .style("font-size", "9.5px")
+    .text((q) => signed(q.d));
+  g.append("text")
+    .attr("class", "tk")
+    .attr("x", x.bandwidth() / 2)
+    .attr("y", H - 4)
+    .style("font-size", "8.5px")
+    .text((q) => q.label);
+  d3.select(el).append("p").attr("class", "ck").text(spec.note);
+}
+
+// spec.by "bands": the change in Lula's share by fixed income bands (spec.edges, in spec.unit), one line per area in
+// spec.series (a municipality, "!code" for the rest of Brazil), so places of different incomes compare on one axis.
+// A grey bar under each band shows the share of the second series' valid vote in it.
+function bandChart(el, spec) {
+  const v = VARS.find((z) => z.k === spec.var),
+    edges = spec.edges.map((e) => e * spec.unit),
+    nb = edges.length + 1,
+    bucket = (x) => {
+      const i = edges.findIndex((e) => x < e);
+      return i < 0 ? edges.length : i;
+    },
+    series = spec.series.map((where, j) => {
+      const sums = placeSums(where, v, bucket, nb),
+        tot = d3.sum(sums, (q) => q[YS[0]][1]);
+      return {
+        j,
+        pts: sums.map((q, i) => ({
+          i,
+          d: q[YS[0]][1] > spec.min ? shareOf(q, YS[0]) - shareOf(q, YS[1]) : null,
+          w: q[YS[0]][1] / tot,
+        })),
+      };
+    });
+  const W = chartW(el),
+    H = 178,
+    top = 40,
+    bot = 44,
+    x = d3
+      .scalePoint()
+      .domain(d3.range(nb))
+      .range([18, W - 8]),
+    all = series.flatMap((q) => q.pts.map((p) => p.d)).filter((d) => d != null),
+    y = d3
+      .scaleLinear()
+      .domain([Math.min(0, d3.min(all)), Math.max(0, d3.max(all))])
+      .nice()
+      .range([H - bot, top]),
+    cols = [COLS[CI("13")], css("--haze")],
+    s = chartSvg(el, W, H, spec.title);
+  s.append("g")
+    .selectAll("text")
+    .data(y.ticks(4))
+    .join("text")
+    .attr("class", "tk")
+    .attr("x", 0)
+    .attr("y", (d) => y(d) + 3)
+    .style("text-anchor", "start")
+    .text((d) => (d ? signed(d).replace(/[.,]0$/, "") : "0"));
+  s.append("line").attr("x1", 18).attr("x2", W).attr("y1", y(0)).attr("y2", y(0)).attr("stroke", css("--rule"));
+  // where the voters are: the share of the last series' valid vote in each band
+  const wb = series[series.length - 1].pts,
+    wmax = d3.max(wb, (p) => p.w);
+  s.append("g")
+    .selectAll("rect")
+    .data(wb)
+    .join("rect")
+    .attr("x", (p) => x(p.i) - 8)
+    .attr("width", 16)
+    .attr("y", (p) => H - 30 - (10 * p.w) / wmax)
+    .attr("height", (p) => (10 * p.w) / wmax)
+    .attr("fill", css("--rule"));
+  for (const q of series) {
+    const line = d3
+      .line()
+      .defined((p) => p.d != null)
+      .x((p) => x(p.i))
+      .y((p) => y(p.d));
+    s.append("path").attr("d", line(q.pts)).attr("fill", "none").attr("stroke", cols[q.j]).attr("stroke-width", 2);
+    s.append("g")
+      .selectAll("circle")
+      .data(q.pts.filter((p) => p.d != null))
+      .join("circle")
+      .attr("cx", (p) => x(p.i))
+      .attr("cy", (p) => y(p.d))
+      .attr("r", 3)
+      .attr("fill", cols[q.j]);
+  }
+  const lab = (i) =>
+    i === 0
+      ? `<${num(spec.edges[0], 1)}`
+      : i === nb - 1
+        ? `>${num(spec.edges[i - 1], 0)}`
+        : `${num(spec.edges[i - 1], 1)}–${num(spec.edges[i], 1)}`.replace(/[.,]0(?=–|$)/g, "");
+  s.append("g")
+    .selectAll("text")
+    .data(d3.range(nb))
+    .join("text")
+    .attr("class", "tk")
+    .attr("x", (i) => x(i))
+    .attr("y", H - 16)
+    .style("font-size", "8.5px")
+    .text(lab);
+  s.append("text")
+    .attr("class", "tk")
+    .attr("x", W / 2)
+    .attr("y", H - 2)
+    .style("font-size", "9px")
+    .text(spec.axis);
+  d3.select(el)
+    .append("p")
+    .attr("class", "ck")
+    .html(
+      spec.labels.map((l, j) => `<i style="background:${cols[j]}"></i>${l}`).join(" ") +
+        ` <i style="background:var(--rule);border-radius:0"></i>${spec.weight}`,
+    );
 }

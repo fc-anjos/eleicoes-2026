@@ -55,12 +55,18 @@ body {
   background: var(--night);
 }
 #cv,
+#cvg,
 #map {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
+}
+/* the previous frame, laid over the new one and faded out, so every change to the dots cross-fades */
+#cvg {
+  pointer-events: none;
+  opacity: 0;
 }
 /* place names: a halo in the background colour separates them from the dots beneath */
 .place text {
@@ -303,4 +309,22 @@ h1 {
 .search .none {
   color: var(--haze);
   cursor: default;
+}
+/* things that appear with a view (the compare divider, the swing-arrow legend, the filter badge) fade in */
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+#swipe:not([hidden]),
+#fbadge:not([hidden]),
+.akey:not([hidden]) {
+  animation: appear 0.45s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  #swipe:not([hidden]),
+  #fbadge:not([hidden]),
+  .akey:not([hidden]) {
+    animation: none;
+  }
 }

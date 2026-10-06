@@ -12,14 +12,18 @@ export function drawNotes(t) {
   const sel = notesG
     .selectAll("g.note")
     .data(S.NOTES, (d) => d.t)
-    .join((en) => {
-      const g = en.append("g").attr("class", "note").style("opacity", 0);
-      g.append("line");
-      g.append("circle").attr("r", 3);
-      g.append("text");
-      g.transition().duration(500).style("opacity", 1);
-      return g;
-    });
+    .join(
+      (en) => {
+        const g = en.append("g").attr("class", "note").style("opacity", 0);
+        g.append("line");
+        g.append("circle").attr("r", 3);
+        g.append("text");
+        g.transition().duration(500).style("opacity", 1);
+        return g;
+      },
+      undefined,
+      (ex) => ex.transition().duration(300).style("opacity", 0).remove(),
+    );
   sel.each(function (d) {
     const p = proj(d.at),
       x = p[0] * t.k + t.x,

@@ -55,8 +55,10 @@ export function saveSoon() {
   if (S.restoring) return;
   clearTimeout(saveT);
   saveT = setTimeout(() => {
+    // the story drives the map itself, so its URL stays clean (a view in the hash means Explore)
+    const story = d3.select("#page").classed("storymode");
     try {
-      history.replaceState(null, "", "#" + stateHash(isEmbed()));
+      history.replaceState(null, "", story ? location.pathname + location.search : "#" + stateHash(isEmbed()));
     } catch {
       /* some embedding contexts refuse history changes */
     }
@@ -227,7 +229,8 @@ export function applyState(str, animate) {
 export function initHash() {
   const applyHash = () => {
     const h = location.hash.slice(1);
-    if (h) applyState(h, false);
+    // in the story the steps set the map; a view in the hash applies to Explore
+    if (h && !d3.select("#page").classed("storymode")) applyState(h, false);
   };
   // a reader editing the hash (or following a link within the page) gets that view
   addEventListener("hashchange", () => {

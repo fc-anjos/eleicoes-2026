@@ -15,6 +15,7 @@ import { AB, COLS, S, YS, nameOf, otherYear } from "../state.js";
 import { figures, natFig } from "../totals.js";
 import { applyState, restoring, saveSoon, setFiltersFrom } from "../view/hash.js";
 import { hintDone } from "../view/hints.js";
+import { tween } from "../view/tween.js";
 import { chart } from "./charts.js";
 import { findStep } from "./find.js";
 
@@ -80,14 +81,15 @@ export function storyTotals() {
     c13 = CATS.findIndex((c) => c.k === "13");
   // a small results table: share (with a bar), votes, change since the other year. The camps' shares are of valid
   // votes, abstention's of the roll, so it sits apart below a rule with its own note.
+  const tw = (i, f, v) => `data-tw="st${i}${f}" data-f="${f}" data-v="${v}"`;
   const lead = F.c[c22] >= F.c[c13] ? c22 : c13;
   const row = (i, n, v, sh, pv, nv) => {
     const ofAll = N ? ` <s>${t("story.ofAll", { v: Math.round((100 * v) / nv) })}</s>` : "",
       note = i === AB ? `<small>${t("story.ofRoll")}</small>` : "";
     return (
       `<div class="sr${i === AB ? " a" : ""}${i === lead ? " lead" : ""}" style="--c:${COLS[i]}"><i></i>` +
-      `<span>${n}${note}<em class="bar"><em style="width:${(100 * sh).toFixed(1)}%"></em></em></span>` +
-      `<b>${pctN(100 * sh)}</b><u>${hum(v, 1)}${ofAll}</u><q>${change((sh - pv) * 100)}</q></div>`
+      `<span>${n}${note}<em class="bar"><em ${tw(i, "w", 100 * sh)} style="width:${(100 * sh).toFixed(1)}%"></em></em></span>` +
+      `<b ${tw(i, "pct", 100 * sh)}>${pctN(100 * sh)}</b><u><span ${tw(i, "hum", v)}>${hum(v, 1)}</span>${ofAll}</u><q>${change((sh - pv) * 100)}</q></div>`
     );
   };
   const head =
@@ -118,9 +120,43 @@ export function storyTotals() {
             .join("")}</div>`
         : ""),
   );
+  tween(document.getElementById("stot"));
+}
+
+// Which tab opens: ?tab=story|explore (also reportagem|explorar). The story is the default; an older shared link
+// that carries only a view in the hash, with no tab, opens in Explore as it used to.
+const TABS = { story: true, reportagem: true, explore: false, explorar: false };
+function tabFromUrl() {
+  const q = (new URLSearchParams(location.search).get("tab") || "").toLowerCase();
+  return q in TABS ? TABS[q] : location.hash.length <= 1;
+}
+// the open tab goes into the URL, so a reload or a shared link reopens it
+function tabToUrl(story) {
+  const u = new URL(location.href);
+  if (story) u.searchParams.delete("tab");
+  else u.searchParams.set("tab", "explore");
+  history.replaceState(history.state, "", u);
+}
+
+// the step on screen, for sharing a link to it
+export const currentStep = () => (stepNow >= 0 ? { id: STORY[stepNow].id, h: copyOf(STORY[stepNow]).h } : null);
+
+// ?step=<id> (from a shared link) opens the story at that step; the argument is then dropped, so a later reload
+// starts from the top like any other visit
+function openAtStep() {
+  const u = new URL(location.href),
+    id = u.searchParams.get("step");
+  if (!id) return;
+  u.searchParams.delete("step");
+  history.replaceState(history.state, "", u);
+  const i = STORY.findIndex((d) => d.id === id);
+  if (i < 0 || !d3.select("#page").classed("storymode")) return;
+  const aside = document.querySelector("aside");
+  requestAnimationFrame(() => (aside.scrollTop = steps.nodes()[i].offsetTop - aside.clientHeight * 0.4));
 }
 
 function setTab(story) {
+  tabToUrl(story);
   const page = d3.select("#page");
   d3.select("#tab-story").attr("aria-selected", String(story));
   d3.select("#tab-explore").attr("aria-selected", String(!story));
@@ -187,11 +223,18 @@ export function initStory() {
     },
     { root: aside, rootMargin: "-45% 0px -50% 0px" },
   );
+  // a card lights up as soon as most of it is on screen, before it reaches the middle and changes the map
+  const lit = new IntersectionObserver((es) => es.forEach((e) => e.target.classList.toggle("near", e.isIntersecting)), {
+    root: aside,
+    rootMargin: "-12% 0px -22% 0px",
+  });
   steps.each(function () {
     io.observe(this);
+    lit.observe(this);
   });
   d3.select("#tab-story").on("click", () => setTab(true));
   d3.select("#tab-explore").on("click", () => setTab(false));
-  setTab(location.hash.length <= 1); // a shared view opens in Explore (initHash then applies it)
+  setTab(tabFromUrl()); // in Explore, initHash then applies a shared view
+  openAtStep();
   setTimeout(precompute, 1500);
 }

@@ -1,4 +1,4 @@
-// Where Brazil Voted: the page's entry point. Modules set up their parts of the page in this order; the data has
+// How Brazil Voted: the page's entry point. Modules set up their parts of the page in this order; the data has
 // loaded by the time any of them runs (see data.js).
 import "./styles/main.css";
 import { applyDom } from "./i18n/index.js";

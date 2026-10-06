@@ -43,7 +43,7 @@
 }
 .stot .sr {
   display: grid;
-  grid-template-columns: 10px 1fr 48px 44px 62px;
+  grid-template-columns: 10px 1fr 52px 76px 62px;
   align-items: baseline;
   gap: 8px;
   font-size: 13px;
@@ -92,6 +92,7 @@
 }
 .stot .sr .bar em {
   display: block;
+  transition: width 0.45s ease-out;
   height: 100%;
   border-radius: 2px;
   background: var(--c);
@@ -145,21 +146,26 @@
 .step:last-child {
   min-height: 80vh;
 }
-.step.on {
+.step.on,
+.step.near {
   opacity: 1;
 }
+/* the story column: wider on large screens, so longer copy and charts breathe */
+:root {
+  --story-w: clamp(452px, 36vw, 560px);
+}
 .step h2 {
-  font: 700 21px/1.25 var(--display);
+  font: 700 20px/1.25 var(--display);
   margin: 0 0 12px;
 }
 .step p {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.55;
   margin: 0 0 12px;
   color: #dcdce0;
 }
 .step p.n {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--haze);
   border-left: 2px solid var(--edge);
   padding-left: 10px;
@@ -209,7 +215,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 452px;
+  width: var(--story-w);
   z-index: 5;
   background: transparent;
   border: 0;
@@ -255,7 +261,8 @@
   box-shadow: 0 10px 40px #0007;
   opacity: 0.55;
 }
-.storymode .step.on {
+.storymode .step.on,
+.step.near {
   opacity: 1;
 }
 .storymode .step:first-child {
@@ -283,7 +290,7 @@
     display: none;
   }
 }
-/* swing arrows key, on the map's top left */
+/* swing arrows key, on the map's top left (centred in the story) */
 .akey {
   position: absolute;
   top: 16px;
@@ -316,8 +323,11 @@
   vertical-align: middle;
   margin: 0 2px;
 }
+/* in the story, centred over the visible map like the filter badge */
 .storymode .akey {
-  left: 476px;
+  left: calc(var(--story-w) + (100% - var(--story-w)) / 2);
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 /* map notes: a dot on the place, a leader line and a haloed label */
 .notes {
@@ -350,20 +360,20 @@
   margin: 18px 0 4px;
 }
 .dumb .ct {
-  font: 600 11.5px var(--body);
+  font: 600 11px var(--body);
   fill: var(--ink);
 }
 .dumb .tk {
-  font: 10px var(--body);
+  font: 9.5px var(--body);
   fill: var(--haze);
   text-anchor: middle;
 }
 .dumb .rl {
-  font: 12px var(--body);
+  font: 11.5px var(--body);
   fill: #dcdce0;
 }
 .dumb .rv {
-  font: 600 11.5px var(--body);
+  font: 600 11px var(--body);
   fill: var(--haze);
   font-variant-numeric: tabular-nums;
 }
@@ -537,4 +547,9 @@
 }
 .areasel[hidden] {
   display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stot .sr .bar em {
+    transition: none;
+  }
 }

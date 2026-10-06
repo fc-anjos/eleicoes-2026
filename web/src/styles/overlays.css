@@ -37,8 +37,8 @@
   white-space: nowrap;
 }
 .storymode .fbadge {
-  left: calc(452px + (100% - 452px) / 2);
-  max-width: calc(100% - 500px);
+  left: calc(var(--story-w) + (100% - var(--story-w)) / 2);
+  max-width: calc(100% - var(--story-w) - 48px);
 }
 .stot .scope {
   font-size: 12px;
@@ -51,9 +51,10 @@
 }
 .stot .sr u s {
   display: block;
+  white-space: nowrap;
   text-decoration: none;
   color: var(--haze);
-  font-size: 11px;
+  font-size: 10.5px;
 }
 .fdesc {
   display: flex;
@@ -119,7 +120,7 @@
   opacity: 0;
 }
 .storymode .maphint {
-  left: calc(452px + (100% - 452px) / 2);
+  left: calc(var(--story-w) + (100% - var(--story-w)) / 2);
 }
 @keyframes mhin {
   from {

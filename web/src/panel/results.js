@@ -8,6 +8,7 @@ import { t } from "../i18n/index.js";
 import { repaint } from "../map/render.js";
 import { A8, AB, AO, COLS, HID, S, candName, dateOf, otherYear, packCols, store } from "../state.js";
 import { storyTotals } from "../story/story.js";
+import { tween } from "../view/tween.js";
 import { figures, natFig } from "../totals.js";
 
 // the panel that is showing: Explore's, or the story's small totals
@@ -125,7 +126,9 @@ function drawRows() {
         : `<span class="dl" title="${t("panel.vs", { year: oy })}">${change((c.share - c.prev) * 100)}</span>`;
     b.append("div")
       .attr("class", "row")
-      .html(`<span class="nm">${c.n}</span>${ds}<span class="pc">${pctN(100 * c.share)}</span>`);
+      .html(
+        `<span class="nm">${c.n}</span>${ds}<span class="pc" data-tw="p${i}" data-f="pct" data-v="${100 * c.share}">${pctN(100 * c.share)}</span>`,
+      );
     b.append("div")
       .attr("class", "vt")
       .text(`${fmt(c.v)} ${c.unit}`);
@@ -154,4 +157,5 @@ function drawRows() {
       .on("mouseleave", () => set(false))
       .on("click", () => set(S.focus !== i));
   });
+  tween(list.node());
 }

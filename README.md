@@ -1,4 +1,4 @@
-# Where Brazil Voted
+# How Brazil Voted
 
 A dot-density map of the Brazilian presidential election, first round, in 2026 and 2022 (switchable): one dot per
 250 votes, placed around the polling place where the votes were cast. Abstentions (people on the roll who didn't
