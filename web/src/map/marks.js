@@ -27,8 +27,8 @@ import { DOT, layers } from "../dots.js";
 import { path, svg } from "./base.js";
 import { cellK, flat, panelVar } from "./panels.js";
 
-// scatter and multiples leave the map for a chart (see panels.js)
-export const VIZS = ["dots", "outline", "circles", "margins", "scatter", "multiples"];
+// scatter and multiples leave the map for a chart (see panels.js); hex pools polling places into hexagons
+export const VIZS = ["dots", "outline", "circles", "margins", "hex", "scatter", "multiples"];
 // what the colour shows; candidates' shares are added as share-<ballot number>
 export const VCOLS = ["moved", "change", "margin", "mix", "abst", "dabst"];
 // the fade between dots and the comparison view, by zoom: it starts at S.VIZK (Studio → Display) and is
@@ -520,6 +520,104 @@ function hatch(cx, col, dpr) {
   return p;
 }
 
+// Hexagons: polling places pooled into equal-area cells of a fixed geography (as in the Times' precinct maps), so a
+// rate reads the same in a city block and in the sertão: neither a big city's votes nor a big municipality's land
+// can take over the map. Cells are HR px across at zoom 1 and halve each time the zoom doubles, down to HMIN, so
+// zooming in resolves finer places. Under a polling-place filter a cell pools only the places that pass; cells
+// holding fewer than HVMIN valid votes are drawn hollow so a lone place can't paint one.
+const HR = 7,
+  HMIN = 2.5,
+  HVMIN = 1000;
+export const hexR = (k) => Math.max(HMIN, HR / 2 ** Math.floor(Math.log2(Math.max(1, k))));
+const HX = {};
+let hxKey = "";
+function hexes(y, r) {
+  const key = [fsig(), S.layoutGen, S.INC80, r].join("|");
+  if (hxKey !== key) for (const k in HX) delete HX[k];
+  hxKey = key;
+  if (HX[y]) return HX[y];
+  const dx = 2 * r * Math.sin(Math.PI / 3),
+    dy = 1.5 * r;
+  // the cell under a point (d3-hexbin's rounding, ISC licence)
+  const cell = (px, py) => {
+    let pj = Math.round((py = py / dy)),
+      pi = Math.round((px = px / dx - (pj & 1) / 2));
+    const py1 = py - pj;
+    if (Math.abs(py1) * 3 > 1) {
+      const px1 = px - pi,
+        pi2 = pi + (px < pi ? -1 : 1) / 2,
+        pj2 = pj + (py < pj ? -1 : 1),
+        px2 = px - pi2,
+        py2 = py - pj2;
+      if (px1 * px1 + py1 * py1 > px2 * px2 + py2 * py2) ((pi = pi2 + (pj & 1 ? 1 : -1) / 2), (pj = pj2));
+    }
+    return [pi, pj];
+  };
+  // per year: each cell's exact votes by category, over its passing places
+  const sums = YS.map((yy) => {
+    const D = DOT[yy],
+      m = new Map();
+    for (let r_ = 0; r_ < ORDER.length; r_++)
+      for (let g = D.GM[r_]; g < D.GM[r_ + 1]; g++) {
+        const n = D.S[g + 1] - D.S[g];
+        if (!n || !D.GP[g] || D.GR[g] < 0) continue;
+        let x = 0,
+          py = 0;
+        for (let i = D.S[g]; i < D.S[g + 1]; i++) ((x += D.P[2 * i]), (py += D.P[2 * i + 1]));
+        const [pi, pj] = cell(x / n, py / n),
+          k = pi + "," + pj;
+        let c = m.get(k);
+        if (!c) m.set(k, (c = { x: (pi + (pj & 1) / 2) * dx, y: pj * dy, v: new Float64Array(K) }));
+        for (let i = 0; i < K; i++) c.v[i] += D.GV[g * K + i];
+      }
+    return m;
+  });
+  const yi = YS.indexOf(y),
+    sign = yi === 0 ? 1 : -1,
+    L = CI("13"),
+    Bc = CI("22"),
+    cands = YEARS[y].cands.filter((c) => c.k).map((c) => c.i),
+    stats = (c) => {
+      let valid = 0;
+      for (let i = 0; i < K; i++) if (i !== AB && i !== AO && i !== A8) valid += c[i];
+      const ab = c[AB] + c[AO] + (S.INC80 ? c[A8] : 0);
+      return { valid, ab, shL: (100 * c[L]) / valid, abr: (100 * ab) / (valid + ab) };
+    },
+    out = [];
+  for (const [k, c] of sums[yi]) {
+    const a = stats(c.v);
+    if (!a.valid) continue;
+    const o = sums[1 - yi].get(k),
+      b = o && stats(o.v),
+      [p, q] = cands.map((i) => c.v[i]).sort((u, v) => v - u),
+      sh = cands.reduce((m, i) => ((m[i] = (100 * c.v[i]) / a.valid), m), {}),
+      shB = (100 * c.v[Bc]) / a.valid;
+    out.push({
+      x: c.x,
+      y: c.y,
+      valid: a.valid,
+      lead: cands.find((i) => c.v[i] === p),
+      margin: (100 * (p - q)) / a.valid,
+      sh,
+      small: 100 - a.shL - shB,
+      ab: a.abr,
+      roll: a.valid + a.ab,
+      dl: b && b.valid ? sign * (a.shL - b.shL) : null,
+      da: b && b.valid ? sign * (a.abr - b.abr) : null,
+    });
+  }
+  return (HX[y] = out);
+}
+// a pointy-top hexagon of radius r around (x, y)
+function hexPath(cx, x, y, r) {
+  cx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 6) * (2 * i + 1);
+    cx[i ? "lineTo" : "moveTo"](x + r * Math.cos(a), y + r * Math.sin(a));
+  }
+  cx.closePath();
+}
+
 export function drawMarks(cx, t, W, H, dpr) {
   const b = blend(t.k);
   if (!b) return;
@@ -559,6 +657,27 @@ export function drawMarks(cx, t, W, H, dpr) {
           cx.globalAlpha = b * 0.9;
           cx.strokeStyle = col;
           cx.stroke(shapes[i]);
+        }
+      }
+    } else if (S.VIZ === "hex") {
+      const r = hexR(t.k),
+        gap = 1 / t.k; // a one-pixel seam of the sea between cells, whatever the zoom
+      cx.setTransform(dpr * t.k, 0, 0, dpr * t.k, dpr * t.x, dpr * t.y);
+      cx.lineWidth = 0.8 / t.k;
+      for (const h of hexes(y, r)) {
+        if (h.x * t.k + t.x < -r * t.k || h.x * t.k + t.x > S.w + r * t.k) continue;
+        if (h.y * t.k + t.y < -r * t.k || h.y * t.k + t.y > S.h + r * t.k) continue;
+        const col = ms.col(h);
+        if (!col) continue;
+        hexPath(cx, h.x, h.y, r - gap);
+        if (h.valid >= HVMIN) {
+          cx.globalAlpha = b;
+          cx.fillStyle = col;
+          cx.fill();
+        } else {
+          cx.globalAlpha = b * 0.7;
+          cx.strokeStyle = col;
+          cx.stroke();
         }
       }
     } else {
@@ -722,6 +841,7 @@ export function drawKey(t = d3.zoomTransform(svg.node())) {
     if (S.VIZ === "margins") h += `<div class="kchips">${chip(marginCol(L, 30), tr("viz.keyFlip"), "hatch")}</div>`;
     if (S.BIG && S.VIZ === "circles") h += `<div class="kn">${tr("viz.keyMarginNames")}</div>`;
   }
+  if (S.VIZ === "hex") h += `<div class="kn">${tr("viz.keyHex")}</div>`;
   // the multiples: the circles' two colours and their sizes at the cells' zoom
   if (flat()) {
     h =

@@ -254,8 +254,9 @@ function paint(t) {
   }
   // under swing arrows the dots recede; under margins they fade to a faint texture; under circles (and the chart
   // views) they go, so a map never shows two kinds of round mark at once
-  const b = S.VIZ === "circles" || S.VIZ === "margins" || flat() ? blend(t.k) : 0,
-    dim = (S.ARROWS ? 0.3 : 1) * (1 - (S.VIZ === "circles" || flat() ? 1 : 0.85) * b);
+  const solid = S.VIZ === "circles" || S.VIZ === "hex" || flat(),
+    b = solid || S.VIZ === "margins" ? blend(t.k) : 0,
+    dim = (S.ARROWS ? 0.3 : 1) * (1 - (solid ? 1 : 0.85) * b);
   for (let b = 0, below = 0; b < 1024; b++) {
     LUT[b] = 255 * dim * (ALO + ((1 - ALO) * below) / Math.max(1, m));
     below += hist[b];

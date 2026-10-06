@@ -280,7 +280,7 @@
   {
     "id": "smaller-candidates",
     "block": "runoff",
-    "view": "y=2026&at=home&viz=margins*&vc=share-small"
+    "view": "y=2026&at=home&viz=hex*&vc=share-small"
   },
   {
     "id": "find",

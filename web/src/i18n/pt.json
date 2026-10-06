@@ -181,7 +181,7 @@
       },
       "smaller-candidates": {
         "h": "Onde os candidatos menores foram melhor",
-        "t": "<p>Em locais de votação que reúnem cerca de um quinto do eleitorado, os candidatos além de Lula e Flávio Bolsonaro tiveram 10% ou mais dos votos válidos. Juntos, somaram 12,1% nesses locais, contra 7,8% no país. A maioria desses locais fica no Estado de São Paulo e em Goiás, Estado de Ronaldo Caiado, em áreas de renda acima da média. Ali, Flávio Bolsonaro teve 51,0%, contra 36,9% de Lula.</p><p>Augusto Cury, Renan Santos e Caiado somaram 8,7 milhões de votos. Uma pesquisa Genial/Quaest feita em 2 e 3 de outubro perguntou aos eleitores deles como votariam num segundo turno entre Lula e Flávio Bolsonaro. Se a divisão da pesquisa valer para esses eleitores, cerca de 3,9 milhões tenderiam a Flávio Bolsonaro, 1,6 milhão a Lula, e 3,2 milhões estariam indecisos ou não apoiariam nenhum dos dois. Os brasileiros voltam às urnas em 25 de outubro, quando Lula e Flávio Bolsonaro disputam o segundo turno.</p><p class=\"n\">A divisão da pesquisa para o segundo turno é nacional, aplicada aqui às contagens de votos. Não é medida local por local.</p>"
+        "t": "<p>Em locais de votação que reúnem cerca de um quinto do eleitorado, os candidatos além de Lula e Flávio Bolsonaro tiveram 10% ou mais dos votos válidos. Juntos, somaram 12,1% nesses locais, contra 7,8% no país. A maioria desses locais fica no Estado de São Paulo e em Goiás, Estado de Ronaldo Caiado, em áreas de renda acima da média. Ali, Flávio Bolsonaro teve 51,0%, contra 36,9% de Lula.</p><p>O mapa agrupa os locais de votação em hexágonos de área igual, com o tom conforme a fatia dos candidatos menores nos votos de cada um, de modo que uma cidade grande e um município rural extenso ocupam o mesmo espaço.</p><p>Augusto Cury, Renan Santos e Caiado somaram 8,7 milhões de votos. Uma pesquisa Genial/Quaest feita em 2 e 3 de outubro perguntou aos eleitores deles como votariam num segundo turno entre Lula e Flávio Bolsonaro. Se a divisão da pesquisa valer para esses eleitores, cerca de 3,9 milhões tenderiam a Flávio Bolsonaro, 1,6 milhão a Lula, e 3,2 milhões estariam indecisos ou não apoiariam nenhum dos dois. Os brasileiros voltam às urnas em 25 de outubro, quando Lula e Flávio Bolsonaro disputam o segundo turno.</p><p class=\"n\">A divisão da pesquisa para o segundo turno é nacional, aplicada aqui às contagens de votos. Não é medida local por local.</p>"
       },
       "find": {
         "h": "Encontre sua cidade",
@@ -492,6 +492,9 @@
     "scatterTitle": "Um gráfico no lugar do mapa: cada município por uma variável e pela mudança na fatia de Lula",
     "multiples": "Painéis",
     "multiplesTitle": "Um mapa pequeno por faixa de uma variável, cada um com os círculos daquela faixa",
+    "hex": "Hexágonos",
+    "hexTitle": "Locais de votação agrupados em hexágonos de área igual, mais finos ao aproximar",
+    "keyHex": "Cada hexágono reúne os locais de votação dentro dele; vazado onde somam menos de 1.000 votos. Aproxime para células mais finas.",
     "under": "Menos de {n}",
     "over": "{n} ou mais",
     "scatterX": "{name} (cada círculo é um município; sua área são os votos válidos)",
