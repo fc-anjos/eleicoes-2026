@@ -264,11 +264,6 @@
     }
   },
   {
-    "id": "excess-abstention",
-    "block": "abstention",
-    "view": "y=2026&at=home&f=pct_excess_2026:90-100&viz=circles*&vc=abst"
-  },
-  {
     "id": "smaller-candidates",
     "block": "runoff",
     "view": "y=2026&at=home&viz=hex*&vc=share-small"
