@@ -553,3 +553,74 @@
     transition: none;
   }
 }
+/* Phones: the map is the backdrop and the story passes over it, as in NYT and Reuters mobile scrollytelling. The
+   totals shrink to one line, views are framed in the band above the cards, and the cards come with long gaps
+   between them so the map is seen on its own. */
+@media (max-width: 900px) {
+  .storymode aside {
+    padding: 8px 10px 0;
+  }
+  .storymode .tabs {
+    top: 8px;
+    margin-top: 8px !important;
+    padding: 6px 12px 0;
+  }
+  .storymode .stot {
+    top: 39px;
+    padding: 6px 12px 8px;
+    margin-bottom: 62vh;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 14px;
+    row-gap: 2px;
+  }
+  .storymode .stot .sl {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 9.5px;
+  }
+  .storymode .stot .scope,
+  .storymode .stot .fdesc,
+  .storymode .stot .sr.sh,
+  .storymode .stot .sr > span,
+  .storymode .stot .sr u {
+    display: none;
+  }
+  .storymode .stot .sr {
+    display: inline-grid;
+    grid-template-columns: 8px auto auto;
+    gap: 5px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    font-size: 12px;
+  }
+  .storymode .stot .sr.a {
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+  .storymode .step {
+    margin-bottom: 85vh;
+    padding: 16px 16px 14px;
+  }
+  .step h2 {
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+  .step p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 9px;
+  }
+  .step p.n {
+    font-size: 11px;
+  }
+  .step .ck {
+    font-size: 10px;
+  }
+  .dumb {
+    margin-top: 10px;
+  }
+}

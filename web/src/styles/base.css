@@ -396,16 +396,19 @@ h1 {
   gap: 14px;
   padding: 24px;
 }
-.ld-mark {
-  width: min(240px, 40vw);
-  height: auto;
-  opacity: 0.85;
-  animation: breathe 2.6s ease-in-out infinite;
+/* a ring spinner, its arc in the two camps' colours */
+.ld-spin {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 25%, var(--c0) 55%, var(--c1) 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  animation: spin 0.9s linear infinite;
 }
-@keyframes breathe {
-  50% {
-    opacity: 0.45;
-    transform: scale(0.98);
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
   }
 }
 .ld-msg {
@@ -459,9 +462,11 @@ h1 {
 }
 @media (prefers-reduced-motion: reduce) {
   .sk,
-  .ld-mark,
   .ld-msg.in {
     animation: none;
     opacity: 1;
+  }
+  .ld-spin {
+    animation-duration: 2.4s;
   }
 }

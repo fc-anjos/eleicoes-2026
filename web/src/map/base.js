@@ -126,10 +126,12 @@ export const zoom = d3
 
 // panning stays within the map; in the story it may also move left under the cards
 export function panLimits(story) {
+  const phone = story && innerWidth <= 900;
   zoom.translateExtent([
-    [story ? -S.w * 0.4 : 0, 0],
-    [S.w, S.h],
+    [story && !phone ? -S.w * 0.4 : phone ? -S.w * 0.3 : 0, phone ? -S.h * 0.2 : 0],
+    [phone ? S.w * 1.3 : S.w, phone ? S.h * 1.5 : S.h],
   ]);
+  zoom.scaleExtent([phone ? 0.5 : 1, MAXK]);
 }
 
 // the map fills its container: on load and on resize, refit the projection and reallocate the pixel buffers

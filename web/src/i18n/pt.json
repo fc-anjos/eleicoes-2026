@@ -35,7 +35,7 @@
     "aria": "Mapa de pontos dos votos por município",
     "arrowKey": "<span class=\"ar r\">←</span> em direção a Lula <span class=\"ar b\">→</span> em direção ao campo bolsonarista · <i id=\"akl\"></i> = 10 pontos de margem",
     "hint": "<b class=\"mh-t\">Arraste</b> para mover<br /><b class=\"mh-z\">Role</b> para dar zoom",
-    "hintPinch": "Pince para dar zoom",
+    "hintPinch": "Pince",
     "divider": "Divisor entre os anos",
     "dragCompare": "Arraste para comparar",
     "share": "Compartilhar",

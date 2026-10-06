@@ -35,7 +35,7 @@
     "aria": "Dot map of votes by municipality",
     "arrowKey": "<span class=\"ar r\">←</span> towards Lula <span class=\"ar b\">→</span> towards the Bolsonaro camp · <i id=\"akl\"></i> = 10 points of margin",
     "hint": "<b class=\"mh-t\">Drag</b> to pan<br /><b class=\"mh-z\">Scroll</b> to zoom",
-    "hintPinch": "Pinch to zoom",
+    "hintPinch": "Pinch",
     "divider": "Divider between years",
     "dragCompare": "Drag to compare",
     "share": "Share view",

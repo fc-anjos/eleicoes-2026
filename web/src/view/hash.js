@@ -115,6 +115,10 @@ export function setFiltersFrom(q) {
 }
 
 // in the story, the cards cover the map's left side: views centre on the visible part to their right
+// on phones the cards scroll up from the bottom: views centre in the band above them (a negative y offset) and the
+// whole country is drawn smaller to fit there
+const phoneStory = () => d3.select("#page").classed("storymode") && innerWidth <= 900;
+export const storyOffsetY = () => (phoneStory() ? -S.h * 0.2 : 0);
 export function storyOffset() {
   const a = document.querySelector("aside");
   return d3.select("#page").classed("storymode") && innerWidth > 900 ? a.getBoundingClientRect().width / 2 : 0;
@@ -209,14 +213,22 @@ export function applyState(str, animate) {
   const at = q.get("at"),
     a3 = (at || "").split(",").map(Number);
   const off = storyOffset(),
-    home = off ? d3.zoomIdentity.translate(off * 0.6, 0) : d3.zoomIdentity;
+    oy = storyOffsetY(),
+    home = off
+      ? d3.zoomIdentity.translate(off * 0.6, 0)
+      : oy
+        ? d3.zoomIdentity
+            .translate(S.w / 2, S.h / 2 + oy)
+            .scale(0.62)
+            .translate(-S.w / 2, -S.h / 2)
+        : d3.zoomIdentity;
   let t = null;
   if (at === "home") t = home;
   else if (a3.length === 3 && a3.every(isFinite)) {
     const p = proj([a3[0], a3[1]]);
     t = d3.zoomIdentity
-      .translate(S.w / 2 + off, S.h / 2)
-      .scale(Math.max(1, Math.min(MAXK, a3[2])))
+      .translate(S.w / 2 + off, S.h / 2 + oy)
+      .scale(Math.max(oy ? 0.62 : 1, Math.min(MAXK, a3[2] * (oy ? 0.8 : 1))))
       .translate(-p[0], -p[1]);
   }
   if (t) {
