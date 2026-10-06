@@ -3,7 +3,7 @@ import prettier from "eslint-config-prettier";
 import globals from "globals";
 
 export default [
-  { ignores: ["dist/", "node_modules/", "web/public/", "brazil_2026_president_map.html"] },
+  { ignores: ["dist/", "node_modules/", "web/public/"] },
   js.configs.recommended,
   {
     files: ["web/src/**/*.js"],

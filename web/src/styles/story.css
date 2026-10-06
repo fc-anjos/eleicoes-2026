@@ -281,7 +281,7 @@
   width: 100%;
   height: auto;
   display: block;
-  margin: 6px 0 2px;
+  margin: 18px 0 4px;
 }
 .dumb .ct {
   font: 600 11.5px var(--body);
@@ -319,19 +319,13 @@
 .step .ck i:first-child {
   margin-left: 0;
 }
-.step .ck .h {
-  border: 1.5px solid var(--c1);
-}
-.step .ck .f {
-  background: var(--c1);
-}
 /* the place chart in "find your place": every category in its own colour, so the key is neutral; the tick is
    Brazil's figure */
 .step .ck .was {
   border: 1.5px solid var(--haze);
 }
-.step .ck .now {
-  background: var(--haze);
+.step .ck.lula .was {
+  border-color: var(--c1);
 }
 .step .ck .nat {
   width: 2px;

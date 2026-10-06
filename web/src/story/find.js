@@ -5,36 +5,46 @@ import { CATS, M, YEARS } from "../data.js";
 import { MAXK, path, proj, select } from "../map/base.js";
 import { AB, COLS, OT, S, YS, nameOf } from "../state.js";
 import { find } from "../search.js";
+import { changeArrows } from "./charts.js";
 import { tally } from "../stats.js";
 import { natFig } from "../totals.js";
 import { applyState, restoring } from "../view/hash.js";
 
-// Rows: each candidate with a colour of their own (in either year), then Others, then abstention. Candidates'
-// shares are of valid votes, abstention's of everyone on the roll, as TSE reports them. a: 2022, b: 2026, n: Brazil
-// 2026, all in %; null where the candidate didn't run.
+// Rows that mean the same in both years: the two camps (ballot numbers 22 and 13), everyone else merged, and
+// abstention. Candidates' shares are of valid votes, abstention's of everyone on the roll, as TSE reports them.
+// a: 2022, b: 2026, n: Brazil 2026, in %. Also returns who "everyone else" was in each year, for the line below.
+const CAMPS = ["22", "13"];
 function placeRows(m) {
   const [old, now] = [YS[1], YS[0]],
     t = { [old]: tally(old, m), [now]: tally(now, m) },
     N = natFig(now),
-    ran = (y, i) => YEARS[y].cands.some((c) => c.i === i);
-  const sh = (y, i) => (t[y] && ran(y, i) ? (100 * t[y].d.c[i]) / t[y].valid : null);
-  const rows = CATS.map((c, i) => ({ i, k: c.k }))
-    .filter(({ i, k }) => k && i < OT && (ran(old, i) || ran(now, i)))
-    .map(({ i, k }) => ({
-      i,
-      label: k === "22" ? "Bolsonaro camp" : nameOf(ran(now, i) ? now : old, k),
-      a: sh(old, i),
-      b: sh(now, i),
-      n: (100 * N.c[i]) / N.valid,
-    }))
-    .sort((p, q) => (q.b ?? 0) - (p.b ?? 0));
-  rows.push({ i: OT, label: "Others", a: sh(old, OT), b: sh(now, OT), n: (100 * N.c[OT]) / N.valid });
+    ci = (k) => CATS.findIndex((c) => c.k === k),
+    pct = (T, i) => (100 * T.c[i]) / T.valid,
+    sh = (y, i) => (t[y] ? (100 * t[y].d.c[i]) / t[y].valid : null);
+  const rows = CAMPS.map((k) => ({
+    i: ci(k),
+    label: k === "22" ? "Bolsonaro camp" : "Lula",
+    a: sh(old, ci(k)),
+    b: sh(now, ci(k)),
+    n: pct(N, ci(k)),
+  }));
+  const rest = (y) => (t[y] ? 100 - rows[0][y === old ? "a" : "b"] - rows[1][y === old ? "a" : "b"] : null);
+  rows.push({ i: OT, label: "Everyone else", a: rest(old), b: rest(now), n: 100 - rows[0].n - rows[1].n });
   const ab = (y) => (t[y] ? (100 * t[y].ab) / t[y].all : null);
   rows.push({ i: AB, label: "Didn't vote", a: ab(old), b: ab(now), n: (100 * N.ab) / N.all });
-  return rows;
+  // everyone else, by name: the candidates with a colour of their own that year, then the rest as "others"
+  const field = (y) => {
+    if (!t[y]) return [];
+    const named = YEARS[y].cands
+      .filter((c) => c.k && !CAMPS.includes(c.k) && c.i < OT)
+      .map((c) => ({ label: nameOf(y, c.k), v: sh(y, c.i) }))
+      .sort((p, q) => q.v - p.v);
+    return [...named, { label: "others", v: sh(y, OT) }];
+  };
+  return { rows, field: { [old]: field(old), [now]: field(now) } };
 }
 
-// one row per category: 2022 hollow, 2026 filled, Brazil's 2026 as a tick; the change on the right
+// one row per category: an arrow from 2022 to 2026, Brazil's 2026 as a tick; the change on the right
 function placeChart(el, title, rows) {
   const W = 330,
     rh = 21,
@@ -79,25 +89,7 @@ function placeChart(el, title, rows) {
     .attr("x2", (d) => x(d.n))
     .attr("y1", -7)
     .attr("y2", 7);
-  r.filter((d) => d.a != null && d.b != null)
-    .append("line")
-    .attr("x1", (d) => x(d.a))
-    .attr("x2", (d) => x(d.b))
-    .attr("stroke", (d) => COLS[d.i])
-    .attr("stroke-width", 2)
-    .attr("opacity", 0.5);
-  r.filter((d) => d.a != null)
-    .append("circle")
-    .attr("cx", (d) => x(d.a))
-    .attr("r", 4)
-    .attr("fill", "none")
-    .attr("stroke", (d) => COLS[d.i])
-    .attr("stroke-width", 1.5);
-  r.filter((d) => d.b != null)
-    .append("circle")
-    .attr("cx", (d) => x(d.b))
-    .attr("r", 4)
-    .attr("fill", (d) => COLS[d.i]);
+  changeArrows(r, x, (d) => COLS[d.i]);
   r.append("text")
     .attr("class", "rv")
     .attr("x", W)
@@ -108,27 +100,37 @@ function placeChart(el, title, rows) {
     .append("p")
     .attr("class", "ck all")
     .html(
-      `<i class="was"></i>${YS[1]} <i class="now"></i>${YS[0]} <i class="nat"></i>Brazil ${YS[0]} · ` +
+      `<i class="was"></i>${YS[1]} → ${YS[0]} <i class="nat"></i>Brazil ${YS[0]} · ` +
         "share of valid votes; didn't vote: of the roll",
     );
 }
 
-// the card's sentence: the two camps and abstention, here against the country
+// the card's sentence: the two camps, everyone else and abstention, here against the country
 function summary(label, rows) {
-  const get = (i) => rows.find((r) => r.i === i),
-    ch = (r) => (r.a == null ? "" : ` (${r.b >= r.a ? "+" : "−"}${Math.abs(r.b - r.a).toFixed(1)})`),
+  const ch = (r) => (r.a == null ? "" : ` (${r.b >= r.a ? "+" : "−"}${Math.abs(r.b - r.a).toFixed(1)})`),
     vs = (r) =>
       Math.abs(r.b - r.n) < 0.5 ? "about the national" : r.b > r.n ? "above the national" : "below the national";
-  const [bol, lula, ab] = [get(CATS.findIndex((c) => c.k === "22")), get(CATS.findIndex((c) => c.k === "13")), get(AB)];
+  const [bol, lula, rest, ab] = rows;
   const [first, second] = bol.b > lula.b ? [bol, lula] : [lula, bol],
     name = (r) => (r === bol ? "the Bolsonaro camp" : "Lula");
-  const third = rows.filter((r) => ![bol, lula, ab].includes(r) && r.b != null && r.i !== OT).slice(0, 1)[0];
   return (
     `<p><b>${label}</b> in ${YS[0]}: ${name(first)} led ${name(second)}, ${first.b.toFixed(1)}%${ch(first)} to ` +
-    `${second.b.toFixed(1)}%${ch(second)}. ` +
-    (third ? `${third.label} took ${third.b.toFixed(1)}%, ${vs(third)} ${third.n.toFixed(1)}%. ` : "") +
-    `${ab.b.toFixed(1)}% of the roll didn't vote${ch(ab)}, ${vs(ab)} ${ab.n.toFixed(1)}%.</p>`
+    `${second.b.toFixed(1)}%${ch(second)}. Everyone else took ${rest.b.toFixed(1)}%${ch(rest)}, ${vs(rest)} ` +
+    `${rest.n.toFixed(1)}%. ${ab.b.toFixed(1)}% of the roll didn't vote${ch(ab)}, ${vs(ab)} ${ab.n.toFixed(1)}%.</p>`
   );
+}
+
+// who "everyone else" was: different candidates each year, so listed, not compared
+function fieldLine(el, field) {
+  const list = (y) =>
+    field[y]
+      .filter((c) => c.v >= 0.05)
+      .map((c) => `${c.label} ${c.v.toFixed(1)}%`)
+      .join(", ");
+  d3.select(el)
+    .append("p")
+    .attr("class", "ck")
+    .html(`<b>Everyone else</b> · ${YS[0]}: ${list(YS[0])} · ${YS[1]}: ${list(YS[1])}`);
 }
 
 export function findStep(el) {
@@ -165,8 +167,9 @@ export function findStep(el) {
       c = proj.invert([(x0 + x1) / 2, (y0 + y1) / 2]);
     restoring(() => applyState(`y=cmp&at=${c[0]},${c[1]},${k}`, true));
     select(d.f);
-    const rows = placeRows(m);
+    const { rows, field } = placeRows(m);
     res.html(summary(d.label, rows));
     placeChart(res.node(), `${d.label}, ${YS[1]} → ${YS[0]}`, rows);
+    fieldLine(res.node(), field);
   }
 }

@@ -75,6 +75,38 @@ const chartSvg = (el, W, H, title) => {
   return s;
 };
 
+// Each row's change as an arrow: a hollow dot at the earlier value (a), the arrowhead at the later one (b), so a fall
+// points left and a rise right, whichever way the eye reads. Rows with only one value get a filled dot there.
+export function changeArrows(r, x, col) {
+  r.filter((d) => d.a != null && d.b != null).each(function (d) {
+    const g = d3.select(this),
+      x0 = x(d.a),
+      x1 = x(d.b),
+      dir = x1 >= x0 ? 1 : -1,
+      head = 7;
+    if (Math.abs(x1 - x0) > head)
+      g.append("line")
+        .attr("x1", x0 + dir * 3.5)
+        .attr("x2", x1 - dir * head)
+        .attr("stroke", col(d))
+        .attr("stroke-width", 2);
+    g.append("circle")
+      .attr("cx", x0)
+      .attr("r", 3.5)
+      .attr("fill", "none")
+      .attr("stroke", col(d))
+      .attr("stroke-width", 1.5);
+    g.append("path")
+      .attr("d", `M${x1},0L${x1 - dir * head},-4.5L${x1 - dir * head},4.5Z`)
+      .attr("fill", col(d));
+  });
+  r.filter((d) => (d.a == null) !== (d.b == null))
+    .append("circle")
+    .attr("cx", (d) => x(d.a ?? d.b))
+    .attr("r", 4)
+    .attr("fill", col);
+}
+
 export function chart(el, spec) {
   if (spec.by === "series") return seriesChart(el, spec);
   const rows = groupShares(spec),
@@ -111,22 +143,7 @@ export function chart(el, spec) {
     .attr("x", 0)
     .attr("y", 4)
     .text((d) => d.label);
-  r.append("line")
-    .attr("x1", (d) => x(d.a))
-    .attr("x2", (d) => x(d.b))
-    .attr("stroke", lula)
-    .attr("stroke-width", 2)
-    .attr("opacity", 0.5);
-  r.append("circle")
-    .attr("cx", (d) => x(d.a))
-    .attr("r", 4)
-    .attr("fill", "none")
-    .attr("stroke", lula)
-    .attr("stroke-width", 1.5);
-  r.append("circle")
-    .attr("cx", (d) => x(d.b))
-    .attr("r", 4)
-    .attr("fill", lula);
+  changeArrows(r, x, () => lula);
   r.append("text")
     .attr("class", "rv")
     .attr("x", W)
@@ -135,15 +152,15 @@ export function chart(el, spec) {
     .text((d) => signed(d.b - d.a));
   d3.select(el)
     .append("p")
-    .attr("class", "ck")
-    .html(`<i class="h"></i>${YS[1]} <i class="f"></i>${YS[0]} · Lula's share of valid votes`);
+    .attr("class", "ck lula")
+    .html(`<i class="was"></i>${YS[1]} → ${YS[0]} · Lula's share of valid votes`);
 }
 
 // a small column chart for a series given in the step (e.g. abstention by election), the last column highlighted
 function seriesChart(el, spec) {
   const W = 330,
-    H = 118,
-    top = 26,
+    H = 128,
+    top = 36,
     bot = 18,
     x = d3
       .scaleBand()
