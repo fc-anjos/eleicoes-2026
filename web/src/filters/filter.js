@@ -5,7 +5,7 @@ import * as d3 from "d3";
 import { M, MG, ORDER } from "../data.js";
 import { DOT } from "../dots.js";
 import { fmt, showVal } from "../format.js";
-import { t } from "../i18n/index.js";
+import { onLang, t } from "../i18n/index.js";
 import { repaint } from "../map/render.js";
 import { panelIfShown } from "../panel/results.js";
 import { S, YS } from "../state.js";
@@ -16,6 +16,10 @@ export const codeOf = MG.features.map((f) => f.properties.codarea);
 
 // Filter results are cached by their signature (story steps reuse them, and are precomputed in idle time)
 const FCACHE = new Map();
+onLang(() => {
+  FCACHE.clear();
+  refilter();
+});
 const fsig = () =>
   VARS.filter(isOn)
     .map((v) => `${v.k}:${lo_(v)}:${hi_(v)}${v.dyn ? ":" + S.YEAR : ""}`)

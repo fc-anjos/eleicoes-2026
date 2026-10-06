@@ -3,7 +3,7 @@
 // them. "Others" stays last. Each row also shows its change since the other year.
 import * as d3 from "d3";
 import { YEARS } from "../data.js";
-import { fmt, hum, pctN, signed } from "../format.js";
+import { change, fmt, hum, pctN } from "../format.js";
 import { t } from "../i18n/index.js";
 import { repaint } from "../map/render.js";
 import { A8, AB, AO, COLS, HID, S, candName, dateOf, otherYear, packCols, store } from "../state.js";
@@ -92,7 +92,7 @@ function drawRows() {
       prev: has(oy, c.i) ? G.c[c.i] / G.valid : null,
       unit: t("panel.votes"),
     })),
-  ].sort((a, b) => (a.k === "") - (b.k === "") || b.v - a.v);
+  ].sort((a, b) => !!a.abst - !!b.abst || (a.k === "") - (b.k === "") || b.v - a.v);
   rows.forEach((c) => {
     const i = c.i;
     const r = list
@@ -100,6 +100,7 @@ function drawRows() {
       .datum(c)
       .attr("class", "cand")
       .classed("ab", !!c.abst)
+      .classed("ab1", !!c.abst && c === rows.find((x) => x.abst))
       .classed("off", !!HID[i])
       .style("--c", COLS[i]);
     // visibility switch | the row itself (hover or click: show only this category) | colour
@@ -118,14 +119,16 @@ function drawRows() {
       .append("button")
       .attr("class", "body")
       .attr("aria-pressed", String(S.focus === i));
-    const d = c.prev == null ? "" : (c.share - c.prev) * 100,
-      ds = d === "" ? "" : `<span class="dl">${t("panel.vs", { d: signed(d), year: oy })}</span>`;
+    const ds =
+      c.prev == null
+        ? ""
+        : `<span class="dl" title="${t("panel.vs", { year: oy })}">${change((c.share - c.prev) * 100)}</span>`;
     b.append("div")
       .attr("class", "row")
-      .html(`<span class="nm">${c.n}</span><span class="pc">${pctN(100 * c.share)}</span>`);
+      .html(`<span class="nm">${c.n}</span>${ds}<span class="pc">${pctN(100 * c.share)}</span>`);
     b.append("div")
       .attr("class", "vt")
-      .html(`${fmt(c.v)} ${c.unit}${ds}`);
+      .text(`${fmt(c.v)} ${c.unit}`);
     if (c.extra) b.append("div").attr("class", "who").text(c.extra);
     if (c.who) b.append("div").attr("class", "who").text(c.who.join(", "));
     const m = c.v / 1e6,

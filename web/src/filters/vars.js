@@ -2,7 +2,7 @@
 // computed here: the change in Lula's share, the abstention rate in the year shown and its change since the other.
 import * as d3 from "d3";
 import { M, MG, PLACES, STUDIO } from "../data.js";
-import { tOr } from "../i18n/index.js";
+import { onLang, tOr } from "../i18n/index.js";
 import { S, YS } from "../state.js";
 import { abRate, lulaShift } from "../stats.js";
 
@@ -32,7 +32,9 @@ const PVARS = PLACES.vars.map((v, j) => {
 });
 
 // names and sources come from the locale (i18n "vars"), falling back to the data's own English
-const named = (v) => ({ ...v, n: tOr(`vars.${v.k}.n`, v.n), src: tOr(`vars.${v.k}.src`, v.src) });
+// (n0/src0); relabelled when the language changes
+const label = (v) => Object.assign(v, { n: tOr(`vars.${v.k}.n`, v.n0), src: tOr(`vars.${v.k}.src`, v.src0) });
+const named = (v) => label({ ...v, n0: v.n, src0: v.src });
 export const VARS = [
   ...PVARS,
   ...STUDIO.map((v, j) => ({ ...v, get: (m) => (m.x ? m.x[j] : null) })),
@@ -49,6 +51,7 @@ export const VARS = [
     dyn: true,
   },
 ].map(named);
+onLang(() => VARS.forEach(label));
 
 // sliders move by municipality count (0–100 = quantiles of the values): income and population are very skewed
 export function quantiles(v) {

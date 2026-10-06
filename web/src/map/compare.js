@@ -6,7 +6,7 @@ import { refilter } from "../filters/filter.js";
 import { VARS } from "../filters/vars.js";
 import { panelIfShown, setFocus } from "../panel/results.js";
 import { requantile } from "../panel/studio.js";
-import { t } from "../i18n/index.js";
+import { onLang, t } from "../i18n/index.js";
 import { S, YS } from "../state.js";
 import { repaint } from "./render.js";
 
@@ -47,6 +47,12 @@ const moveSplit = (v) => {
 };
 
 export function initCompare() {
+  onLang(() =>
+    d3
+      .select("#years")
+      .selectAll("button")
+      .text((y) => (y === "cmp" ? t("map.compare") : y)),
+  );
   d3.select("#years")
     .selectAll("button")
     .data([...YS, "cmp"])

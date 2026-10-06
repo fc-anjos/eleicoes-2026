@@ -170,6 +170,14 @@ path.uf {
 .mapbar .credit {
   text-align: right;
 }
+.langs a {
+  color: var(--haze);
+  text-decoration: none;
+  font-weight: 600;
+}
+.langs a[aria-current] {
+  color: var(--ink);
+}
 button {
   font: 500 12px/1 var(--mono);
   color: var(--ink);

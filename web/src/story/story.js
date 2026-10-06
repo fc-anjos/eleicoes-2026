@@ -5,8 +5,8 @@ import * as d3 from "d3";
 import { CATS, M, STORY } from "../data.js";
 import { computeFilter, describeFilter } from "../filters/filter.js";
 import { VARS } from "../filters/vars.js";
-import { hum, pctN, signed } from "../format.js";
-import { t } from "../i18n/index.js";
+import { change, hum, pctN } from "../format.js";
+import { onLang, t } from "../i18n/index.js";
 import { layout, panLimits, svg, zoom } from "../map/base.js";
 import { setNotes } from "../map/notes.js";
 import { repaint } from "../map/render.js";
@@ -78,15 +78,21 @@ export function storyTotals() {
     N = FILTERED ? natFig(YEAR) : null;
   const c22 = CATS.findIndex((c) => c.k === "22"),
     c13 = CATS.findIndex((c) => c.k === "13");
+  // a small results table: share (with a bar), votes, change since the other year. The camps' shares are of valid
+  // votes, abstention's of the roll, so it sits apart below a rule with its own note.
+  const lead = F.c[c22] >= F.c[c13] ? c22 : c13;
   const row = (i, n, v, sh, pv, nv) => {
-    const d = (sh - pv) * 100,
-      change = pv == null ? "" : t("story.vs", { d: signed(d), year: oy }),
-      ofAll = N ? ` <s>${t("story.ofAll", { v: Math.round((100 * v) / nv) })}</s>` : "";
+    const ofAll = N ? ` <s>${t("story.ofAll", { v: Math.round((100 * v) / nv) })}</s>` : "",
+      note = i === AB ? `<small>${t("story.ofRoll")}</small>` : "";
     return (
-      `<div class="sr${i === AB ? " a" : ""}" style="--c:${COLS[i]}"><i></i><span>${n}</span>` +
-      `<b>${pctN(100 * sh)}</b><u>${hum(v)}${ofAll}</u><em>${change}</em></div>`
+      `<div class="sr${i === AB ? " a" : ""}${i === lead ? " lead" : ""}" style="--c:${COLS[i]}"><i></i>` +
+      `<span>${n}${note}<em class="bar"><em style="width:${(100 * sh).toFixed(1)}%"></em></em></span>` +
+      `<b>${pctN(100 * sh)}</b><u>${hum(v, 1)}${ofAll}</u><q>${change((sh - pv) * 100)}</q></div>`
     );
   };
+  const head =
+    `<div class="sr sh"><i></i><span>${t("story.ofValid")}</span><b>${t("story.colShare")}</b>` +
+    `<u>${t("story.colVotes")}</u><q>${t("story.colChange", { year: oy })}</q></div>`;
   const one = INSET && INSET.size === 1 ? M[[...INSET][0]].n : null,
     where =
       " · " +
@@ -102,6 +108,7 @@ export function storyTotals() {
       (N
         ? `<div class="scope">${t("story.scope", { n: hum(F.all), p: Math.round((100 * F.all) / N.all), all: hum(N.all) })}</div>`
         : "") +
+      head +
       row(c22, nameOf(YEAR, "22"), F.c[c22], F.c[c22] / F.valid, G.c[c22] / G.valid, N && N.c[c22]) +
       row(c13, t("cats.lula"), F.c[c13], F.c[c13] / F.valid, G.c[c13] / G.valid, N && N.c[c13]) +
       row(AB, t("cats.didntVote"), F.ab, F.ab / F.all, G.ab / G.all, N && N.ab) +
@@ -139,13 +146,9 @@ function setTab(story) {
   }
 }
 
-export function initStory() {
-  steps = d3
-    .select("#steps")
-    .selectAll(".step")
-    .data(STORY)
-    .join("section")
-    .attr("class", "step")
+// each step's copy, charts and the find box, and the progress dots' labels; redrawn when the language changes
+function fillSteps() {
+  steps
     .html((d) => `<h2>${copyOf(d).h}</h2>${copyOf(d).t}`)
     .each(function (d) {
       if (d.chart) chart(this, { ...d.chart, ...copyOf(d).chart });
@@ -156,18 +159,27 @@ export function initStory() {
     .append("p")
     .attr("class", "cue")
     .html('<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>' + t("story.cue"));
+  prog.attr("aria-label", (d) => copyOf(d).h).attr("title", (d) => copyOf(d).h);
+  d3.select("#toexplore").on("click", () => setTab(false));
+}
+
+export function initStory() {
+  steps = d3.select("#steps").selectAll(".step").data(STORY).join("section").attr("class", "step");
   const aside = document.querySelector("aside");
   prog = d3
     .select("#prog")
     .selectAll("button")
     .data(STORY)
     .join("button")
-    .attr("aria-label", (d) => copyOf(d).h)
-    .attr("title", (d) => copyOf(d).h)
     .on("click", (e, d) => {
       const i = STORY.indexOf(d);
       aside.scrollTo({ top: steps.nodes()[i].offsetTop - aside.clientHeight * 0.4, behavior: "smooth" });
     });
+  fillSteps();
+  onLang(() => {
+    fillSteps();
+    if (stepNow >= 0) setNotes(notesOf(stepNow));
+  });
   const io = new IntersectionObserver(
     (es) => {
       const vis = es.filter((e) => e.isIntersecting);
@@ -180,7 +192,6 @@ export function initStory() {
   });
   d3.select("#tab-story").on("click", () => setTab(true));
   d3.select("#tab-explore").on("click", () => setTab(false));
-  d3.select("#toexplore").on("click", () => setTab(false));
   setTab(location.hash.length <= 1); // a shared view opens in Explore (initHash then applies it)
   setTimeout(precompute, 1500);
 }

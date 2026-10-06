@@ -88,8 +88,10 @@
 .cand.off .body {
   opacity: 0.4;
 }
-.cand.ab .nm {
-  font-weight: 600;
+/* abstention is a share of the roll, not of valid votes: set apart below the candidates */
+.cand.ab1 {
+  border-top: 2px solid var(--rule);
+  margin-top: 10px;
 }
 @media (prefers-reduced-motion: reduce) {
   .cand .vis,
@@ -311,8 +313,7 @@
   font-size: 12px;
 }
 .cand .dl {
-  margin-left: 8px;
-  color: var(--haze);
+  font: 12px/1 var(--body);
 }
 #tip .sub {
   color: var(--haze);

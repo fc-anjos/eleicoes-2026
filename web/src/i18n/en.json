@@ -12,12 +12,14 @@
   },
   "units": {
     "pct": "{v}%",
-    "pp": "{v} pp",
+    "pp": "{v} points",
     "perKm2": "{v}/km²",
     "brl": "R$ {v}",
     "times": "{v}×",
     "million": "{v}M",
-    "thousand": "{v}k"
+    "thousand": "{v}k",
+    "up": "up {v} points",
+    "down": "down {v} points"
   },
   "cats": {
     "others": "Others",
@@ -39,7 +41,8 @@
     "share": "Share view",
     "key": "<b>1 dot = <span class=\"vpd\"></span> votes</b><br />Votes placed around their polling place<br /><span class=\"hint\">Scroll to zoom · drag to pan</span>",
     "credit": "Created by <b>Felipe dos Anjos</b><br /><a href=\"https://github.com/fc-anjos\">github.com/fc-anjos</a> · <a href=\"mailto:felipe.cavalheiro.anjos@gmail.com\">felipe.cavalheiro.anjos@gmail.com</a><br />Data: <a href=\"https://dadosabertos.tse.jus.br/\">Tribunal Superior Eleitoral (TSE)</a>",
-    "compare": "Compare"
+    "compare": "Compare",
+    "language": "Language"
   },
   "tip": {
     "ofWhomOptional": "of whom optional",
@@ -186,8 +189,12 @@
     "litMunis": "lit municipalities",
     "inLitPlaces": "{place}, lit polling places",
     "ofAll": "{v}% of all",
-    "vs": "{d} vs {year}",
-    "scope": "<b>{n}</b> people on the roll here, <b>{p}%</b> of Brazil's {all}"
+    "scope": "<b>{n}</b> people on the roll here, <b>{p}%</b> of Brazil's {all}",
+    "colShare": "Share",
+    "colVotes": "Votes",
+    "colChange": "Since {year}",
+    "ofRoll": "of registered voters",
+    "ofValid": "of valid votes"
   },
   "explore": {
     "years": "Election year",
@@ -203,7 +210,7 @@
     "show": "Show {name}",
     "colour": "Colour for {name}",
     "votes": "votes",
-    "vs": "{d} pp vs {year}",
+    "vs": "since {year}",
     "abHad": "people aged 18–69 on the roll didn't vote",
     "abOptional": "people aged 70–79 or 16–17 didn't vote",
     "ab80": "people aged 80+ didn't vote",

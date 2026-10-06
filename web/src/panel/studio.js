@@ -5,7 +5,7 @@ import { CATS, M, VPD } from "../data.js";
 import { refilter } from "../filters/filter.js";
 import { VARS, hi_, isOn, lo_, quantiles, resetVar } from "../filters/vars.js";
 import { fmt, num, showVal, unit } from "../format.js";
-import { t } from "../i18n/index.js";
+import { onLang, t } from "../i18n/index.js";
 import { repaint } from "../map/render.js";
 import { A8, AB, AO, COLS, HID, K, S, css, packCols, store } from "../state.js";
 import { saveSoon } from "../view/hash.js";
@@ -176,7 +176,24 @@ function initDisplay() {
   });
 }
 
+// a language change: the filter names, sources and values, and the numbers set by the display controls
+function relabel() {
+  fl.select(".fn").text((v) => v.n);
+  fl.select(".fs").text((v) => v.src);
+  fl.select("input.lo").attr("aria-label", (v) => t("studio.min", { name: v.n }));
+  fl.select("input.hi").attr("aria-label", (v) => t("studio.max", { name: v.n }));
+  VARS.forEach(drawRange);
+  const v = fmt(S.STEP * VPD);
+  d3.selectAll(".vpd").text(v);
+  d3.select("#vpdv").text(v);
+  d3.select("#rad").dispatch("input");
+  const st = d3.select("#studiox");
+  st.attr("title", t(st.attr("aria-expanded") === "true" ? "studio.hide" : "studio.show"));
+  drawArea();
+}
+
 export function initStudio() {
+  onLang(relabel);
   // the studio column collapses to a strip; the map refits to the space it frees
   d3.select("#studiox").on("click", (e) => {
     const o = e.currentTarget.getAttribute("aria-expanded") !== "true";

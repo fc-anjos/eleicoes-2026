@@ -35,9 +35,11 @@ tests/smoke.mjs        opens the built page in headless Chromium and checks each
 ## Translating
 
 All copy lives in `web/src/i18n/en.json`: the page's labels, the story's text by step id (`story.steps.<id>`), chart
-titles and the filter variables' names. To add a language, copy it to `web/src/i18n/xx.json` (e.g. `pt.json`),
-translate the values and open the page with `?lang=xx`. Keys left out fall back to English; `{name}` placeholders
-must stay. Numbers follow the locale.
+titles and the filter variables' names. `pt.json` is the Brazilian Portuguese translation. The page picks `?lang=xx`
+if given, else the first of the browser's languages it has (any `pt-*` gets Portuguese), else English; the EN · PT
+links in the credits switch and keep the view. To add a language, copy `en.json` to `web/src/i18n/xx.json`,
+translate the values and add a link beside EN · PT in `index.html`. Keys left out fall back to English; `{name}`
+placeholders must stay. Numbers follow the locale.
 
 ## Building
 
