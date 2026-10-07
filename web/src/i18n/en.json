@@ -176,7 +176,7 @@
       },
       "smaller-candidates": {
         "h": "Where the other candidates did best",
-        "t": "<p class=\"howto\">This map pools polling places into equal-sized hexagons, brighter where the other candidates' combined share was higher. Hollow hexagons hold fewer than 1,000 votes; zoom in for finer cells.</p><p>In polling places that hold about a fifth of all voters, candidates other than Lula and Flávio Bolsonaro won 10 percent or more of the valid vote. Together they took 12.1 percent in these places, compared with 7.8 percent nationally. Most of these polling places are in São Paulo state and in Goiás, Ronaldo Caiado's home state, in neighbourhoods with above-average income. Flávio Bolsonaro led Lula there, 51.0 percent to 36.9 percent.</p><p>Augusto Cury, Renan Santos and Caiado won 8.7 million votes combined. A Genial/Quaest poll taken 2–3 October asked their voters how they would vote in a runoff between Lula and Flávio Bolsonaro. If the poll's split holds for these voters, about 3.9 million would lean toward Flávio Bolsonaro, 1.6 million toward Lula, and 3.2 million would be undecided or back neither. Brazilians vote again on 25 October, when Lula and Flávio Bolsonaro meet in the runoff.</p><p class=\"n\">The poll's runoff split is national, applied here to the vote counts. It was not measured at each polling place.</p>"
+        "t": "<p class=\"howto\">This map pools polling places into equal-sized hexagons, brighter where the other candidates' combined share was higher. Hollow hexagons hold fewer than 1,000 votes; zoom in for finer cells. The buttons show each candidate separately.</p><p>In polling places that hold about a fifth of all voters, candidates other than Lula and Flávio Bolsonaro won 10 percent or more of the valid vote. Together they took 12.1 percent in these places, compared with 7.8 percent nationally. Most of these polling places are in São Paulo state and in Goiás, Ronaldo Caiado's home state, in neighbourhoods with above-average income. Flávio Bolsonaro led Lula there, 51.0 percent to 36.9 percent.</p><p>Augusto Cury, Renan Santos and Caiado won 8.7 million votes combined. A Genial/Quaest poll taken 2–3 October asked their voters how they would vote in a runoff between Lula and Flávio Bolsonaro. If the poll's split holds for these voters, about 3.9 million would lean toward Flávio Bolsonaro, 1.6 million toward Lula, and 3.2 million would be undecided or back neither. Brazilians vote again on 25 October, when Lula and Flávio Bolsonaro meet in the runoff.</p><p class=\"n\">The poll's runoff split is national, applied here to the vote counts. It was not measured at each polling place.</p>"
       },
       "find": {
         "h": "Find your place",
@@ -511,7 +511,9 @@
     "keyMarginNames": "Names: Lula's margin in points, 2022 → 2026",
     "scatterYAbst": "Change in the abstention rate, 2022 → 2026, in points",
     "keyRoll": "people on the roll",
-    "scatterXShort": "{name} (circle area: voters)"
+    "scatterXShort": "{name} (circle area: voters)",
+    "smallShort": "All others",
+    "keyShareNat": "Nationally: {v}. The classes run from half to three times that."
   },
   "tour": {
     "title": "How to use this map",

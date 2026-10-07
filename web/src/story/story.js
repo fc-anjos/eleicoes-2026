@@ -8,6 +8,7 @@ import { VARS } from "../filters/vars.js";
 import { change, hum, pctN } from "../format.js";
 import { onLang, t } from "../i18n/index.js";
 import { layout, panLimits, svg, zoom } from "../map/base.js";
+import { vcolName } from "../map/marks.js";
 import { setNotes } from "../map/notes.js";
 import { repaint } from "../map/render.js";
 import { panel } from "../panel/results.js";
@@ -242,6 +243,24 @@ function setTab(story) {
   }
 }
 
+// a step with a choice of colour measure (vcs: vc= values): one button per measure, which recolours the map
+const vcOf = (d) => new URLSearchParams(d.view).get("vc");
+function vcToggle(el, d) {
+  const box = d3.select(el).append("div").attr("class", "races").attr("role", "group");
+  box
+    .selectAll("button")
+    .data(d.vcs)
+    .join("button")
+    .attr("aria-pressed", (v) => v === vcOf(d))
+    .text((v) => (v === "share-small" ? t("viz.smallShort") : vcolName(v)))
+    .on("click", (e, v) => {
+      d.view = d.view.replace(/vc=[^&]+/, "vc=" + v);
+      box.selectAll("button").attr("aria-pressed", (q) => q === v);
+      restoring(() => applyState(d.view, true));
+      saveSoon();
+    });
+}
+
 // each step's copy, charts and the find box, and the progress dots' labels; redrawn when the language changes
 function fillSteps() {
   steps
@@ -251,6 +270,7 @@ function fillSteps() {
         `<h2>${copyOf(d).h}</h2>${copyOf(d).t}`,
     )
     .each(function (d) {
+      if (d.vcs) vcToggle(this, d);
       if (d.chart) chart(this, { ...d.chart, ...copyOf(d).chart });
       if (d.chart2) chart(this, { ...d.chart2, ...copyOf(d).chart2 });
       if (d.find) findStep(this);

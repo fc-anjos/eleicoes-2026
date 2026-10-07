@@ -1072,3 +1072,15 @@ kbd {
   font: 700 10px/13px var(--body);
   text-align: center;
 }
+/* a step's colour-measure buttons (vcs in story.json): one pressed at a time */
+.races {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 12px;
+}
+.races button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--night);
+  border-color: var(--ink);
+}

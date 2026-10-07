@@ -239,8 +239,8 @@ export function measure(y, bg) {
   if (v === "abst")
     return { col: (r) => (r.ab == null ? null : seq(COLS[CI("A")], (r.ab - ABR[0]) / (ABR[1] - ABR[0]), bg)) };
   if (v.startsWith("share-")) {
-    const { get, col } = shareOf(v.slice(6));
-    return { col: (r) => (get(r) == null ? null : seq(col, SSTEP[sclass(get(r))], bg)) };
+    const { get, col, cls } = shareOf(v.slice(6));
+    return { col: (r) => (get(r) == null ? null : seq(col, SSTEP[cls(get(r))], bg)) };
   }
   if (v === "mix") return { col: (r) => COLS[r.lead], layers: hatchMix };
   return { col: (r) => marginCol(r.lead, r.margin), hatch: flipped };
@@ -248,14 +248,27 @@ export function measure(y, bg) {
 // a candidate's (or the smaller candidates') share: its getter, colour and the top of its scale (the highest value
 // over both years, so the two sides of the divider share one scale). One hue for every candidate, since some
 // candidates' own colours are greys that make no ramp on the dark map
-// drawn in five classes of five points (under 5%, 5–10 … 20% and over): steps are easier to tell apart than a
-// continuous shade, and the same class means the same share for every candidate
-const SCUTS = [5, 10, 15, 20],
-  SSTEP = [0, 0.3, 0.55, 0.78, 1];
-const sclass = (x) => SCUTS.filter((c) => x >= c).length;
+// drawn in six classes set by the candidate's own national share (half of it, the share itself, 1.5×, 2× and 3×,
+// rounded): one fixed scale left the candidates with 2–4% of the vote in one class across the whole country, and
+// steps are easier to tell apart than a continuous shade. The middle break is the national share, named in the key
+const SMULT = [0.5, 1, 1.5, 2, 3],
+  SSTEP = [0, 0.24, 0.44, 0.63, 0.82, 1];
+const nice = (x) => (x < 5 ? Math.round(x * 2) / 2 : Math.round(x));
 export function shareOf(k) {
   const get = k === "small" ? (r) => r.small : ((i) => (r) => (i in r.sh ? r.sh[i] : null))(CI(k));
-  return { get, col: SHARE };
+  const c = YEARS[YS[0]].cands,
+    valid = d3.sum(c, (x) => x.v),
+    v =
+      k === "small"
+        ? valid -
+          d3.sum(
+            c.filter((x) => x.k === "13" || x.k === "22"),
+            (x) => x.v,
+          )
+        : c.find((x) => x.k === k)?.v,
+    nat = (100 * (v || 0)) / valid,
+    cuts = SMULT.map((m) => nice(nat * m));
+  return { get, col: SHARE, nat, cuts, cls: (x) => cuts.filter((q) => x >= q).length };
 }
 // circle radius in css px: area ∝ votes (a sqrt scale, as in Bostock's bubble maps), following the zoom gently so a
 // city doesn't swallow the screen. One national scale whatever the municipal filter, so a small town always looks small: the
@@ -853,14 +866,14 @@ export function drawKey(t = d3.zoomTransform(svg.node())) {
     const cols = [0, 0.5, 1].map((u) => seq(COLS[CI("A")], u, bg));
     h = `<div class="kt">${tr("viz.keyAbst")}</div>` + bar(cols, [ABR[0] + "%", ABR[1] + "%"]);
   } else if (v.startsWith("share-")) {
-    const { col } = shareOf(v.slice(6));
+    const { col, cuts, nat } = shareOf(v.slice(6));
     h =
       `<div class="kt">${tr("viz.keyShare", { name: vcolName(v) })}</div><div class="ksteps">` +
       SSTEP.map(
         (u, i) =>
-          `<span><i style="background:${seq(col, u, bg)}"></i>${i ? SCUTS[i - 1] + (i === SCUTS.length ? "%+" : "") : "0"}</span>`,
+          `<span><i style="background:${seq(col, u, bg)}"></i>${i ? num(cuts[i - 1], cuts[i - 1] % 1 ? 1 : 0) + (i === cuts.length ? "%+" : "") : "0"}</span>`,
       ).join("") +
-      `</div>`;
+      `</div><div class="kn">${tr("viz.keyShareNat", { v: pctN(nat) })}</div>`;
   } else {
     // Lula's classes left, grey in the middle, the camp's right
     const L = CI("13"),

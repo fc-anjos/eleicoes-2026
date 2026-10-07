@@ -287,7 +287,7 @@ function stackChart(el, spec) {
     .attr("class", "tk")
     .attr("x", (d, i) => (i === 0 ? 0 : i === parts.length - 1 ? W : x((d.x0 + d.x1) / 2)))
     .attr("y", top + bh + 16)
-    .attr("text-anchor", (d, i) => (i === 0 ? "start" : i === parts.length - 1 ? "end" : "middle"))
+    .style("text-anchor", (d, i) => (i === 0 ? "start" : i === parts.length - 1 ? "end" : "middle"))
     .text((d) => d.label);
   if (spec.note) d3.select(el).append("p").attr("class", "ck").text(spec.note);
 }

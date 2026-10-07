@@ -288,7 +288,8 @@
   {
     "id": "smaller-candidates",
     "block": "runoff",
-    "view": "y=2026&at=home&viz=hex*&vc=share-small"
+    "view": "y=2026&at=home&viz=hex*&vc=share-small",
+    "vcs": ["share-small", "share-70", "share-14", "share-55"]
   },
   {
     "id": "find",
