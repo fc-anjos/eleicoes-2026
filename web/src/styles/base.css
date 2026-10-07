@@ -339,65 +339,19 @@ h1 {
     animation: none;
   }
 }
-/* loader: skeletons of the story card and the map while the data downloads */
+/* loader: a centred spinner and progress while the data downloads */
 .loader {
   position: fixed;
   inset: 0;
   z-index: 50;
   background: var(--night);
   display: grid;
-  grid-template-columns: var(--story-w, 452px) 1fr;
+  place-items: center;
   transition: opacity 0.45s ease-out;
 }
 .loader.out {
   opacity: 0;
   pointer-events: none;
-}
-.ld-card {
-  margin: 20px 24px 0 40px;
-  align-self: start;
-  padding: 18px 16px;
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  background: var(--dusk);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.sk {
-  display: block;
-  height: 10px;
-  border-radius: 5px;
-  background: linear-gradient(90deg, var(--rule) 0%, #3a3a40 50%, var(--rule) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
-}
-.sk-tabs {
-  width: 40%;
-  height: 14px;
-  margin-bottom: 8px;
-}
-.sk-h {
-  width: 75%;
-  height: 18px;
-}
-.sk-s {
-  width: 55%;
-}
-.sk-gap {
-  height: 0;
-  margin: 6px 0;
-  background: var(--rule);
-  animation: none;
-  height: 1px;
-}
-@keyframes shimmer {
-  from {
-    background-position: 100% 0;
-  }
-  to {
-    background-position: -100% 0;
-  }
 }
 .ld-map {
   display: flex;
@@ -463,16 +417,7 @@ h1 {
   color: var(--haze);
   font-variant-numeric: tabular-nums;
 }
-@media (max-width: 900px) {
-  .loader {
-    grid-template-columns: 1fr;
-  }
-  .ld-card {
-    display: none;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
-  .sk,
   .ld-msg.in {
     animation: none;
     opacity: 1;

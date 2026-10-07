@@ -1,5 +1,5 @@
-// The loader: the data is a 20 MB download, so while it arrives the page shows skeletons of the story card and the
-// map, a progress bar and a few lines about what is being prepared. Removed once the page is drawn (done()).
+// The loader: the data is a 20 MB download, so while it arrives the page shows a centred spinner, a progress bar
+// and a few lines about what is being prepared. Removed once the page is drawn (done()).
 import { t } from "../i18n/index.js";
 import { num } from "../format.js";
 
