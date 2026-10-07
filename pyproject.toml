@@ -1,0 +1,21 @@
+[project]
+name = "where-brazil-voted"
+version = "0.1.0"
+description = "Data pipeline for the Brazil presidential dot-density map"
+requires-python = ">=3.11"
+dependencies = ["numpy>=2"]
+
+[dependency-groups]
+dev = ["ruff>=0.6"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4", "PIE", "RUF"]
+ignore = [
+  "RUF046", # int(round(x)) is kept: numpy floats round to floats
+  "E731", # lambdas as small named helpers are used deliberately in the tuning constants
+  "RUF001", "RUF002", "RUF003", # en dashes and accented text are intentional (Portuguese names, ranges)
+]

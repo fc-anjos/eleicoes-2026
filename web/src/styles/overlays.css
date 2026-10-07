@@ -1,0 +1,361 @@
+/* Map overlays: the active-filter badge and first-visit hints */
+/* the active filter, spelled out over the map */
+.fbadge {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  max-width: min(560px, calc(100% - 40px));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--dusk) 92%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 7px 10px;
+  pointer-events: none;
+}
+.fbadge[hidden] {
+  display: none;
+}
+.fbadge b {
+  font: 600 10.5px/1.4 var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--haze);
+}
+.fbadge span,
+.fdesc span {
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+.storymode .fbadge {
+  left: calc(var(--story-w) + (100% - var(--story-w)) / 2);
+  max-width: calc(100% - var(--story-w) - 48px);
+}
+.stot .scope {
+  font-size: 12px;
+  color: var(--haze);
+  margin: 0 0 4px;
+}
+.stot .scope b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.stot .sr u s {
+  display: block;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--haze);
+  font-size: 10.5px;
+}
+.fdesc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--haze);
+}
+/* phones: the badge would cover the map; the card's own filter line says it instead */
+@media (max-width: 900px) {
+  .storymode .fbadge {
+    display: none;
+  }
+}
+
+/* first-visit hints. Map gestures: a hand that drags then pinches inside a frame, like the "use two fingers"
+   overlays on embedded maps; the divider pulses and says what it does until it is dragged */
+.maphint {
+  position: absolute;
+  left: 50%;
+  top: 78%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--dusk) 88%, transparent);
+  border: 1px solid var(--rule);
+  color: var(--haze);
+  font-size: 13px;
+  line-height: 1.5;
+  pointer-events: none;
+  transition: opacity 0.5s;
+  animation: mhin 0.6s 1.2s both;
+}
+.maphint b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.maphint svg {
+  width: 44px;
+  height: 44px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.maphint .mh-frame {
+  stroke: var(--rule);
+  stroke-dasharray: 3 3;
+}
+.maphint .mh-hand {
+  animation: mhdrag 3.2s ease-in-out infinite;
+  transform-origin: 22px 26px;
+}
+.maphint.gone {
+  opacity: 0;
+}
+.storymode .maphint {
+  left: calc(var(--story-w) + (100% - var(--story-w)) / 2);
+}
+@keyframes mhin {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+}
+@keyframes mhdrag {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-5px, -3px);
+  }
+  50% {
+    transform: translate(4px, 2px);
+  }
+  70% {
+    transform: scale(0.85);
+  }
+  85% {
+    transform: scale(1.08);
+  }
+}
+#swipe:not(.used) .grip {
+  animation: gpulse 1.8s ease-out infinite;
+}
+@keyframes gpulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ink) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+#swipe .gl {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font: 600 11.5px/1 var(--body);
+  color: var(--ink);
+  background: var(--dusk);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 5px 8px;
+  transition: opacity 0.4s;
+}
+#swipe.used .gl {
+  opacity: 0;
+}
+@media (max-width: 900px) {
+  .storymode .maphint {
+    left: 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .maphint,
+  .maphint .mh-hand,
+  #swipe:not(.used) .grip {
+    animation: none;
+  }
+}
+/* compare mode: the divider's year labels and drag hint sit at the top centre, so the badge drops below them and
+   over the divider's line */
+.page:has(#swipe:not([hidden])) .fbadge {
+  top: 68px;
+  z-index: 4;
+}
+
+/* the guided tour: a glowing ring around the part being shown, gliding from stop to stop, and a card beside it.
+   Nothing is dimmed, so the map keeps its full colour. */
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none; /* the page stays live underneath: scrolling or clicking it ends the tour */
+}
+.tour[hidden] {
+  display: none;
+}
+.tspot {
+  position: fixed;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--ink) 85%, transparent),
+    0 0 18px 4px color-mix(in srgb, var(--ink) 28%, transparent);
+  transition:
+    left 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+/* one swell of the glow once the ring has arrived */
+.tspot.pulse {
+  animation: tpulse 0.9s ease-out 0.4s;
+}
+@keyframes tpulse {
+  40% {
+    box-shadow:
+      0 0 0 2px var(--ink),
+      0 0 34px 10px color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tspot {
+    transition: none;
+  }
+  .tspot.pulse {
+    animation: none;
+  }
+}
+.tcard {
+  position: fixed;
+  pointer-events: auto;
+  width: min(300px, calc(100vw - 24px));
+  padding: 14px 16px 12px;
+  background: var(--dusk);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.6);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  transition:
+    left 0.35s ease,
+    top 0.35s ease;
+}
+.tcard p {
+  margin: 0 0 10px;
+}
+.tcard .tc {
+  display: flex;
+  gap: 5px;
+  margin: 2px 0 10px;
+}
+.tcard .tc i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--edge);
+  transition: all 0.25s;
+}
+.tcard .tc i.on {
+  width: 16px;
+  border-radius: 3px;
+  background: var(--ink);
+}
+.tcard .tl {
+  display: block;
+  margin: 6px 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--edge);
+}
+.tcard .tl:last-child {
+  margin-bottom: 0;
+}
+/* the offer of English on the first card, above the tour's own copy and set apart from it */
+.tcard .tlang {
+  margin: 0 0 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--edge);
+}
+.tcard .tlang p {
+  margin: 0 0 6px;
+  color: var(--haze);
+  font-size: 0.92em;
+}
+.tcard .tlang button {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: var(--lift);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.05em;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.tcard .tlang button:hover {
+  background: var(--edge);
+}
+.tcard .tx {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--haze);
+  font-size: 18px;
+  line-height: 1;
+}
+.tcard .tx:hover {
+  color: var(--ink);
+}
+.tcard .tb {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+.tcard .tb .link {
+  margin-right: auto;
+}
+.tcard .tb .go {
+  background: var(--ink);
+  color: var(--night);
+  border-color: var(--ink);
+  font-weight: 600;
+}
+/* the tour's replay button, under Share on the map (beside it in the phone's slim header) */
+.share.tourbtn {
+  top: 52px;
+  right: 14px;
+  width: 30px;
+  justify-content: center;
+  font-weight: 700;
+}
+@media (max-width: 900px) {
+  .storymode .share.tourbtn {
+    top: 10px;
+    right: 58px;
+    width: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tspot,
+  .tcard {
+    transition: none;
+  }
+}

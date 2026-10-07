@@ -1,0 +1,24 @@
+{
+  "name": "how-brazil-voted",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/og.mjs",
+    "preview": "vite preview",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write . && eslint --fix .",
+    "test:smoke": "node tests/smoke.mjs",
+    "check": "npm run lint && npm run build && npm run test:smoke"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "d3": "^7.9.0",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.13.0",
+    "playwright": "^1.63.0",
+    "prettier": "^3.9.9",
+    "vite": "^8.3.3"
+  }
+}

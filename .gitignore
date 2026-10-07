@@ -1,0 +1,8 @@
+__pycache__/
+.DS_Store
+.venv/
+.ruff_cache/
+node_modules/
+dist/
+data/raw/
+# web/public/data/map.json is built by `make data` (pipeline/build.py) and committed, so Pages can build the site

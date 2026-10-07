@@ -1,0 +1,1074 @@
+/* Story and Explore tabs, story cards, swing-arrow key, map notes, charts, find your place, scroll cues */
+/* story / explore tabs at the top of the left column */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--rule);
+  margin: -6px 0 18px;
+}
+.tabs button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  padding: 8px 2px;
+  margin-right: 16px;
+  color: var(--haze);
+  font: 600 13px/1 var(--body);
+}
+.tabs button[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+/* story: steps scroll past the column's middle; the one there drives the map */
+#story[hidden],
+#explore[hidden] {
+  display: none;
+}
+.stot {
+  position: sticky;
+  top: -28px;
+  z-index: 2;
+  background: var(--night);
+  padding: 10px 0 10px;
+  margin: 0 0 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.stot .sl {
+  font: 600 10.5px/1.4 var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--haze);
+  margin-bottom: 4px;
+}
+.stot .sr {
+  display: grid;
+  grid-template-columns: 10px 1fr 52px 76px 62px;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 3px 0;
+}
+.stot .sr i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c);
+  align-self: center;
+}
+.stot .sr b,
+.stot .sr u,
+.stot .sr q {
+  font-weight: 400;
+  text-decoration: none;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.stot .sr b {
+  font-weight: 600;
+}
+.stot .sr u {
+  font-size: 12px;
+  color: var(--haze);
+}
+.stot .sr q {
+  font-size: 12px;
+}
+.stot .sr q::before,
+.stot .sr q::after {
+  content: none;
+}
+.stot .sr.lead > span {
+  font-weight: 600;
+}
+/* a thin bar under the name, its length the share */
+.stot .sr .bar {
+  display: block;
+  height: 3px;
+  margin-top: 3px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+.stot .sr .bar em {
+  display: block;
+  transition: width 0.45s ease-out;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--c);
+}
+.stot .sr small {
+  display: block;
+  font-size: 11px;
+  color: var(--haze);
+}
+/* column headings */
+.stot .sr.sh {
+  font-size: 10.5px;
+  color: var(--haze);
+  padding: 0;
+}
+.stot .sr.sh b {
+  font-weight: 400;
+}
+.stot .sr.sh u {
+  font-size: inherit;
+}
+.stot .sr.sh q {
+  font-size: inherit;
+}
+/* abstention: a share of the roll, not of valid votes, so set apart */
+.stot .sr.a {
+  border-top: 1px solid var(--rule);
+  margin-top: 4px;
+  padding-top: 6px;
+}
+.chg {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.chg::first-letter {
+  font-size: 0.75em;
+}
+.chg.up::first-letter,
+.chg.dn::first-letter {
+  color: var(--haze);
+}
+.step {
+  padding: 28px 0 28px;
+  min-height: 62vh;
+  opacity: 0.35;
+  transition: opacity 0.3s;
+}
+.step:first-child {
+  padding-top: 6px;
+}
+.step:last-child {
+  min-height: 80vh;
+}
+.step.on,
+.step.near {
+  opacity: 1;
+}
+/* the story column: wider on large screens, so longer copy and charts breathe */
+:root {
+  --story-w: clamp(452px, 36vw, 560px);
+}
+.step h2 {
+  font: 700 20px/1.25 var(--display);
+  margin: 0 0 12px;
+}
+.step p {
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0 0 12px;
+  color: #dcdce0;
+}
+.step p.n {
+  font-size: 12px;
+  color: var(--haze);
+  border-left: 2px solid var(--edge);
+  padding-left: 10px;
+}
+.step b {
+  font-weight: 600;
+}
+.step .sb {
+  color: var(--c0);
+}
+.step .sr {
+  color: var(--c1);
+}
+.step .sa {
+  color: var(--ca);
+}
+.step .sa2 {
+  color: var(--cb);
+}
+.step .sa3 {
+  color: var(--cc);
+}
+@media (max-width: 900px) {
+  .step {
+    min-height: 40vh;
+  }
+  .step:last-child {
+    min-height: 50vh;
+  }
+}
+/* Story layout: the map goes full-bleed and the story's cards scroll over its left side (as in map-led stories by
+   the Washington Post, SF Chronicle and Mapbox's storytelling template). The column itself is transparent: wheel
+   and touch over it scroll the story, anywhere else they move the map. */
+.page.storymode {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+.storymode #wrap {
+  grid-column: 1;
+  grid-row: 1;
+}
+.storymode .studio {
+  display: none;
+}
+.storymode aside {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--story-w);
+  z-index: 5;
+  background: transparent;
+  border: 0;
+  padding: 0 24px 0 40px;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.storymode aside::-webkit-scrollbar {
+  display: none;
+}
+/* wider screens: cards scrolled up past the sticky header vanish into a fade from the top of the screen down to
+   the tabs (the column is transparent, so without it their text runs on above the header) */
+@media (min-width: 901px) {
+  .storymode .tabs::before {
+    content: "";
+    position: absolute;
+    left: -41px;
+    right: -25px;
+    bottom: 100%;
+    height: 21px;
+    background: var(--night);
+    pointer-events: none;
+  }
+  .storymode .tabs,
+  .storymode .stot {
+    background: color-mix(in srgb, var(--dusk) 97%, transparent);
+  }
+  /* the cards already read leave as they slide under the header, so no edge of them is left below it */
+  .storymode .step.past {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+}
+.storymode .tabs {
+  position: sticky;
+  top: 20px;
+  margin-top: 20px !important;
+  z-index: 3;
+  margin: 0;
+  padding: 10px 16px 0;
+  background: color-mix(in srgb, var(--dusk) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+.storymode .stot {
+  position: sticky;
+  top: 57px;
+  margin: 0 0 var(--first-gap, 36vh);
+  padding: 10px 16px 12px;
+  background: color-mix(in srgb, var(--dusk) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-top: 1px solid var(--rule);
+  border-radius: 0 0 10px 10px;
+}
+.storymode .step {
+  min-height: 0;
+  margin: 0 0 32vh;
+  padding: 18px 20px 8px;
+  background: color-mix(in srgb, var(--night) 86%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  opacity: 0.55;
+}
+.storymode .step.on,
+.step.near {
+  opacity: 1;
+}
+.storymode .step:first-child {
+  padding-top: 18px;
+}
+.storymode .step:last-child {
+  margin-bottom: 45vh;
+}
+.storymode .mapbar {
+  left: calc(var(--story-w) + 16px);
+}
+@media (max-width: 900px) {
+  .storymode aside {
+    width: auto;
+    right: 0;
+    padding: 12px 12px 0;
+  }
+  .storymode .stot {
+    margin-bottom: 52vh;
+  }
+  .storymode .step {
+    margin-bottom: 60vh;
+  }
+  .storymode .mapbar {
+    display: none;
+  }
+}
+/* swing arrows key, on the map's top left (centred in the story) */
+.akey {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  z-index: 3;
+  font-size: 12px;
+  color: var(--haze);
+  background: color-mix(in srgb, var(--dusk) 90%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 6px 10px;
+  pointer-events: none;
+}
+.akey[hidden] {
+  display: none;
+}
+.akey .ar {
+  font-weight: 700;
+}
+.akey .r {
+  color: var(--c1);
+}
+.akey .b {
+  color: var(--c0);
+}
+.akey i {
+  display: inline-block;
+  height: 2px;
+  background: var(--haze);
+  vertical-align: middle;
+  margin: 0 2px;
+}
+/* in the story, centred over the visible map like the filter badge */
+.storymode .akey {
+  left: calc(var(--story-w) + (100% - var(--story-w)) / 2);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+/* map notes: a dot on the place, a leader line and a haloed label */
+.notes {
+  pointer-events: none;
+}
+.note line {
+  stroke: var(--ink);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+.note circle {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.note text {
+  font: 600 12.5px var(--body);
+  fill: var(--ink);
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: var(--night);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+/* dumbbell charts in story cards */
+.dumb {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 18px 0 4px;
+}
+.dumb .ct {
+  font: 600 11px var(--body);
+  fill: var(--ink);
+}
+.dumb .tk {
+  font: 9.5px var(--body);
+  fill: var(--haze);
+  text-anchor: middle;
+}
+.dumb .rl {
+  font: 11.5px var(--body);
+  fill: #dcdce0;
+}
+.dumb .rv {
+  font: 600 11px var(--body);
+  fill: var(--haze);
+  font-variant-numeric: tabular-nums;
+}
+.step .ck {
+  font-size: 11px;
+  color: var(--haze);
+  margin: 0 0 12px;
+}
+.step .ck i {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  line-height: 0;
+  border-radius: 50%;
+  margin: 0 4px 0 8px;
+  vertical-align: 0;
+}
+.step .ck i:first-child {
+  margin-left: 0;
+}
+/* the place chart in "find your place": every category in its own colour, so the key is neutral; the tick is
+   Brazil's figure */
+.step .ck .was {
+  border: 1.5px solid var(--haze);
+}
+.step .ck.lula .was {
+  border-color: var(--c1);
+}
+.step .ck .nat {
+  width: 2px;
+  height: 10px;
+  border-radius: 0;
+  background: var(--haze);
+  vertical-align: -1px;
+}
+.dumb .nat {
+  stroke: var(--haze);
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+/* find your place */
+.find {
+  position: relative;
+  margin: 4px 0 12px;
+}
+.find input {
+  width: 100%;
+  height: 38px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--dusk);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 0 12px;
+}
+.find .fl {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  background: var(--dusk);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+.find .fl:empty {
+  display: none;
+}
+.find li {
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 13.5px;
+  display: flex;
+  justify-content: space-between;
+}
+.find li:hover {
+  background: var(--rule);
+}
+.find li span {
+  color: var(--haze);
+}
+.fres p {
+  margin-top: 12px;
+}
+.step .scope {
+  display: inline-flex;
+  margin: 2px 0 14px;
+}
+
+/* scroll cues, after map-led stories: a "scroll" prompt on the first card, and progress dots beside the cards
+   that show where you are and jump to a step */
+.cue {
+  margin: 14px 0 6px;
+  color: var(--haze);
+  font-size: 12.5px;
+}
+.step .cue p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-size: inherit;
+  color: inherit;
+}
+.cue .ci {
+  display: inline-flex;
+  justify-content: center;
+  gap: 3px;
+  min-width: 38px;
+}
+.cue svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+kbd {
+  display: inline-block;
+  min-width: 17px;
+  padding: 1px 4px;
+  border: 1px solid var(--edge);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font: 600 11px/1.3 var(--body);
+  color: var(--ink);
+  text-align: center;
+}
+/* until the reader first moves, the scroll sign bounces (sideways on phones) and the keys and the phone's › pulse */
+#page:not(.moved) .cue .sc svg {
+  animation: bounce 1.2s ease-in-out infinite;
+}
+#page:not(.moved) .cue .sw svg {
+  animation: sway 1.2s ease-in-out infinite;
+}
+#page:not(.moved) .cue kbd,
+#page:not(.moved) #snext {
+  animation: keypulse 1.8s ease-out infinite;
+}
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+@keyframes sway {
+  0%,
+  100% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+@keyframes keypulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #page .cue svg,
+  #page .cue kbd,
+  #page #snext {
+    animation: none !important;
+  }
+}
+.prog {
+  display: none;
+}
+.storymode .prog {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  position: fixed;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+}
+.prog button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--haze);
+  background: transparent;
+  opacity: 0.6;
+}
+.prog button[aria-current="step"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  opacity: 1;
+}
+@media (max-width: 900px) {
+  .storymode .prog {
+    display: none;
+  }
+}
+.areasel {
+  width: 100%;
+  height: 32px;
+  margin: 0 0 8px;
+  background: var(--night);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 12.5px;
+}
+.areasel[hidden] {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stot .sr .bar em {
+    transition: none;
+  }
+}
+/* Phones: the map is the backdrop and the story passes over it, as in NYT and Reuters mobile scrollytelling. The
+   totals shrink to one line, views are framed in the band above the cards, and the cards come with long gaps
+   between them so the map is seen on its own. */
+@media (max-width: 900px) {
+  /* a slim header: every pixel it doesn't take goes to the map */
+  .storymode aside {
+    padding: 4px 10px 0;
+  }
+  .storymode .tabs {
+    top: 4px;
+    margin-top: 4px !important;
+    padding: 2px 12px 0;
+  }
+  .storymode .tabs button {
+    padding: 6px 2px;
+    font-size: 12px;
+  }
+  .storymode .share {
+    top: 10px;
+    right: 20px;
+    z-index: 8;
+    padding: 6px 7px;
+    background: none;
+    backdrop-filter: none;
+  }
+  .storymode .share span {
+    display: none;
+  }
+  .storymode .stot {
+    top: 36px;
+    padding: 4px 12px 6px;
+    margin-bottom: 62vh;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 14px;
+    row-gap: 2px;
+  }
+  .storymode .stot .sl {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 9.5px;
+  }
+  .storymode .stot .scope,
+  .storymode .stot .sr.sh,
+  .storymode .stot .sr > span,
+  .storymode .stot .sr u {
+    display: none;
+  }
+  /* the filter, in one line (the badge over the map is off on phones) */
+  .storymode .stot .fdesc {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 10.5px;
+    margin-top: 2px;
+  }
+  .storymode .stot .sr {
+    display: inline-grid;
+    grid-template-columns: 8px auto auto;
+    gap: 5px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    font-size: 12px;
+  }
+  .storymode .stot .sr.a {
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+  .storymode .step {
+    margin-bottom: 85vh;
+    padding: 16px 16px 14px;
+  }
+  .step h2 {
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+  .step p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 9px;
+  }
+  .step p.n {
+    font-size: 11px;
+  }
+  .step .ck {
+    font-size: 10px;
+  }
+  .dumb {
+    margin-top: 10px;
+  }
+}
+/* Phones: a stepper, not a scroll. The map keeps the top of the screen to itself; the totals sit above it and one
+   step at a time sits in a panel below it. Readers swipe the panel (or tap ‹ ›) between steps; a long step scrolls
+   inside the panel, never over the map. */
+.pstep {
+  display: none;
+}
+@media (max-width: 900px) {
+  .storymode aside {
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .storymode aside > *,
+  .storymode #story > * {
+    pointer-events: auto;
+  }
+  .storymode #story {
+    pointer-events: none;
+  }
+  .storymode .stot {
+    margin-bottom: 0;
+  }
+  .storymode #steps {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--panel-h);
+    display: flex;
+    overflow: hidden;
+    touch-action: pan-y;
+    pointer-events: none;
+  }
+  .storymode #steps::-webkit-scrollbar {
+    display: none;
+  }
+  .storymode .step,
+  .storymode .step:first-child,
+  .storymode .step:last-child {
+    flex: 0 0 100%;
+    box-sizing: border-box;
+    margin: 0;
+    /* a short step only takes the room it needs, at the panel's bottom; a long one fills it and scrolls */
+    align-self: flex-end;
+    height: auto;
+    max-height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    pointer-events: auto;
+    opacity: 1;
+    border-radius: 14px 14px 0 0;
+    border-bottom: 0;
+    padding: 42px 18px calc(18px + env(safe-area-inset-bottom));
+    background: var(--dusk);
+  }
+  .storymode .prog {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    left: 56px;
+    right: 56px;
+    top: auto;
+    /* on the card's top edge, under its grip, so the map keeps the room above the card */
+    bottom: calc(var(--card-h) - 30px);
+    transform: none;
+    z-index: 6;
+  }
+  .storymode .prog button {
+    width: 7px;
+    height: 7px;
+  }
+  .storymode .pstep {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    bottom: calc(var(--card-h) - 36px);
+    z-index: 6;
+    width: 36px;
+    height: 26px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--dusk) 92%, transparent);
+    color: var(--ink);
+    font: 600 18px/1 var(--body);
+  }
+  .storymode #sprev {
+    left: 12px;
+  }
+  .storymode #snext {
+    right: 12px;
+  }
+  .storymode .pstep:disabled {
+    opacity: 0.3;
+  }
+}
+:root {
+  --panel-h: 32dvh; /* the most a step may take; a shorter one sets --card-h to its own height */
+  --card-h: var(--panel-h);
+}
+/* desktop: a step's title beside its dot, on hover */
+@media (hover: hover) and (min-width: 901px) {
+  .storymode .prog button {
+    position: relative;
+  }
+  .storymode .prog button:hover::after,
+  .storymode .prog button:focus-visible::after {
+    content: attr(aria-label);
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font: 500 12px/1 var(--body);
+    color: var(--ink);
+    background: var(--dusk);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 6px 8px;
+    pointer-events: none;
+  }
+}
+#pgrip {
+  display: none;
+}
+@media (max-width: 900px) {
+  /* the panel's top edge: drag it up or down to give the text or the map more room */
+  /* the key: one strip across the bottom of the map's band, just above the card (the map's band stops short of
+     it); the circle sizes and notes are left out for room */
+  .storymode .akey.vkey {
+    left: 8px;
+    right: 8px;
+    bottom: calc(var(--card-h) + 6px);
+    width: auto;
+    padding: 6px 10px;
+    font-size: 10.5px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px 12px;
+  }
+  .storymode .vkey .kt {
+    font-size: 10.5px;
+    margin: 0;
+    flex: 1 1 100%;
+  }
+  .storymode .vkey .ksteps,
+  .storymode .vkey .kbar {
+    flex: 1 1 140px;
+  }
+  .storymode .vkey .kax {
+    flex: 1 1 100%;
+  }
+  .storymode .vkey .kchips {
+    margin: 0;
+  }
+  .storymode .vkey .kcirc,
+  .storymode .vkey .kn {
+    display: none;
+  }
+  .storymode #pgrip {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--card-h) - 42px);
+    height: 42px;
+    z-index: 5;
+    touch-action: none;
+    cursor: ns-resize;
+    /* the card's header band: opaque, so the text scrolls under the dots and arrows */
+    background: var(--dusk);
+    border-radius: 14px 14px 0 0;
+  }
+  .storymode #pgrip::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 9px;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: var(--haze);
+    opacity: 0.6;
+  }
+}
+
+/* the zoomed-in view's key (map/marks.js): a card at the bottom right, above the credits. A title, the colour bar
+   with labelled ends, then for circles the reference sizes beside a labelled specimen */
+.akey.vkey {
+  top: auto;
+  left: auto;
+  right: 20px;
+  bottom: 104px;
+  width: 236px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--night) 86%, transparent);
+  backdrop-filter: blur(6px);
+  font-size: 11.5px;
+  line-height: 1.35;
+  white-space: normal;
+  transform: none;
+}
+.akey.vkey[hidden] {
+  display: none;
+}
+.vkey .kt {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.vkey .kbar {
+  height: 8px;
+  border-radius: 4px;
+}
+.vkey .kax {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+/* a classed scale: one block per class, each labelled with where it starts */
+.vkey .ksteps {
+  display: flex;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.vkey .ksteps span {
+  flex: 1;
+}
+.vkey .ksteps i {
+  display: block;
+  width: auto;
+  height: 8px;
+  margin: 0 0 4px;
+  border-radius: 2px;
+}
+.vkey .kn {
+  color: var(--haze);
+}
+.vkey .kchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+.vkey .kchips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.vkey .kchips i {
+  width: 8px;
+  height: 8px;
+  margin: 0;
+  border-radius: 50%;
+  background: var(--c);
+}
+.vkey .kchips i.hatch {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(135deg, var(--c) 0 1px, transparent 1px 3px);
+}
+.vkey .kcirc {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+.vkey .krow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.vkey .ksize,
+.vkey .kspec {
+  flex: none;
+  display: block;
+}
+.vkey .ksize circle {
+  fill: none;
+  stroke: var(--haze);
+}
+.vkey .ksize line {
+  stroke: var(--edge);
+  stroke-dasharray: 2 2;
+}
+.vkey .ksize text {
+  fill: var(--haze);
+  font-size: 10.5px;
+}
+.vkey .krow b {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+}
+/* a story block's name above its steps' headlines */
+.step .kick {
+  font: 600 10.5px/1 var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--haze);
+  margin-bottom: 8px;
+}
+/* the chart views (scatter, multiples) replace the map: its borders and names step aside */
+.flat #map g {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+/* beside a chart panel the key moves to the map's top-left corner, clear of the chart and above the country */
+.panelled .akey.vkey {
+  right: auto;
+  bottom: auto;
+  top: 56px;
+  left: calc(var(--story-w, 0px) + 20px);
+}
+
+/* "how to read": the first time a step brings a new kind of chart, a short boxed note says what its marks mean,
+   set apart from the story's prose so a reader who knows can skip it */
+.step p.howto {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 8px 10px 8px 32px;
+  position: relative;
+}
+.step p.howto::before {
+  content: "i";
+  position: absolute;
+  left: 10px;
+  top: 9px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1.3px solid var(--haze);
+  color: var(--haze);
+  font: 700 10px/13px var(--body);
+  text-align: center;
+}

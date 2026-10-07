@@ -1,0 +1,27 @@
+import js from "@eslint/js";
+import prettier from "eslint-config-prettier";
+import globals from "globals";
+
+export default [
+  { ignores: ["dist/", "node_modules/", "web/public/"] },
+  js.configs.recommended,
+  {
+    files: ["web/src/**/*.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: { ...globals.browser, __MAP_BYTES__: "readonly" },
+    },
+    rules: {
+      "no-unused-vars": ["error", { args: "none" }],
+      "prefer-const": "error",
+      eqeqeq: ["error", "smart"],
+      "no-var": "error",
+    },
+  },
+  {
+    files: ["*.config.js", "tests/**/*.mjs", "scripts/**/*.mjs"],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  prettier,
+];

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{TITLE}}</title>
+    <meta name="description" content="{{DESC}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{{TITLE}}" />
+    <meta property="og:title" content="{{TITLE}}" />
+    <meta property="og:description" content="{{DESC}}" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:url" content="https://fc-anjos.github.io/eleicoes-2026/" />
+    <meta property="og:image" content="https://fc-anjos.github.io/eleicoes-2026/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" hreflang="pt-BR" href="https://fc-anjos.github.io/eleicoes-2026/" />
+    <link rel="alternate" hreflang="en" href="https://fc-anjos.github.io/eleicoes-2026/en/" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <div class="loader" id="loader" role="status" aria-live="polite">
+      <div class="ld-card" aria-hidden="true">
+        <i class="sk sk-tabs"></i><i class="sk sk-h"></i><i class="sk"></i><i class="sk"></i><i class="sk sk-s"></i>
+        <i class="sk sk-gap"></i><i class="sk"></i><i class="sk"></i><i class="sk sk-s"></i>
+      </div>
+      <div class="ld-map">
+        <i class="ld-spin" aria-hidden="true"></i>
+        <p class="ld-msg" id="ldmsg"></p>
+        <div class="ld-bar"><i id="ldbar"></i></div>
+        <p class="ld-n" id="ldn"></p>
+      </div>
+    </div>
+    <div class="page" id="page">
+      <div id="wrap">
+        <canvas id="cv"></canvas><canvas id="cvg" aria-hidden="true"></canvas
+        ><svg id="map" data-i18n-attr="aria-label:map.aria"></svg><canvas id="cvp" aria-hidden="true"></canvas>
+        <div class="akey vkey" id="vkey" hidden></div>
+        <div class="akey" id="akey" data-i18n-html="map.arrowKey" hidden></div>
+        <div class="maphint" id="maphint" aria-hidden="true">
+          <svg viewBox="0 0 40 40">
+            <rect class="mh-frame" x="3" y="3" width="34" height="34" rx="6" />
+            <g class="mh-hand">
+              <path
+                d="M17 30v-9.5a2 2 0 0 1 4 0V25m0-3.5v-1a2 2 0 0 1 4 0V25m0-2.5a2 2 0 0 1 4 0V27a6 6 0 0 1-6 6h-2.5a6 6 0 0 1-4.8-2.4L12 27.5a2 2 0 0 1 3-2.6l2 2"
+              />
+            </g></svg
+          ><span data-i18n-html="map.hint"></span>
+        </div>
+        <div class="fbadge" id="fbadge" role="status" hidden></div>
+        <div id="swipe" hidden>
+          <span class="yl" id="swl"></span><span class="yl r" id="swr"></span>
+          <div
+            class="grip"
+            role="slider"
+            tabindex="0"
+            data-i18n-attr="aria-label:map.divider"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="50"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4 2 8l4 4M10 4l4 4-4 4" /></svg
+            ><span class="gl" data-i18n="map.dragCompare"></span>
+          </div>
+        </div>
+        <button id="share" class="share" aria-haspopup="dialog">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4h10V9" /></svg
+          ><span data-i18n="map.share"></span>
+        </button>
+        <button id="tourbtn" class="share tourbtn" data-i18n-attr="aria-label:tour.replay;title:tour.replay">?</button>
+        <div class="mapbar">
+          <div class="key"><span class="k-dot"></span><span data-i18n-html="map.key"></span></div>
+          <div class="credit">
+            <nav class="langs" data-i18n-attr="aria-label:map.language">
+              <a data-lang="en" lang="en">EN</a> · <a data-lang="pt" lang="pt">PT</a>
+            </nav>
+            <div data-i18n-html="map.credit"></div>
+          </div>
+        </div>
+      </div>
+      <aside>
+        <div class="tabs" role="tablist" data-i18n-attr="aria-label:tabs.aria">
+          <button role="tab" id="tab-story" aria-selected="true" aria-controls="story" data-i18n="tabs.story"></button
+          ><button
+            role="tab"
+            id="tab-explore"
+            aria-selected="false"
+            aria-controls="explore"
+            data-i18n="tabs.explore"
+          ></button>
+        </div>
+        <div id="story" role="tabpanel" aria-labelledby="tab-story">
+          <div class="stot" id="stot" aria-live="polite"></div>
+          <div id="pgrip" data-i18n-attr="aria-label:story.resize" role="separator" aria-orientation="horizontal"></div>
+          <div id="steps"></div>
+          <nav class="prog" id="prog" data-i18n-attr="aria-label:story.steps"></nav>
+          <button class="pstep" id="sprev" data-i18n-attr="aria-label:story.prev">‹</button>
+          <button class="pstep" id="snext" data-i18n-attr="aria-label:story.next">›</button>
+        </div>
+        <div id="explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
+          <div class="years" id="years" role="group" data-i18n-attr="aria-label:explore.years"></div>
+          <p class="eyebrow" id="date"></p>
+          <h1 data-i18n="explore.h1"></h1>
+          <p class="deck"></p>
+          <div class="search">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <circle cx="7" cy="7" r="5" />
+              <path d="M11 11l3.5 3.5" stroke-linecap="round" /></svg
+            ><input
+              id="q"
+              type="text"
+              role="combobox"
+              aria-expanded="false"
+              aria-controls="qlist"
+              aria-autocomplete="list"
+              data-i18n-attr="placeholder:explore.search"
+              autocomplete="off"
+            />
+            <ul id="qlist" role="listbox" hidden></ul>
+          </div>
+          <div id="cands"></div>
+          <p class="studio-note">
+            <span data-i18n="explore.rowsNote"></span>
+            <button id="reset" class="link" data-i18n="explore.reset"></button>
+          </p>
+        </div>
+      </aside>
+      <section class="studio" id="studio" data-i18n-attr="aria-label:studio.aria">
+        <div class="sh">
+          <button id="studiox" aria-expanded="true" aria-controls="studiob" data-i18n-attr="title:studio.hide">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" /></svg>
+          </button>
+          <h2 data-i18n="studio.title"></h2>
+        </div>
+        <div id="studiob">
+          <h3 data-i18n="studio.display"></h3>
+          <div class="disp">
+            <div class="lbl">
+              <span data-i18n="studio.dotSize"></span>
+              <div id="mode" role="group" data-i18n-attr="aria-label:studio.dotSizing">
+                <button
+                  data-m="a"
+                  aria-pressed="true"
+                  data-i18n-attr="title:studio.adaptiveTitle"
+                  data-i18n="studio.adaptive"
+                ></button
+                ><button
+                  data-m="f"
+                  aria-pressed="false"
+                  data-i18n-attr="title:studio.byZoomTitle"
+                  data-i18n="studio.byZoom"
+                ></button>
+              </div>
+            </div>
+            <div class="lbl">
+              <span data-i18n="viz.label"></span>
+              <div id="viz" class="seg" role="group" data-i18n-attr="aria-label:viz.label">
+                <button
+                  data-v="dots"
+                  aria-pressed="true"
+                  data-i18n-attr="title:viz.dotsTitle"
+                  data-i18n="viz.dots"
+                ></button
+                ><button
+                  data-v="outline"
+                  aria-pressed="false"
+                  data-i18n-attr="title:viz.outlineTitle"
+                  data-i18n="viz.outline"
+                ></button
+                ><button
+                  data-v="circles"
+                  aria-pressed="false"
+                  data-i18n-attr="title:viz.circlesTitle"
+                  data-i18n="viz.circles"
+                ></button
+                ><button
+                  data-v="margins"
+                  aria-pressed="false"
+                  data-i18n-attr="title:viz.marginsTitle"
+                  data-i18n="viz.margins"
+                ></button
+                ><button
+                  data-v="hex"
+                  aria-pressed="false"
+                  data-i18n-attr="title:viz.hexTitle"
+                  data-i18n="viz.hex"
+                ></button>
+              </div>
+              <p id="vizhint" class="vizhint" hidden></p>
+            </div>
+            <label
+              ><span data-i18n="viz.colour"></span
+              ><select id="vcol" data-i18n-attr="aria-label:viz.colour"></select
+            ></label>
+            <label
+              ><span data-i18n="viz.from" data-i18n-attr="title:viz.fromTitle"></span
+              ><input id="vizk" type="range" min="0" max="4.33" step=".05" value="1.58" /><output id="vizkv"
+                >3×</output
+              ></label
+            >
+            <label
+              ><span data-i18n="studio.votesPerDot"></span
+              ><input id="vpd" type="range" min="0" max="5" step="1" value="0" /><output id="vpdv">250</output></label
+            >
+            <label
+              ><span data-i18n="studio.scale"></span
+              ><input id="rad" type="range" min="-1" max="1" step=".05" value="0" /><output id="radv">1×</output></label
+            >
+            <label class="sec sw80 swa"
+              ><span class="fn" data-i18n="studio.arrows"></span><input type="checkbox" id="arrows" class="vis"
+            /></label>
+          </div>
+          <h3 data-i18n="studio.abstention"></h3>
+          <div class="sec">
+            <span class="fn" data-i18n="cats.didntVote"></span>
+            <div id="asplit" class="seg" role="group" data-i18n-attr="aria-label:studio.abstention">
+              <button data-v="all" aria-pressed="true" data-i18n="studio.together"></button
+              ><button data-v="age" aria-pressed="false" data-i18n="studio.byAge"></button>
+            </div>
+          </div>
+          <label class="sec sw80"
+            ><span class="fn" data-i18n="studio.count80"></span><input type="checkbox" id="inc80" class="vis" checked
+          /></label>
+          <p class="note" data-i18n="studio.note80"></p>
+          <h3 data-i18n="studio.area"></h3>
+          <div class="sec">
+            <span class="fn" data-i18n="studio.addUp"></span>
+            <div id="area" class="seg" role="group" data-i18n-attr="aria-label:studio.area">
+              <button data-a="br" aria-pressed="true" data-i18n="studio.brazil"></button
+              ><button data-a="uf" aria-pressed="false" data-i18n="studio.state"></button
+              ><button data-a="mu" aria-pressed="false" data-i18n="studio.municipality"></button>
+            </div>
+          </div>
+          <select id="areauf" class="areasel" data-i18n-attr="aria-label:studio.state" hidden></select>
+          <p class="note" id="areamu" hidden></p>
+          <h3 data-i18n="studio.aroundPlace"></h3>
+          <div id="pfilters"></div>
+          <h3 data-i18n="studio.municipalHead"></h3>
+          <div id="filters"></div>
+          <div class="fstat">
+            <span id="fcount"></span><button id="fclear" class="link" data-i18n="studio.clear" hidden></button>
+          </div>
+          <p class="note" data-i18n="studio.filtersNote"></p>
+        </div>
+      </section>
+    </div>
+    <div id="tip"></div>
+    <dialog id="sharedlg" aria-labelledby="sharet">
+      <form method="dialog" class="sd">
+        <div class="sdh">
+          <h2 id="sharet"></h2>
+          <button id="shareclose" type="button" class="x" data-i18n-attr="aria-label:share.close">×</button>
+        </div>
+        <p id="sharebody"></p>
+        <div class="sdr">
+          <input id="shareurl" type="text" readonly data-i18n-attr="aria-label:share.link" /><button
+            id="sharecopy"
+            type="button"
+            data-i18n="share.copy"
+          ></button>
+        </div>
+        <label class="sde" id="sharesteprow"
+          ><input type="checkbox" id="sharestep" /> <span id="sharesteplabel"></span
+        ></label>
+        <label class="sde" id="shareembedrow"
+          ><input type="checkbox" id="shareembed" /> <span data-i18n="share.embed"></span
+        ></label>
+      </form>
+    </dialog>
+  </body>
+</html>

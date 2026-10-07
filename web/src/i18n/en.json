@@ -1,0 +1,536 @@
+{
+  "meta": {
+    "title": "How Brazil Voted",
+    "description": "A dot map of every vote in Brazil's 2026 presidential first round, and where the vote moved since 2022, in every municipality and at every polling place."
+  },
+  "years": {
+    "2022": {
+      "date": "2 October 2022"
+    },
+    "2026": {
+      "date": "4 October 2026"
+    }
+  },
+  "units": {
+    "pct": "{v}%",
+    "pp": "{v} points",
+    "perKm2": "{v}/km²",
+    "brl": "R$ {v}",
+    "times": "{v}×",
+    "million": "{v}M",
+    "million1": "{v}M",
+    "thousand": "{v}k",
+    "up": "up {v} points",
+    "down": "down {v} points"
+  },
+  "cats": {
+    "others": "Others",
+    "lula": "Lula",
+    "bolsonaroCamp": "Bolsonaro camp",
+    "everyoneElse": "Everyone else",
+    "didntVote": "Didn't vote",
+    "didntVoteHad": "Didn't vote (voting required)",
+    "didntVoteOptional": "Didn't vote (voting optional)",
+    "didntVote80": "Didn't vote, 80+"
+  },
+  "map": {
+    "aria": "Dot map of votes by municipality",
+    "arrowKey": "<span class=\"ar r\">←</span> towards Lula <span class=\"ar b\">→</span> towards the Bolsonaro camp · <i id=\"akl\"></i> = 10 points of margin",
+    "hint": "<b class=\"mh-t\">Drag</b> to pan<br /><b class=\"mh-z\">Scroll</b> to zoom",
+    "hintPinch": "Pinch",
+    "divider": "Divider between years",
+    "dragCompare": "Drag to compare",
+    "share": "Share view",
+    "key": "<span class=\"kd\"><b>1 dot = <span class=\"vpd\"></span> votes</b><br />Votes placed around their polling place<br /></span><span class=\"hint\">Scroll to zoom · drag to pan</span>",
+    "credit": "Created by <b>Felipe dos Anjos</b><br /><a href=\"https://github.com/fc-anjos\">github.com/fc-anjos</a> · <a href=\"mailto:felipe.cavalheiro.anjos@gmail.com\">felipe.cavalheiro.anjos@gmail.com</a><br />Data: <a href=\"https://dadosabertos.tse.jus.br/\">Tribunal Superior Eleitoral (TSE)</a>",
+    "compare": "Compare",
+    "language": "Language"
+  },
+  "tip": {
+    "ofWhomOptional": "of whom optional",
+    "ofWhom80": "of whom 80+",
+    "validVotes": "{n} valid votes in {year}",
+    "outside": " · outside the filters"
+  },
+  "tabs": {
+    "aria": "Mode",
+    "story": "Story",
+    "explore": "Explore"
+  },
+  "story": {
+    "steps": {
+      "intro": {
+        "h": "How Brazil voted in 2026",
+        "t": "<p>Each dot on this map stands for 250 votes or 250 people who did not vote, scattered around the polling place where they are registered. <b class=\"sb\">Blue</b> dots are votes for the Bolsonaro camp, the PL's candidate (Jair Bolsonaro in 2022, Flávio Bolsonaro in 2026), <b class=\"sr\">red</b> for Luiz Inácio Lula da Silva, <b class=\"sa\">amber</b> for people on the roll who did not vote, and grey for votes for the other candidates.</p><p>What follows shows where the vote moved between the first rounds of 2022 and 2026.</p>"
+      },
+      "read": {
+        "h": "How to read the circles",
+        "t": "<p>From here on, most maps show one circle per municipality. Its <b>colour</b> says which way the vote moved between 2022 and 2026: <b class=\"sb\">blue</b> toward the Bolsonaro camp, <b class=\"sr\">red</b> toward Lula.</p><p>Its <b>size</b> is how many votes that shift is worth: the points Lula's share moved, times the votes cast. A big city with a small shift can draw as big a circle as a mid-sized city with a large one.</p><p class=\"howto\">São Paulo: Lula's share fell 1.0 point across 6.6 million votes, about 63,000 net votes. Goiânia: it fell 4.9 points across 0.8 million, about 38,000. Belém: it rose 2.3 points, about 19,000 toward Lula.</p>",
+        "notes": ["São Paulo −1.0 pt ≈ 63,000 votes", "Goiânia −4.9 pts ≈ 38,000", "Belém +2.3 pts ≈ 19,000"]
+      },
+      "overview": {
+        "h": "The vote moved toward the Bolsonaro camp almost everywhere",
+        "t": "<p>Lula's share of the vote fell in 5,468 of Brazil's 5,570 municipalities. In 2022 he led Jair Bolsonaro in the first round, 48.4 percent to 43.2 percent. This year Flávio Bolsonaro finished first, with 47.0 percent to Lula's 45.2 percent.</p><p>The shift was spread across the country. Lula's share slipped in the North and the Southeast and fell further in the South, by 5.5 percentage points. In the Northeast he still won 63.8 percent of the valid vote. In 716 municipalities where he finished ahead in 2022, the Bolsonaro camp came out ahead this time.</p><p class=\"n\">The ballot is secret. These maps show how places voted. They cannot show which voters changed their minds.</p>"
+      },
+      "arrows": {
+        "h": "The shift, municipality by municipality",
+        "t": "<p>The margin moved toward the Bolsonaro camp in 5,512 of 5,570 municipalities. The next three views sort them by how much Lula's share fell.</p><p class=\"howto\">Each arrow is a municipality. It points <b class=\"sr\">left</b> where the margin moved toward Lula and <b class=\"sb\">right</b> where it moved toward the Bolsonaro camp; the longer the arrow, the bigger the change in the margin.</p>"
+      },
+      "held": {
+        "h": "Where Lula's share held",
+        "t": "<p>Lula's share held or rose in 102 municipalities, shown here. Most are big cities: Rio de Janeiro, Brasília, Fortaleza, Manaus, Recife, Belém, Maceió, Aracaju, Niterói and Santos. Together they cast 12 percent of the valid vote.</p><p class=\"howto\">Places outside the selection fade; the totals at the top count only the lit ones.</p>",
+        "notes": ["Rio +0.4", "Brasília +1.3", "Belém +2.3", "Recife +1.3", "Manaus +0.1"]
+      },
+      "slipped": {
+        "h": "Where Lula's share dipped",
+        "t": "<p>His share fell by up to five points in 2,312 municipalities. They include São Paulo, Salvador, most municipalities of 100,000 to 500,000 residents and much of the Northeast, and they cast 63 percent of the valid vote. Across them, Lula's share went from 48.0 percent to 45.6 percent.</p>"
+      },
+      "shifted": {
+        "h": "Where Lula's share fell furthest",
+        "t": "<p>In the other 3,156 municipalities his share fell by more than five points. That is more than half of Brazil's municipalities, but they cast only 26 percent of the valid vote. Most are small municipalities in the interior, the South and the Centre-West. Lula's share there dropped from 50.9 percent to 43.6 percent.</p>"
+      },
+      "small-towns": {
+        "h": "The smaller the municipality, the bigger the shift",
+        "t": "<p>The average shift grows steadily as places get smaller, from about one percentage point toward the Bolsonaro camp in the biggest cities to seven in towns under 10,000 residents.</p><p class=\"howto\">This view is a chart, not a map. Each circle is a municipality: further right, more residents; higher, Lula's share rose; lower, it fell. Its area is the valid votes. The white line joins the average change in each population band, such as the −6.7 in towns under 10,000 residents.</p>",
+        "chart": {
+          "title": "Lula's share by municipality size (residents)",
+          "labels": ["Under 10k", "10k–50k", "50k–200k", "200k–1M", "Over 1M"]
+        }
+      },
+      "abstention": {
+        "h": "Abstention barely changed",
+        "t": "<p>In 2026, 33.5 million people on the roll did not vote, more than voted for any candidate except the two leaders. Abstention has risen in every presidential first round since 2006, from 16.8 percent to 21.1 percent.</p><p>Not all of them were required to vote. By the age estimate, 70 percent of non-voters were aged 18 to 69, for whom voting is compulsory. Another 17 percent were 16 or 17 or aged 70 to 79, for whom it is optional, and 13 percent were 80 or older.</p><p>It rose by only 0.1 percentage points from 2022, too little to explain, on its own, the fall in Lula's share. Lula received 3.4 million fewer votes than in 2022, and the Bolsonaro camp 5.0 million more. In the quarter of municipalities with the lowest average income, where Lula is strongest, abstention fell 2.5 points. In the quarter with the highest average income, abstention rose 0.9 points.</p><p>Abstention fell across the North and Northeast and rose in the South and South-east, and the two moves cancel out. By income, it fell in the poorest places and rose in the richest.</p><p class=\"howto\">Here the colour is abstention, not the vote: <b class=\"sa\">amber</b> where a larger share of the roll stayed home than in 2022, green where a smaller share did. The chart on the right sets each municipality's income against that change.</p>",
+        "chart": {
+          "title": "Abstention, presidential first round (% of the roll)",
+          "note": "Source: TSE. Includes voters abroad."
+        },
+        "chart2": {
+          "title": "Who didn't vote in 2026, by age",
+          "labels": ["18–69 (must vote)", "16–17, 70–79", "80+"],
+          "note": "The 2026 age split is estimated."
+        }
+      },
+      "northeast": {
+        "h": "In the Northeast, Lula's share fell three points, but he still leads",
+        "t": "<p>Lula still leads in the Northeast, but his share there fell from 66.8 percent to 63.8 percent, and the Bolsonaro camp's rose 3.9 points. In Salvador his share went from 67.0 percent to 65.3 percent. In Feira de Santana, Bahia's second-largest city, it fell from 61.7 percent to 57.1 percent. In a few capitals, such as Fortaleza and Recife, Lula's share held.</p>",
+        "chart": {
+          "title": "Lula's share by region",
+          "labels": ["Northeast", "North", "Southeast", "Centre-West", "South"]
+        },
+        "notes": [
+          "Fortaleza 53.2% → 53.5%",
+          "Recife 54.0% → 55.3%",
+          "Salvador 67.0% → 65.3%",
+          "Feira de Santana 61.7% → 57.1%"
+        ]
+      },
+      "capitals": {
+        "h": "The capitals held",
+        "t": "<p class=\"howto\">The circles change here: their size is all valid votes, their colour who led and by how much. The labels give Lula's margin in points, 2022 → 2026.</p><p>In the 27 state capitals, Lula's share slipped from 45.5 percent to 44.9 percent. Everywhere else it fell from 49.3 percent to 45.2 percent.</p><p>The difference is visible in the Rio metropolitan area. The city and Niterói held. Next door, in the Baixada Fluminense and São Gonçalo, the Bolsonaro camp's share grew. Lula's share in each, 2022 to 2026:</p>",
+        "chart": {
+          "title": "Lula's share: capitals vs the rest",
+          "labels": ["27 state capitals", "All other municipalities"]
+        }
+      },
+      "goias": {
+        "h": "In Goiás, the state's own candidate",
+        "t": "<p>Lula's share fell more in Goiás than in any other state, by 8.5 percentage points. Ronaldo Caiado, a former governor, won 12.3 percent of the valid vote in Goiás.</p><p class=\"howto\">Here each municipality is shaded by Caiado's share of the vote, brighter where he did better.</p>",
+        "notes": ["Aparecida de Goiânia −8.3", "Goiânia −4.9", "Anápolis −6.0"]
+      },
+      "south": {
+        "h": "Lula's share fell most in the South",
+        "t": "<p>Lula's share fell more in the South than in any other region, by 5.5 percentage points, and by 6.6 points in Rio Grande do Sul. In Caxias do Sul and its neighbours in the hills of the Serra Gaúcha, Lula's share fell about five points. Abstention in the area also rose.</p>",
+        "notes": ["Caxias do Sul −4.9"]
+      },
+      "sp-classes-ac": {
+        "h": "In São Paulo, Lula's share rose in the richest neighbourhoods",
+        "t": "<p class=\"howto\">Zoomed into the city, each circle is a polling place, not a municipality. Colour and size read as before.</p><p>In the city of São Paulo as a whole, Lula's share fell. In its richest neighbourhoods, it rose. At polling places in neighbourhoods where household heads earn more than four minimum wages on average (R$ 4,848 a month, at the 2022 census minimum wage of R$ 1,212), Lula's share rose from 39.6 percent to 41.9 percent. The Bolsonaro camp's share also rose, from 42.0 percent to 45.4 percent. The other candidates' combined share fell from 18.4 percent to 12.7 percent. Abstention rose from 22.2 percent to 23.4 percent.</p><p class=\"n\">A neighbourhood here is the census tracts within one kilometre of each polling place, and income is the average of the household heads in those tracts. It is not voters' household income, and it does not match the income bands in election polls.</p>",
+        "chart": {
+          "title": "Lula's share in São Paulo, by neighbourhood average income",
+          "labels": ["Under 2 MW", "2–4 MW", "Over 4 MW"]
+        }
+      },
+      "sp-class-d": {
+        "h": "It also fell in neighbourhoods averaging two to four minimum wages",
+        "t": "<p>In neighbourhoods where household heads earn two to four minimum wages on average, Lula's share fell from 47.0 percent to 45.5 percent. The Bolsonaro camp rose from 39.3 percent to 43.4 percent. Abstention went from 21.2 percent to 23.2 percent.</p>",
+        "chart": {
+          "title": "Lula's share in São Paulo, by neighbourhood average income",
+          "labels": ["Under 2 MW", "2–4 MW", "Over 4 MW"]
+        }
+      },
+      "sp-class-e": {
+        "h": "And it fell most in the poorest, up to two minimum wages",
+        "t": "<p>Lula still finished first in the poorest neighbourhoods, where household heads earn up to two minimum wages on average. But his share fell from 58.4 percent to 54.5 percent, and the Bolsonaro camp grew from 30.8 percent to 35.7 percent, its largest gain of the three groups. Abstention rose the most here as well, from 20.2 percent to 23.7 percent.</p><p>In the city, Lula's share fell in neighbourhoods averaging under four minimum wages, and most of all in the poorest.</p>",
+        "chart": {
+          "title": "Lula's share in São Paulo, by neighbourhood average income",
+          "labels": ["Under 2 MW", "2–4 MW", "Over 4 MW"]
+        }
+      },
+      "religion": {
+        "h": "Lula's share fell further in the most Catholic municipalities",
+        "t": "<p>In the most Catholic quarter of municipalities, where at least 80 percent of residents are Catholic, Lula's share fell 5.3 points, from 66.5 percent to 61.2 percent. These places are mostly small and rural. The Bolsonaro camp rose from 27.7 percent to 33.5 percent, and abstention fell from 20.6 percent to 19.5 percent.</p><p>In the least Catholic quarter, mostly big cities, Lula's share fell 2.6 points. The quarter of municipalities with the largest share of evangelicals matched the national drop of 3.3 points.</p><p class=\"n\">The data describes places. It does not show how Catholics voted.</p>",
+        "chart": {
+          "title": "Lula's share by Catholic share of residents",
+          "labels": ["Least (under 58%)", "58–70%", "70–80%", "Most (over 80%)"]
+        }
+      },
+      "smaller-candidates": {
+        "h": "Where the other candidates did best",
+        "t": "<p class=\"howto\">This map pools polling places into equal-sized hexagons, brighter where the other candidates' combined share was higher. Hollow hexagons hold fewer than 1,000 votes; zoom in for finer cells.</p><p>In polling places that hold about a fifth of all voters, candidates other than Lula and Flávio Bolsonaro won 10 percent or more of the valid vote. Together they took 12.1 percent in these places, compared with 7.8 percent nationally. Most of these polling places are in São Paulo state and in Goiás, Ronaldo Caiado's home state, in neighbourhoods with above-average income. Flávio Bolsonaro led Lula there, 51.0 percent to 36.9 percent.</p><p>Augusto Cury, Renan Santos and Caiado won 8.7 million votes combined. A Genial/Quaest poll taken 2–3 October asked their voters how they would vote in a runoff between Lula and Flávio Bolsonaro. If the poll's split holds for these voters, about 3.9 million would lean toward Flávio Bolsonaro, 1.6 million toward Lula, and 3.2 million would be undecided or back neither. Brazilians vote again on 25 October, when Lula and Flávio Bolsonaro meet in the runoff.</p><p class=\"n\">The poll's runoff split is national, applied here to the vote counts. It was not measured at each polling place.</p>"
+      },
+      "find": {
+        "h": "Find your place",
+        "t": "<p>Type the name of a municipality to see how its vote changed, compared with the country as a whole.</p>"
+      },
+      "explore": {
+        "h": "Explore the map",
+        "t": "<p>Every view in this story comes from the same map. In <b>Explore</b> you can search for any municipality, compare the two years, show the shift arrows, split abstention by age and filter by the area around each polling place or by municipality. <b>Share view</b> creates a link to what you are looking at.</p><p><button class=\"link\" id=\"toexplore\">Explore the map</button></p>"
+      },
+      "sp-income": {
+        "h": "In São Paulo, the poorer the neighbourhood, the bigger the drop",
+        "t": "<p>Split more finely, the city shows a steady gradient. In the tenth of polling places in the poorest neighbourhoods, averaging 1.3 to 1.7 minimum wages, Lula's share fell 4.6 percentage points. The drop shrinks as income rises and turns into a rise above 3.4 minimum wages. In the tenth in the richest neighbourhoods, above 8.8 minimum wages, his share rose 3.3 points.</p><p>Across Brazil the pattern is less steady. Nationally, the largest drops came at polling places in neighbourhoods averaging 1.5 to 2.5 minimum wages, not in the poorest.</p>",
+        "chart": {
+          "title": "Change in Lula's share, by neighbourhood average income (percentage points)",
+          "note": "Ten groups of polling places with equal votes, by the average income of household heads nearby, in minimum wages"
+        }
+      },
+      "sp-vs-brazil": {
+        "h": "Elsewhere, Lula's share fell most in middle-income neighbourhoods",
+        "t": "<p>In the rest of the country, Lula's share fell 3.4 percentage points in the poorest neighbourhoods, averaging under one minimum wage, and 4.7 points in those averaging 1.5 to 2.5 minimum wages. His share rose only above six minimum wages.</p><p>The city's line sits above the rest of the country's. In neighbourhoods averaging over two minimum wages, Lula's share in the city was 1.3 to 2.5 points higher than elsewhere at the same income. In the city, his share fell most in the poorest neighbourhoods: 5.6 points.</p><p>Most votes are cast where his share fell most. In the rest of the country, about seven in ten valid votes come from polling places in neighbourhoods averaging under 2.5 minimum wages.</p><p>The map shows only polling places in neighbourhoods averaging 1.5 to 2.5 minimum wages.</p>",
+        "chart": {
+          "title": "Change in Lula's share, by neighbourhood average income (percentage points)",
+          "axis": "Average income of household heads within 1 km, minimum wages",
+          "labels": ["São Paulo city", "Rest of Brazil"],
+          "weight": "share of the rest of Brazil's vote"
+        }
+      },
+      "flipped": {
+        "h": "Where the lead changed hands",
+        "t": "<p>Lula led in 3,379 municipalities in 2022. In 716 of them, the Bolsonaro camp finished ahead this time. No municipality went the other way.</p><p>Most are in Minas Gerais (178), Rio Grande do Sul (134), São Paulo and Paraná (91 each). The largest are Osasco, Ananindeua, Betim, Montes Claros and Barueri. Together these 716 municipalities cast 6.9 percent of the valid vote.</p>",
+        "notes": [
+          "Osasco 45.7% → 43.3%",
+          "Betim 45.8% → 41.2%",
+          "Montes Claros 46.6% → 42.6%",
+          "Ananindeua 45.3% → 45.0%",
+          "Santa Maria 45.4% → 41.9%"
+        ]
+      }
+    },
+    "cue": "Scroll to read the story",
+    "cueSwipe": "Swipe the card sideways",
+    "prev": "Previous part",
+    "next": "Next part",
+    "resize": "Drag to resize the text panel",
+    "totals": "{year} totals",
+    "brazil": "Brazil",
+    "litPlaces": "lit polling places",
+    "litMunis": "lit municipalities",
+    "inLitPlaces": "{place}, lit polling places",
+    "ofAll": "{v}% of all",
+    "scope": "<b>{n}</b> people on the roll here, <b>{p}%</b> of Brazil's {all}",
+    "colShare": "Share",
+    "colVotes": "Votes",
+    "colChange": "Since {year}",
+    "ofRoll": "of registered voters",
+    "ofValid": "of valid votes",
+    "blocks": {
+      "shift": "The shift",
+      "size": "Town size",
+      "regions": "Regions",
+      "income": "Income",
+      "religion": "Religion",
+      "abstention": "Abstention",
+      "runoff": "The runoff"
+    },
+    "cueKeys": "Or use the arrow keys",
+    "cueTap": "Or tap › for the next part"
+  },
+  "explore": {
+    "years": "Election year",
+    "h1": "Brazil's presidential election, first round",
+    "deck": {
+      "dots": "1 dot = <b><span class=\"vpd\"></span> votes</b>, placed around the polling place where they were cast. Hover a candidate to show only their votes; click a municipality to outline it.",
+      "outline": "1 dot = <b><span class=\"vpd\"></span> votes</b>, and each municipality is outlined in its leader's colour. Hover a candidate to show only their votes; click a municipality to outline it.",
+      "circles": "One circle per municipality, coloured by <b>{name}</b>. Hover a candidate to colour by their share; click a municipality to see its polling places as circles.",
+      "margins": "Each municipality shaded by <b>{name}</b>. Hover a candidate to shade by their share; click a municipality to outline it.",
+      "hex": "Polling places pooled into equal-area hexagons, coloured by <b>{name}</b>. Zoom in for finer cells; hover a candidate to colour by their share.",
+      "scatter": "A chart in place of the map: each circle is a municipality, placed by <b>{name}</b> and the change in Lula's share, its area the votes cast.",
+      "multiples": "One small map per band of <b>{name}</b>, each with that band's circles of votes that moved."
+    },
+    "search": "Search a municipality",
+    "noMatch": "No municipality found",
+    "rowsNote": "Toggle a row to hide it; click its swatch to change its colour.",
+    "reset": "Reset"
+  },
+  "panel": {
+    "scope": " · {n} on the roll, {p}% of Brazil",
+    "show": "Show {name}",
+    "colour": "Colour for {name}",
+    "votes": "votes",
+    "vs": "since {year}",
+    "abHad": "people aged 18–69 on the roll didn't vote",
+    "abOptional": "people aged 70–79 or 16–17 didn't vote",
+    "ab80": "people aged 80+ didn't vote",
+    "ab": "people on the roll didn't vote",
+    "abUnder80": "people on the roll under 80 didn't vote",
+    "estimated2026": "Age split estimated for 2026",
+    "note80": "Includes people likely no longer living who are still on the roll",
+    "note80est": "; estimated for 2026"
+  },
+  "studio": {
+    "aria": "Studio",
+    "title": "Studio",
+    "hide": "Hide the studio",
+    "show": "Show the studio",
+    "display": "Display",
+    "dotSize": "Dot size",
+    "dotSizing": "Dot sizing",
+    "adaptive": "Adaptive",
+    "adaptiveTitle": "Sized to the dots in view",
+    "byZoom": "By zoom",
+    "byZoomTitle": "Sized by zoom only",
+    "votesPerDot": "Votes per dot",
+    "scale": "Scale",
+    "arrows": "Swing arrows, 2022→2026",
+    "abstention": "Abstention",
+    "together": "Together",
+    "byAge": "By age",
+    "count80": "Count people aged 80+",
+    "note80": "Voting is optional at 70+ and 16–17. 80+ is shown apart: the 2026 roll lists 297,977 voters aged 100 or older, and 99% of that group didn't vote in 2022, so the band probably includes people no longer living. Leaving 80+ out takes them out of the dots and rates. Ages for 2026 are estimated.",
+    "area": "Area",
+    "addUp": "Add up",
+    "brazil": "Brazil",
+    "state": "State",
+    "municipality": "Municipality",
+    "pickFirst": "Click a municipality on the map or search for one first.",
+    "aroundPlace": "Around each polling place",
+    "municipalHead": "Municipality",
+    "clear": "Clear filters",
+    "filtersNote": "Ranges move by number of municipalities. Totals add up the municipalities that pass; rates in small places swing widely. Every filter describes places, not voters: a municipality that is 40% evangelical and voted for Flávio Bolsonaro doesn't show how evangelicals voted.",
+    "min": "{name}, minimum",
+    "max": "{name}, maximum"
+  },
+  "filters": {
+    "all": "All municipalities",
+    "places": "{n} of {total} polling places",
+    "munis": "{n} of {total} municipalities",
+    "showingOnly": "Showing only",
+    "state": "State: {uf}",
+    "nMunis": "{n} municipalities",
+    "atPlace": " (at polling place)",
+    "aroundPlace": " (around polling place)"
+  },
+  "share": {
+    "title": "Share this view",
+    "close": "Close",
+    "body": "The link opens the map exactly as you see it: year, place, zoom, filters, colours and settings.",
+    "link": "Link to this view",
+    "copy": "Copy",
+    "copied": "Copied",
+    "manual": "Select and copy",
+    "embed": "Map only, for embedding (hides the side panels)",
+    "storyTitle": "Share the story",
+    "storyBody": "The link opens the story from the beginning.",
+    "atStep": "Open at this part: “{h}”",
+    "storyBodyStep": "The link opens the story at this part."
+  },
+  "charts": {
+    "lulaLegend": "{from} → {to} · Lula's share of valid votes",
+    "placeLegend": "{from} → {to} <i class=\"nat\"></i>Brazil {to} · share of valid votes; didn't vote: of the roll",
+    "new": "new"
+  },
+  "find": {
+    "placeholder": "Type a municipality",
+    "aria": "Find a municipality",
+    "title": "{place}, {from} → {to}",
+    "bolsonaroCamp": "the Bolsonaro camp",
+    "lula": "Lula",
+    "aboutNational": "about the national",
+    "aboveNational": "above the national",
+    "belowNational": "below the national",
+    "summary": "<p><b>{place}</b> in {year}: {first} led {second}, {a}%{ca} to {b}%{cb}. Everyone else took {rest}%{cr}, {vsRest} {restN}%. {ab}% of the roll didn't vote{cab}, {vsAb} {abN}%.</p>",
+    "fieldLine": "<b>Everyone else</b> · {y0}: {l0} · {y1}: {l1}",
+    "others": "others"
+  },
+  "vars": {
+    "dlula": {
+      "n": "Change in Lula's share",
+      "src": "TSE, 2026 minus 2022, share of valid votes"
+    },
+    "abst": {
+      "n": "Abstention rate",
+      "src": "TSE, year shown"
+    },
+    "dabst": {
+      "n": "Change in abstention",
+      "src": "TSE, year shown compared with the other"
+    },
+    "renda_dom_pc_media_2022": {
+      "n": "Household income per person",
+      "src": "Censo 2022, monthly average"
+    },
+    "censo_sup_comp_25p_2022": {
+      "n": "Adults with a degree",
+      "src": "Censo 2022, ages 25+"
+    },
+    "censo_medio_comp_mais_25p_2022": {
+      "n": "Adults who finished secondary school",
+      "src": "Censo 2022, ages 25+"
+    },
+    "pct_urbana_2022": {
+      "n": "Urban population",
+      "src": "Censo 2022"
+    },
+    "pop_2022": {
+      "n": "Population",
+      "src": "Censo 2022"
+    },
+    "eleit_sup_comp_2026": {
+      "n": "Voters with a degree",
+      "src": "TSE 2026, self-reported at registration"
+    },
+    "pct_evangelica_2022": {
+      "n": "Evangelical",
+      "src": "Censo 2022, residents aged 10+"
+    },
+    "pct_catolica_2022": {
+      "n": "Catholic",
+      "src": "Censo 2022, residents aged 10+"
+    },
+    "pct_sem_religiao_2022": {
+      "n": "No religion",
+      "src": "Censo 2022, residents aged 10+"
+    },
+    "setor_renda_resp_media": {
+      "n": "Income of household heads",
+      "src": "2022 census tracts within 1 km, monthly average, in minimum wages"
+    },
+    "setor_pct_urbana": {
+      "n": "Urban population",
+      "src": "Censo 2022 tracts within 1 km"
+    },
+    "setor_dens_hab_km2": {
+      "n": "Population density",
+      "src": "Censo 2022 tracts within 1 km, people per km²"
+    },
+    "setor_pct_70p": {
+      "n": "Residents aged 70+",
+      "src": "Censo 2022 tracts within 1 km"
+    },
+    "setor_pct_preta_parda": {
+      "n": "Black or Brown",
+      "src": "Censo 2022 tracts within 1 km"
+    },
+    "pct_excess_2026": {
+      "n": "Abstention above expected",
+      "src": "2026 abstention minus a baseline from the roll's age and schooling, at 2022 rates (model)"
+    },
+    "small_2026": {
+      "n": "Votes for the other candidates",
+      "src": "TSE 2026, combined share of valid votes at the polling place for all candidates except Lula and Flávio Bolsonaro"
+    },
+    "flip": {
+      "n": "Leader changed since 2022",
+      "src": "TSE, candidate with the most votes, 2022 and 2026"
+    }
+  },
+  "loader": {
+    "lines": [
+      "Downloading the votes of 5,570 municipalities",
+      "More than 1.2 million dots, one for every 250 votes",
+      "Placing each dot near one of 94,000 polling places",
+      "Lining up 2022 and 2026 at every polling place"
+    ],
+    "drawing": "Drawing the map",
+    "mb": "{got} of {total} MB"
+  },
+  "viz": {
+    "label": "Zoomed in",
+    "from": "Zoomed in from",
+    "always": "Always",
+    "hintAlways": "Showing at every zoom",
+    "hintOn": "Showing (from {k}× zoom)",
+    "hintOff": "Zoom in past {k}× to see it, or lower “Zoomed in from”",
+    "fromTitle": "The zoom where the zoomed-in view starts to fade in over the dots (fully in at about twice it)",
+    "dots": "Dots",
+    "dotsTitle": "Dots at every zoom",
+    "outline": "Outlines",
+    "outlineTitle": "Dots at a fixed size, over each municipality outlined in its leader's colour",
+    "circles": "Circles",
+    "circlesTitle": "One circle per municipality: its area is the votes, its colour the measure chosen below",
+    "margins": "Margins",
+    "marginsTitle": "Each municipality filled by its leader's margin, hatched where few people live",
+    "keyMargin": "Who led, and by how many points",
+    "keyCircles": "valid votes",
+    "colour": "Colour by",
+    "vc": {
+      "moved": "Votes that moved",
+      "change": "Change in Lula's share",
+      "margin": "Leader's margin",
+      "abst": "Abstention",
+      "mix": "Everyone (hatching)",
+      "dabst": "Abstention: change in people"
+    },
+    "small": "Other candidates (all but the top two)",
+    "keyChange": "Change in Lula's share, 2022 → 2026",
+    "lost": "−{n} points",
+    "gained": "+{n} points",
+    "keyAbst": "Didn't vote, share of the roll",
+    "keyShare": "{name}: share of valid votes",
+    "keyFlip": "the leader changed since 2022",
+    "keyMix": "Lines in proportion to each share of the roll",
+    "camp": "Bolsonaro camp",
+    "others": "others",
+    "didnt": "didn't vote",
+    "keyGrain": "Closer lines: more voters per km²",
+    "same": "0",
+    "keyMoved": "Net votes that moved, 2022 → 2026",
+    "movedAway": "toward the Bolsonaro camp",
+    "movedTo": "toward Lula",
+    "keyMovedSize": "votes moved",
+    "keyDabst": "Change in the number who didn't vote, 2022 → 2026",
+    "abstUp": "more stayed home",
+    "abstDown": "fewer stayed home",
+    "keyDabstSize": "people",
+    "keyDabstRate": "Change in abstention, 2022 → 2026, in points",
+    "scatter": "Chart",
+    "scatterTitle": "A chart in place of the map: each municipality by a variable and the change in Lula's share",
+    "multiples": "Panels",
+    "multiplesTitle": "One small map per band of a variable, each with that band's circles",
+    "hex": "Hexagons",
+    "hexTitle": "Polling places pooled into equal-area hexagons, finer as you zoom in",
+    "keyHex": "Each hexagon pools the polling places inside it; hollow where they hold under 1,000 votes. Zoom in for finer cells.",
+    "under": "Under {n}",
+    "over": "{n} and over",
+    "scatterX": "{name} (each circle is a municipality; its area is its valid votes)",
+    "scatterY": "Change in Lula's share, 2022 → 2026, in points",
+    "scatterTrend": "average of each band, weighted by votes",
+    "lulaShare": "Lula",
+    "nMuni": "{n} municipalities",
+    "keyMultiples": "Municipalities by {name}",
+    "keyMarginNames": "Names: Lula's margin in points, 2022 → 2026",
+    "scatterYAbst": "Change in the abstention rate, 2022 → 2026, in points",
+    "keyRoll": "people on the roll",
+    "scatterXShort": "{name} (circle area: voters)"
+  },
+  "tour": {
+    "title": "How to use this map",
+    "replay": "How to use this map",
+    "card": "Each part of the story brings a new map.<span class=\"tl\"><b>Scroll</b> for the next step</span><span class=\"tl\">or press <kbd>←</kbd> <kbd>→</kbd></span>",
+    "cardPhone": "Each part of the story brings a new map.<span class=\"tl\"><b>Swipe</b> the card sideways</span><span class=\"tl\">or tap <kbd>›</kbd> for the next step</span>",
+    "dots": "Each dot is a step. Click one to jump to it.",
+    "dotsPhone": "Each dot is a step. Tap one to jump to it.",
+    "map": "You can move the map too.<span class=\"tl\"><b>Drag</b> to pan</span><span class=\"tl\"><b>Scroll</b> to zoom</span><span class=\"tl\"><b>Hover</b> over a place to see its numbers</span>The next step brings the view back.",
+    "mapPhone": "You can move the map too.<span class=\"tl\"><b>Drag</b> to pan</span><span class=\"tl\"><b>Pinch</b> to zoom</span><span class=\"tl\"><b>Tap</b> a place to see its numbers</span>The next step brings the view back.",
+    "key": "The key says what the marks mean. It changes along with the map.",
+    "tabs": "When you're done, open <b>Explore</b> to search any town, compare 2022 and 2026, and filter the map yourself.",
+    "skip": "Skip tour",
+    "close": "Got it",
+    "next": "Next",
+    "prev": "Back",
+    "replayHelp": "Press <b>?</b> any time to see this again.",
+    "closeX": "Close the tour",
+    "toEnglish": "Switch to English →",
+    "inEnglish": "Prefer English? This story has an English version."
+  }
+}

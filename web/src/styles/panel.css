@@ -1,0 +1,378 @@
+/* Results rows and the studio column */
+/* a row: visibility switch, the row body (hover/click to isolate), colour swatch */
+.cand {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  column-gap: 10px;
+  border-top: 1px solid var(--rule);
+  padding: 9px 0;
+  transition: opacity 0.2s;
+}
+.cand .body {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  background: none;
+}
+.sw80 {
+  cursor: pointer;
+}
+.sw80 .vis {
+  --c: var(--ca);
+}
+.cand .vis,
+.sw80 .vis {
+  appearance: none;
+  margin: 3px 0 0;
+  width: 26px;
+  height: 15px;
+  border-radius: 8px;
+  background: var(--rule);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cand .vis::after,
+.sw80 .vis::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--haze);
+  transition:
+    transform 0.15s,
+    background 0.15s;
+}
+.cand .vis:checked,
+.sw80 .vis:checked {
+  background: color-mix(in srgb, var(--c) 40%, var(--rule));
+}
+.cand .vis:checked::after,
+.sw80 .vis:checked::after {
+  transform: translateX(11px);
+  background: var(--c);
+}
+.cand .col {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 2px 0 0;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--edge);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+.cand .col::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.cand .col::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+.cand .col::-moz-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+.cand.off .body {
+  opacity: 0.4;
+}
+/* abstention is a share of the roll, not of valid votes: set apart below the candidates */
+.cand.ab1 {
+  border-top: 2px solid var(--rule);
+  margin-top: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cand .vis,
+  .cand .vis::after,
+  .sw80 .vis::after {
+    transition: none;
+  }
+}
+/* studio: its own column right of the map, so the totals on the left react as the controls move; collapses to a
+   thin strip */
+.page {
+  grid-template-columns: 380px minmax(0, 1fr) 300px;
+}
+.page.nostudio {
+  grid-template-columns: 380px minmax(0, 1fr) 40px;
+}
+.studio {
+  grid-column: 3;
+  grid-row: 1;
+  overflow-y: auto;
+  border-left: 1px solid var(--rule);
+  padding: 18px 18px 22px;
+  background: var(--night);
+}
+.studio .sh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.studio h2 {
+  font: 700 15px/1.2 var(--display);
+  margin: 0;
+}
+.studio h3 {
+  font: 600 11px/1.5 var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--haze);
+  margin: 18px 0 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+}
+.studio #studiob > h3:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.disp {
+  display: grid;
+  gap: 10px;
+}
+#studiox {
+  border: 0;
+  background: none;
+  padding: 4px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+}
+#studiox svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--haze);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.15s;
+}
+.nostudio .studio {
+  padding: 18px 8px;
+  overflow: hidden;
+}
+.nostudio .studio h2 {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 13px;
+  color: var(--haze);
+}
+.nostudio .studio .sh {
+  flex-direction: column;
+}
+.nostudio #studiox svg {
+  transform: rotate(180deg);
+}
+.nostudio #studiob {
+  display: none;
+}
+.studio .sec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 2px 0 6px;
+}
+.studio .fn {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.seg {
+  display: flex;
+  background: var(--night);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 2px;
+}
+.seg button {
+  border: 0;
+  border-radius: 4px;
+  padding: 5px 10px;
+  background: none;
+  color: var(--haze);
+  font: inherit;
+  font-size: 11.5px;
+}
+.seg button[aria-pressed="true"] {
+  background: var(--rule);
+  color: var(--ink);
+}
+.studio .note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--haze);
+  margin: 4px 0 12px;
+}
+.f {
+  padding: 8px 0;
+  border-top: 1px solid var(--rule);
+}
+.fh {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.fv {
+  white-space: nowrap;
+  font-size: 11.5px;
+  color: var(--haze);
+  font-variant-numeric: tabular-nums;
+}
+.f.on .fv {
+  color: var(--ink);
+}
+.fs {
+  font-size: 10.5px;
+  color: var(--haze);
+  opacity: 0.75;
+  margin-top: 1px;
+}
+.rng {
+  position: relative;
+  height: 22px;
+}
+.rng .track {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 10px;
+  height: 2px;
+  background: var(--rule);
+  border-radius: 1px;
+}
+.rng .fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--haze);
+  border-radius: 1px;
+}
+.f.on .rng .fill {
+  background: var(--ink);
+}
+.rng input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.rng input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--dusk);
+  cursor: pointer;
+}
+.rng input::-moz-range-thumb {
+  pointer-events: auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--dusk);
+  cursor: pointer;
+}
+.rng input::-webkit-slider-runnable-track {
+  background: none;
+}
+.rng input:focus-visible {
+  outline: none;
+}
+.rng input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--c0);
+}
+.fstat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px solid var(--rule);
+  padding: 9px 0 0;
+  font-size: 12px;
+}
+.cand .dl {
+  font: 12px/1 var(--body);
+}
+#tip .sub {
+  color: var(--haze);
+  padding-left: 8px;
+}
+.studio-note {
+  font-size: 11.5px;
+  color: var(--haze);
+  margin: 10px 0 0;
+}
+.link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--edge);
+  text-underline-offset: 2px;
+  border-radius: 0;
+}
+.cand:hover {
+  border-color: var(--rule);
+}
+.cand .row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.cand .nm {
+  font: 500 15px/1.2 var(--body);
+  flex: 1;
+}
+.cand .pc {
+  font: 600 18px/1 var(--body);
+}
+.cand .vt {
+  font: 11px/1.3 var(--mono);
+  color: var(--haze);
+  margin-top: 3px;
+}
+.cand .who {
+  font-size: 11px;
+  color: var(--haze);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.grains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 8px;
+}
+.grains i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--c);
+}
+.grains i.part {
+  opacity: 0.4;
+}
