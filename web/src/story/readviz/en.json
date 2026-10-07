@@ -1,0 +1,36 @@
+{
+  "aria": "Animation: how the change in Lula's share between 2022 and 2026 corresponds to a change in votes in Goiânia, São Paulo and Belém",
+  "replay": "Play again",
+  "cities": {
+    "gyn": {
+      "name": "Goiânia (GO)",
+      "votes": "791,000 votes",
+      "change": "−4.8 percentage points",
+      "net": "≈ 38,000 votes"
+    },
+    "sp": {
+      "name": "São Paulo (SP)",
+      "votes": "6.6 million votes",
+      "change": "−1.0 percentage point",
+      "net": "≈ 63,000 votes"
+    },
+    "bel": {
+      "name": "Belém (PA)",
+      "votes": "826,000 votes",
+      "change": "+2.3 percentage points",
+      "net": "≈ 19,000 votes"
+    }
+  },
+  "captions": {
+    "b1": "This square stands for Goiânia's 791,000 valid votes in 2026.",
+    "b2": "The red part is Lula's share of the vote in Goiânia in 2022: 33.0% of valid votes.",
+    "b3": "In 2026, Lula won 28.2% of the valid vote in Goiânia. The highlighted strip is the difference: 4.8 percentage points.",
+    "b4": "The strip turns blue because Lula's share fell.",
+    "b5": "The strip becomes a circle of the same area. The 4.8 percentage points come to about 38,000 votes.",
+    "b6": "Beside it, at the same scale, the square for São Paulo's 6.6 million valid votes, eight times Goiânia's.",
+    "b7": "In São Paulo, Lula's share fell 1 percentage point. The strip is narrow, but it comes to about 63,000 votes, and the circle is bigger than Goiânia's.",
+    "b8": "In Belém, with almost as many votes as Goiânia, Lula's share rose 2.3 percentage points, about 19,000 votes. The strip and the circle turn red.",
+    "b9": "On the map, each of the 5,570 municipalities has a circle worked out the same way."
+  },
+  "close": "Close"
+}

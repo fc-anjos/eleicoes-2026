@@ -908,6 +908,8 @@ export function drawKey(t = d3.zoomTransform(svg.node())) {
           : chip(camp, tr("viz.movedAway")) + chip(lula, tr("viz.movedTo"))) +
         `</div>`;
     h += `<div class="kcirc"><div class="krow">${sizes(t.k)}<div class="kn">${tr(v === "dabst" ? "viz.keyDabstSize" : mv ? "viz.keyMovedSize" : "viz.keyCircles")}</div></div></div>`;
+    // the change circles' explainer (readviz.js), opened from here
+    if (mv && v !== "dabst") h += `<button type="button" class="rvopen">${tr("viz.howToRead")}</button>`;
   }
   if (h !== keyHtml) key.html((keyHtml = h));
 }

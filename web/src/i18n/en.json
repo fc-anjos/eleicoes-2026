@@ -35,7 +35,6 @@
   },
   "map": {
     "aria": "Dot map of votes by municipality",
-    "arrowKey": "<span class=\"ar r\">←</span> towards Lula <span class=\"ar b\">→</span> towards the Bolsonaro camp · <i id=\"akl\"></i> = 10 points of margin",
     "hint": "<b class=\"mh-t\">Drag</b> to pan<br /><b class=\"mh-z\">Scroll</b> to zoom",
     "hintPinch": "Pinch",
     "divider": "Divider between years",
@@ -63,18 +62,9 @@
         "h": "How Brazil voted in 2026",
         "t": "<p>Each dot on this map stands for 250 votes or 250 people who did not vote, scattered around the polling place where they are registered. <b class=\"sb\">Blue</b> dots are votes for the Bolsonaro camp, the PL's candidate (Jair Bolsonaro in 2022, Flávio Bolsonaro in 2026), <b class=\"sr\">red</b> for Luiz Inácio Lula da Silva, <b class=\"sa\">amber</b> for people on the roll who did not vote, and grey for votes for the other candidates.</p><p>What follows shows where the vote moved between the first rounds of 2022 and 2026.</p>"
       },
-      "read": {
-        "h": "How to read the circles",
-        "t": "<p>From here on, most maps show one circle per municipality. Its <b>colour</b> says which way the vote moved between 2022 and 2026: <b class=\"sb\">blue</b> toward the Bolsonaro camp, <b class=\"sr\">red</b> toward Lula.</p><p>Its <b>size</b> is how many votes that shift is worth: the points Lula's share moved, times the votes cast. A big city with a small shift can draw as big a circle as a mid-sized city with a large one.</p><p class=\"howto\">São Paulo: Lula's share fell 1.0 point across 6.6 million votes, about 63,000 net votes. Goiânia: it fell 4.9 points across 0.8 million, about 38,000. Belém: it rose 2.3 points, about 19,000 toward Lula.</p>",
-        "notes": ["São Paulo −1.0 pt ≈ 63,000 votes", "Goiânia −4.9 pts ≈ 38,000", "Belém +2.3 pts ≈ 19,000"]
-      },
       "overview": {
-        "h": "The vote moved toward the Bolsonaro camp almost everywhere",
-        "t": "<p>Lula's share of the vote fell in 5,468 of Brazil's 5,570 municipalities. In 2022 he led Jair Bolsonaro in the first round, 48.4 percent to 43.2 percent. This year Flávio Bolsonaro finished first, with 47.0 percent to Lula's 45.2 percent.</p><p>The shift was spread across the country. Lula's share slipped in the North and the Southeast and fell further in the South, by 5.5 percentage points. In the Northeast he still won 63.8 percent of the valid vote. In 716 municipalities where he finished ahead in 2022, the Bolsonaro camp came out ahead this time.</p><p class=\"n\">The ballot is secret. These maps show how places voted. They cannot show which voters changed their minds.</p>"
-      },
-      "arrows": {
-        "h": "The shift, municipality by municipality",
-        "t": "<p>The margin moved toward the Bolsonaro camp in 5,512 of 5,570 municipalities. The next three views sort them by how much Lula's share fell.</p><p class=\"howto\">Each arrow is a municipality. It points <b class=\"sr\">left</b> where the margin moved toward Lula and <b class=\"sb\">right</b> where it moved toward the Bolsonaro camp; the longer the arrow, the bigger the change in the margin.</p>"
+        "h": "What changed from 2022 to 2026",
+        "t": "<p>Lula's share of the vote fell in 5,468 of Brazil's 5,570 municipalities. In 2022 he won 48.4% of the valid vote in the first round and finished ahead. This year he won 45.2%, and Flávio Bolsonaro came first, with 47.0%.</p><p>The drop was largest in the South, in small municipalities and in the most Catholic ones. In the state capitals, Lula's share barely changed. In the Northeast it fell about three percentage points, but he is still ahead. Turnout stayed about the same.</p><p class=\"howto\">On the maps that follow, each circle is a municipality. The colour shows the change in Lula's share of the valid vote between 2022 and 2026: <b class=\"sb\">blue</b> where it fell, <b class=\"sr\">red</b> where it rose. The <b>area of each circle</b> shows how many votes that change represents.</p><p class=\"n\">The ballot is secret. These maps show how places voted. They cannot show which voters changed their minds.</p>"
       },
       "held": {
         "h": "Where Lula's share held",
@@ -135,7 +125,7 @@
       "goias": {
         "h": "In Goiás, the state's own candidate",
         "t": "<p>Lula's share fell more in Goiás than in any other state, by 8.5 percentage points. Ronaldo Caiado, a former governor, won 12.3 percent of the valid vote in Goiás.</p><p class=\"howto\">Here each municipality is shaded by Caiado's share of the vote, brighter where he did better.</p>",
-        "notes": ["Aparecida de Goiânia −8.3", "Goiânia −4.9", "Anápolis −6.0"]
+        "notes": ["Aparecida de Goiânia −8.3", "Goiânia −4.8", "Anápolis −6.0"]
       },
       "south": {
         "h": "Lula's share fell most in the South",
@@ -184,7 +174,7 @@
       },
       "explore": {
         "h": "Explore the map",
-        "t": "<p>Every view in this story comes from the same map. In <b>Explore</b> you can search for any municipality, compare the two years, show the shift arrows, split abstention by age and filter by the area around each polling place or by municipality. <b>Share view</b> creates a link to what you are looking at.</p><p><button class=\"link\" id=\"toexplore\">Explore the map</button></p>"
+        "t": "<p>Every view in this story comes from the same map. In <b>Explore</b> you can search for any municipality, compare the two years, split abstention by age and filter by the area around each polling place or by municipality. <b>Share view</b> creates a link to what you are looking at.</p><p><button class=\"link\" id=\"toexplore\">Explore the map</button></p>"
       },
       "sp-income": {
         "h": "In São Paulo, the poorer the neighbourhood, the bigger the drop",
@@ -291,7 +281,6 @@
     "byZoomTitle": "Sized by zoom only",
     "votesPerDot": "Votes per dot",
     "scale": "Scale",
-    "arrows": "Swing arrows, 2022→2026",
     "abstention": "Abstention",
     "together": "Together",
     "byAge": "By age",
@@ -513,7 +502,8 @@
     "keyRoll": "people on the roll",
     "scatterXShort": "{name} (circle area: voters)",
     "smallShort": "All others",
-    "keyShareNat": "Nationally: {v}. The classes run from half to three times that."
+    "keyShareNat": "Nationally: {v}. The classes run from half to three times that.",
+    "howToRead": "How to read this map"
   },
   "tour": {
     "title": "How to use this map",

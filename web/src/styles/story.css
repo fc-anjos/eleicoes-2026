@@ -1,4 +1,4 @@
-/* Story and Explore tabs, story cards, swing-arrow key, map notes, charts, find your place, scroll cues */
+/* Story and Explore tabs, story cards, map keys, map notes, charts, find your place, scroll cues */
 /* story / explore tabs at the top of the left column */
 .tabs {
   display: flex;
@@ -312,7 +312,7 @@
     display: none;
   }
 }
-/* swing arrows key, on the map's top left (centred in the story) */
+/* a map key, on the map's top left (centred in the story) */
 .akey {
   position: absolute;
   top: 16px;
@@ -328,22 +328,6 @@
 }
 .akey[hidden] {
   display: none;
-}
-.akey .ar {
-  font-weight: 700;
-}
-.akey .r {
-  color: var(--c1);
-}
-.akey .b {
-  color: var(--c0);
-}
-.akey i {
-  display: inline-block;
-  height: 2px;
-  background: var(--haze);
-  vertical-align: middle;
-  margin: 0 2px;
 }
 /* in the story, centred over the visible map like the filter badge */
 .storymode .akey {
@@ -1056,21 +1040,20 @@ kbd {
   background: color-mix(in srgb, var(--ink) 6%, transparent);
   border: 1px solid var(--rule);
   border-radius: 8px;
-  padding: 8px 10px 8px 32px;
-  position: relative;
+  padding: 9px 12px;
 }
+/* the usual info icon, set inline at the start of the first line so the text keeps the box's left edge */
 .step p.howto::before {
-  content: "i";
-  position: absolute;
-  left: 10px;
-  top: 9px;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  border: 1.3px solid var(--haze);
-  color: var(--haze);
-  font: 700 10px/13px var(--body);
-  text-align: center;
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  background: var(--haze);
+  -webkit-mask: var(--info) center / contain no-repeat;
+  mask: var(--info) center / contain no-repeat;
+  --info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 1.3a5.7 5.7 0 1 1 0 11.4A5.7 5.7 0 0 1 8 2.3zM7.25 7h1.5v4.5h-1.5zM8 4.1a.95.95 0 1 1 0 1.9.95.95 0 0 1 0-1.9z'/%3E%3C/svg%3E");
 }
 /* a step's colour-measure buttons (vcs in story.json): one pressed at a time */
 .races {
@@ -1083,4 +1066,135 @@ kbd {
   background: var(--ink);
   color: var(--night);
   border-color: var(--ink);
+}
+/* "how to read this map": the circles explainer (readviz.js), in a modal over the page, opened from the map key */
+.rvmodal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--night) 70%, transparent);
+  backdrop-filter: blur(3px);
+  animation: rvin 0.3s ease-out both;
+}
+@keyframes rvin {
+  from {
+    opacity: 0;
+  }
+}
+.rv-panel {
+  position: relative;
+  width: min(880px, 100%);
+  height: min(620px, 100%);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--dusk);
+  overflow: hidden;
+}
+.rv-x {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--haze);
+  font: 22px/1 var(--body);
+  cursor: pointer;
+}
+.rv-x:hover {
+  color: var(--ink);
+  background: var(--rule);
+}
+.rv-end {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0;
+}
+.rv-end button,
+.rvopen {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  background: none;
+  color: var(--ink);
+  font: 12px var(--body);
+  cursor: pointer;
+  pointer-events: auto;
+}
+.rv-end button:hover,
+.rvopen:hover {
+  border-color: var(--haze);
+}
+.rvopen {
+  margin-top: 10px;
+}
+.rvopen::before {
+  content: "";
+  border: 4px solid transparent;
+  border-left: 6px solid currentColor;
+  border-right: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rvopen {
+    display: none;
+  }
+}
+.rv-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.rviz text {
+  fill: var(--haze);
+  font: 12px var(--body);
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+.rviz .rv-l {
+  text-anchor: start;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.rviz .rv-n {
+  fill: var(--ink);
+  font-weight: 600;
+  font-size: 14px;
+}
+.rv-track {
+  fill: var(--rule);
+}
+.rv-cap {
+  position: absolute;
+  margin: 0;
+  text-align: center;
+  font: 15px/1.45 var(--body);
+  color: var(--ink);
+  opacity: 0;
+}
+/* the strip of change, outlined until it takes its colour */
+.rv-sl {
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+.rv-sq {
+  fill: #3a3a40;
+}
+.rv-world rect {
+  vector-effect: non-scaling-stroke;
 }

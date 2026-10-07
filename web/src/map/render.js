@@ -12,7 +12,6 @@ import * as d3 from "d3";
 import { layers } from "../dots.js";
 import { A8, DC, HID, PX, S, css, hidden } from "../state.js";
 import { saveSoon } from "../view/hash.js";
-import { drawArrows } from "./arrows.js";
 import { blend, drawKey, drawMarks, fixedDots } from "./marks.js";
 import { drawPanels, flat, mapFrame, panelled } from "./panels.js";
 import { setPanelCut, svg } from "./base.js";
@@ -254,11 +253,11 @@ function paint(t) {
     const v = TI[j];
     if (v) hist[((v - ilo) * sc) | 0]++;
   }
-  // under swing arrows the dots recede; under margins they fade to a faint texture; under circles (and the chart
+  // under margins they fade to a faint texture; under circles (and the chart
   // views) they go, so a map never shows two kinds of round mark at once
   const solid = S.VIZ === "circles" || S.VIZ === "hex" || flat(),
     b = solid || S.VIZ === "margins" ? blend(t.k) : 0,
-    dim = (S.ARROWS ? 0.3 : 1) * (1 - (solid ? 1 : 0.85) * b);
+    dim = 1 - (solid ? 1 : 0.85) * b;
   for (let b = 0, below = 0; b < 1024; b++) {
     LUT[b] = 255 * dim * (ALO + ((1 - ALO) * below) / Math.max(1, m));
     below += hist[b];
@@ -279,7 +278,6 @@ function paint(t) {
   else drawMarks(cx, t, W, H, dpr);
   drawSide();
   drawKey(t);
-  if (S.ARROWS) drawArrows(cx, t, W, H);
   drawn = t;
   cv.style.transform = "";
 }

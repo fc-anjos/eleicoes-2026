@@ -19,6 +19,7 @@ import { hintDone } from "../view/hints.js";
 import { tween } from "../view/tween.js";
 import { chart } from "./charts.js";
 import { findStep } from "./find.js";
+import { stopRead } from "./readviz.js";
 
 const viewOf = (i) => STORY[i].view;
 // a step's copy (i18n story.steps.<id>): headline h, text t, note labels in order, chart title and labels
@@ -76,6 +77,7 @@ function goStep(i) {
   }
   if (i === stepNow) return;
   stepNow = i;
+  stopRead(); // the circles explainer closes when the story moves on
   steps.classed("on", (d, j) => j === i).classed("past", (d, j) => j < i);
   prog.attr("aria-current", (d, j) => (j === i ? "step" : null));
   d3.select("#sprev").property("disabled", i === 0);
@@ -236,6 +238,7 @@ function setTab(story) {
     document.getElementById("steps").scrollLeft = 0;
     goStep(0);
   } else {
+    stopRead();
     setNotes([]);
     panel();
     svg.interrupt().call(zoom.transform, d3.zoomIdentity);

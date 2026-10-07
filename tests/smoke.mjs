@@ -42,7 +42,7 @@ try {
   await check("explore", "", (p) => p.click("#tab-explore"));
   await check("compare", "#y=cmp&split=0.5&at=-47.9,-15.8,1");
   await check("filtered", "#y=2026&at=-46.6,-23.6,8&f=setor_renda_resp_media@*~2424");
-  await check("state", "#y=2022&in=uf:BA&arrows=1");
+  await check("state", "#y=2022&in=uf:BA");
   // the language is in the path (root Portuguese, en/ English); old ?lang= links still pick it and move to the path
   for (const [url, lang, path] of [
     ["", "pt-BR", "/"],

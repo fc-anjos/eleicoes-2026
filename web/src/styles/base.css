@@ -30,6 +30,7 @@
   box-sizing: border-box;
 }
 body {
+  visibility: visible; /* index.html hides the page until this stylesheet has loaded */
   margin: 0;
   background: var(--night);
   color: var(--ink);
@@ -321,7 +322,7 @@ h1 {
   color: var(--haze);
   cursor: default;
 }
-/* things that appear with a view (the compare divider, the swing-arrow legend, the filter badge) fade in */
+/* things that appear with a view (the compare divider, the map keys, the filter badge) fade in */
 @keyframes appear {
   from {
     opacity: 0;

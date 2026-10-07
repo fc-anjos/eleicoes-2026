@@ -50,13 +50,6 @@ export const flipped = (m) => {
     b = leader(YS[1], m);
   return a == null || b == null ? null : +(a !== b);
 };
-export const marginShift = (m) => {
-  const a = share(YS[0], m, "22"),
-    b = share(YS[1], m, "22"),
-    c = share(YS[0], m, "13"),
-    d = share(YS[1], m, "13");
-  return a == null || b == null ? null : a - c - (b - d);
-};
 export const abRate = (y, m) => {
   const t = tally(y, m);
   return t && t.all ? (100 * t.ab) / t.all : null;

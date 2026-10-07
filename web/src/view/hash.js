@@ -7,7 +7,6 @@ import * as d3 from "d3";
 import { CATS, M, SG, VPD } from "../data.js";
 import { computeFilter } from "../filters/filter.js";
 import { VARS, isOn, resetVar } from "../filters/vars.js";
-import { setArrows } from "../map/arrows.js";
 import { MAXK, getView, layout, mapH, panLimits, path, proj, svg, zoom } from "../map/base.js";
 import { placeSwipe, setMode } from "../map/compare.js";
 import { DEF_VX, mapFrame, panelled } from "../map/panels.js";
@@ -28,7 +27,6 @@ export function stateHash(embed) {
     q.set("in", whole ? "uf:" + u : [...S.INSET].join(","));
   }
   if (S.SPLITA) q.set("ages", "1");
-  if (S.ARROWS) q.set("arrows", "1");
   if (S.BIG) q.set("big", "1");
   if (!S.INC80) q.set("80plus", "0");
   const f = VARS.filter(isOn).map((x) =>
@@ -161,7 +159,6 @@ export function applyState(str, animate) {
   });
   S.INC80 = q.get("80plus") !== "0";
   d3.select("#inc80").property("checked", S.INC80);
-  setArrows(q.has("arrows"));
   if (q.has("size")) {
     S.ADAPT = q.get("size") !== "zoom";
     d3.selectAll("#mode button").attr("aria-pressed", function () {

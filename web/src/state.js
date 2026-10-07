@@ -32,7 +32,6 @@ export const S = {
   FILTERED: false, // some filter or area is on
   PLACEF: false, // some neighbourhood (polling-place) filter is on
   INSET: null, // the area: a Set of IBGE codes the map and totals are limited to, or null
-  ARROWS: false, // swing arrows shown
   BIG: false, // circles: only the capitals and the cities big enough for the zoom, the biggest named (big=1)
   SIZE: 1, // dot radius multiplier
   STEP: 1, // draw every STEP-th dot

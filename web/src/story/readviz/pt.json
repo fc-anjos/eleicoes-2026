@@ -1,0 +1,36 @@
+{
+  "aria": "Animação: como a variação da votação de Lula entre 2022 e 2026 corresponde a uma variação em votos em Goiânia, São Paulo e Belém",
+  "replay": "Ver de novo",
+  "cities": {
+    "gyn": {
+      "name": "Goiânia (GO)",
+      "votes": "791 mil votos",
+      "change": "−4,8 pontos percentuais",
+      "net": "≈ 38 mil votos"
+    },
+    "sp": {
+      "name": "São Paulo (SP)",
+      "votes": "6,6 milhões de votos",
+      "change": "−1,0 ponto percentual",
+      "net": "≈ 63 mil votos"
+    },
+    "bel": {
+      "name": "Belém (PA)",
+      "votes": "826 mil votos",
+      "change": "+2,3 pontos percentuais",
+      "net": "≈ 19 mil votos"
+    }
+  },
+  "captions": {
+    "b1": "Este quadrado representa os 791 mil votos válidos de Goiânia em 2026.",
+    "b2": "A parte vermelha é a votação de Lula em Goiânia em 2022: 33,0% dos votos válidos.",
+    "b3": "Em 2026, Lula teve 28,2% dos votos válidos em Goiânia. A faixa destacada é a diferença: 4,8 pontos percentuais.",
+    "b4": "A faixa fica azul porque a votação de Lula caiu.",
+    "b5": "A faixa vira um círculo de mesma área. Os 4,8 pontos percentuais equivalem a cerca de 38 mil votos.",
+    "b6": "Ao lado, na mesma escala, o quadrado dos 6,6 milhões de votos válidos de São Paulo, oito vezes os de Goiânia.",
+    "b7": "Em São Paulo, a votação de Lula caiu 1 ponto percentual. A faixa é estreita, mas equivale a cerca de 63 mil votos, e o círculo é maior que o de Goiânia.",
+    "b8": "Em Belém, com quase o mesmo número de votos que Goiânia, a votação de Lula subiu 2,3 pontos percentuais, cerca de 19 mil votos. A faixa e o círculo ficam vermelhos.",
+    "b9": "No mapa, cada um dos 5.570 municípios tem um círculo calculado da mesma forma."
+  },
+  "close": "Fechar"
+}

@@ -2,7 +2,6 @@
 // loaded by the time any of them runs (see data.js).
 import "./styles/main.css";
 import { applyDom } from "./i18n/index.js";
-import { initArrows } from "./map/arrows.js";
 import { initMap } from "./map/base.js";
 import { initCompare } from "./map/compare.js";
 import { initLabels } from "./map/labels.js";
@@ -11,6 +10,7 @@ import { repaint } from "./map/render.js";
 import { panel } from "./panel/results.js";
 import { initStudio } from "./panel/studio.js";
 import { initSearch } from "./search.js";
+import { initReadViz } from "./story/readviz.js";
 import { initStory } from "./story/story.js";
 import { initHash } from "./view/hash.js";
 import { initHints } from "./view/hints.js";
@@ -29,8 +29,8 @@ initNotes();
 repaint();
 initCompare();
 initSearch();
-initArrows();
 initShare();
 initStory();
+initReadViz();
 initHash(); // after the tabs, so a shared view's layout and settings win
 requestAnimationFrame(loaded); // once the first frame is painted

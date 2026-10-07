@@ -35,7 +35,6 @@
   },
   "map": {
     "aria": "Mapa de pontos dos votos por município",
-    "arrowKey": "<span class=\"ar r\">←</span> pró-Lula <span class=\"ar b\">→</span> pró-campo bolsonarista · <i id=\"akl\"></i> = 10 pontos de margem",
     "hint": "<b class=\"mh-t\">Arraste</b> para mover<br /><b class=\"mh-z\">Role</b> para aproximar",
     "hintPinch": "Use dois dedos",
     "divider": "Divisor entre os anos",
@@ -63,18 +62,9 @@
         "h": "Como o Brasil votou em 2026",
         "t": "<p>Cada ponto neste mapa representa 250 votos ou 250 pessoas que não votaram, distribuídos em volta do local de votação onde estão inscritas. Pontos <b class=\"sb\">azuis</b> são votos no campo bolsonarista, o candidato do PL (Jair Bolsonaro em 2022, Flávio Bolsonaro em 2026), <b class=\"sr\">vermelhos</b> em Luiz Inácio Lula da Silva, <b class=\"sa\">amarelos</b> são eleitores que não votaram, e cinza, votos nos demais candidatos.</p><p>A seguir, onde o voto mudou entre o primeiro turno de 2022 e o de 2026.</p>"
       },
-      "read": {
-        "h": "Como ler os círculos",
-        "t": "<p>Daqui em diante, a maioria dos mapas mostra um círculo por município. A <b>cor</b> indica para que lado o voto pendeu entre 2022 e 2026: <b class=\"sb\">azul</b> para o campo bolsonarista, <b class=\"sr\">vermelho</b> para Lula.</p><p>O <b>tamanho</b> é o saldo de votos dessa mudança: a variação da votação de Lula, em pontos, multiplicada pelos votos do município. Uma cidade grande com pouca variação pode ter um círculo tão grande quanto o de uma cidade média com muita.</p><p class=\"howto\">São Paulo: a votação de Lula caiu 1,0 ponto sobre 6,6 milhões de votos, um saldo de cerca de 63 mil votos. Goiânia: caiu 4,9 pontos sobre 0,8 milhão, cerca de 38 mil. Belém: subiu 2,3 pontos, cerca de 19 mil a favor de Lula.</p>",
-        "notes": ["São Paulo −1,0 pt ≈ 63 mil votos", "Goiânia −4,9 pts ≈ 38 mil", "Belém +2,3 pts ≈ 19 mil"]
-      },
       "overview": {
-        "h": "O voto pendeu para o campo bolsonarista em quase todo o país",
-        "t": "<p>A votação de Lula caiu em 5.468 dos 5.570 municípios do Brasil. Em 2022, ele terminou o primeiro turno à frente de Jair Bolsonaro, com 48,4% contra 43,2%. Neste ano, Flávio Bolsonaro ficou em primeiro, com 47,0%, contra 45,2% de Lula.</p><p>A mudança se espalhou pelo país. A votação de Lula recuou no Norte e no Sudeste e caiu mais no Sul, 5,5 pontos percentuais. No Nordeste, ele ainda teve 63,8% dos votos válidos. Em 716 municípios onde ele ficou à frente em 2022, o campo bolsonarista ficou à frente desta vez.</p><p class=\"n\">O voto é secreto. Estes mapas mostram como os lugares votaram. Não mostram quais eleitores mudaram de voto.</p>"
-      },
-      "arrows": {
-        "h": "A mudança, município a município",
-        "t": "<p>A margem pendeu para o campo bolsonarista em 5.512 dos 5.570 municípios. As próximas três telas dividem os municípios pelo tamanho da queda na votação de Lula.</p><p class=\"howto\">Cada seta é um município. Ela aponta para a <b class=\"sr\">esquerda</b> onde a margem pendeu para Lula e para a <b class=\"sb\">direita</b> onde pendeu para o campo bolsonarista; quanto mais longa a seta, maior a mudança na margem.</p>"
+        "h": "O que mudou de 2022 para 2026",
+        "t": "<p>A votação de Lula caiu em 5.468 dos 5.570 municípios do país. Em 2022, ele teve 48,4% dos votos válidos no primeiro turno e terminou à frente. Neste ano, teve 45,2%, e Flávio Bolsonaro ficou em primeiro, com 47,0%.</p><p>A queda foi maior no Sul, nos municípios pequenos e nos mais católicos. Nas capitais, a votação de Lula quase não mudou. No Nordeste, caiu cerca de três pontos percentuais, mas ele segue à frente. A abstenção ficou praticamente igual.</p><p class=\"howto\">Nos mapas a seguir, cada círculo é um município. A cor mostra a variação do percentual de Lula nos votos válidos entre 2022 e 2026: <b class=\"sb\">azul</b> onde caiu, <b class=\"sr\">vermelho</b> onde subiu. A <b>área de cada círculo</b> mostra quantos votos essa variação representa.</p><p class=\"n\">O voto é secreto. Estes mapas mostram como os lugares votaram. Não mostram quais eleitores mudaram de voto.</p>"
       },
       "held": {
         "h": "Onde a votação de Lula se manteve",
@@ -135,7 +125,7 @@
       "goias": {
         "h": "Em Goiás, o candidato do Estado",
         "t": "<p>Goiás teve a maior queda na votação de Lula entre os Estados: 8,5 pontos percentuais. Ronaldo Caiado, ex-governador, teve 12,3% dos votos válidos em Goiás.</p><p class=\"howto\">Aqui cada município tem a cor da votação de Caiado, mais clara onde ele foi melhor.</p>",
-        "notes": ["Aparecida de Goiânia −8,3", "Goiânia −4,9", "Anápolis −6,0"]
+        "notes": ["Aparecida de Goiânia −8,3", "Goiânia −4,8", "Anápolis −6,0"]
       },
       "south": {
         "h": "A maior queda na votação de Lula, no Sul",
@@ -184,7 +174,7 @@
       },
       "explore": {
         "h": "Explore o mapa",
-        "t": "<p>Todas as telas desta reportagem vêm do mesmo mapa. Em <b>Explorar</b>, você pode buscar qualquer município, comparar os dois anos, mostrar as setas de mudança, separar a abstenção por idade e filtrar pelo entorno de cada local de votação ou por município. <b>Compartilhar</b> cria um link para o que você está vendo.</p><p><button class=\"link\" id=\"toexplore\">Explorar o mapa</button></p>"
+        "t": "<p>Todas as telas desta reportagem vêm do mesmo mapa. Em <b>Explorar</b>, você pode buscar qualquer município, comparar os dois anos, separar a abstenção por idade e filtrar pelo entorno de cada local de votação ou por município. <b>Compartilhar</b> cria um link para o que você está vendo.</p><p><button class=\"link\" id=\"toexplore\">Explorar o mapa</button></p>"
       },
       "sp-income": {
         "h": "Na capital paulista, quanto menor a renda da vizinhança, maior a queda",
@@ -255,7 +245,7 @@
       "margins": "Cada município sombreado por <b>{name}</b>. Passe o mouse sobre um candidato para sombrear pela votação dele; clique num município para destacá-lo.",
       "hex": "Locais de votação agrupados em hexágonos de área igual, coloridos por <b>{name}</b>. Aproxime para células mais finas; passe o mouse sobre um candidato para colorir pela votação dele.",
       "scatter": "Um gráfico no lugar do mapa: cada círculo é um município, posicionado por <b>{name}</b> e pela mudança na votação de Lula, com área proporcional aos votos.",
-      "multiples": "Um mapa pequeno por faixa de <b>{name}</b>, cada um com os círculos de saldo de votos dessa faixa."
+      "multiples": "Um mapa pequeno por faixa de <b>{name}</b>, cada um com os círculos de variação em votos dessa faixa."
     },
     "search": "Buscar município",
     "noMatch": "Nenhum município encontrado",
@@ -291,7 +281,6 @@
     "byZoomTitle": "Ajustado só pelo zoom",
     "votesPerDot": "Votos/ponto",
     "scale": "Escala",
-    "arrows": "Setas de mudança, 2022→2026",
     "abstention": "Abstenção",
     "together": "Juntos",
     "byAge": "Por idade",
@@ -464,7 +453,7 @@
     "keyCircles": "votos válidos",
     "colour": "Cor",
     "vc": {
-      "moved": "Saldo de votos",
+      "moved": "Variação em votos",
       "change": "Variação de Lula",
       "margin": "Margem de quem lidera",
       "abst": "Abstenção",
@@ -484,10 +473,10 @@
     "didnt": "não votou",
     "keyGrain": "Linhas mais juntas: mais eleitores por km²",
     "same": "0",
-    "keyMoved": "Saldo de votos, 2022 → 2026",
+    "keyMoved": "Variação em votos, 2022 → 2026",
     "movedAway": "a favor do campo bolsonarista",
     "movedTo": "a favor de Lula",
-    "keyMovedSize": "votos de saldo",
+    "keyMovedSize": "votos de diferença",
     "keyDabst": "Variação no número dos que não votaram, 2022 → 2026",
     "abstUp": "mais gente não votou",
     "abstDown": "menos gente não votou",
@@ -513,7 +502,8 @@
     "keyRoll": "eleitores no cadastro",
     "scatterXShort": "{name} (área do círculo: eleitores)",
     "smallShort": "Todos os demais",
-    "keyShareNat": "No país: {v}. As faixas vão de metade a três vezes isso."
+    "keyShareNat": "No país: {v}. As faixas vão de metade a três vezes isso.",
+    "howToRead": "Como ler este mapa"
   },
   "tour": {
     "title": "Como usar este mapa",
